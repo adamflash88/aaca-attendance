@@ -40,6 +40,9 @@ App:
       // ---------- Month / year pickers (Attendance toolbar) ----------
       MonthOptions = ForAll(Sequence(12), {MonthNum: Value, MonthName: Text(Date(2000, Value, 1), "mmmm")});
       FirstSchoolYear = Coalesce(Year(First(Sort('School Years', 'Start Date', SortOrder.Ascending)).'Start Date'), Year(Today()));
+      // ---------- Absence classification (build 3) ----------
+      CanClassify = IsOfficeRole || IsAdminRole;
+      CurrentSchoolYear = LookUp('School Years', 'Start Date' <= Today() && 'End Date' >= Today());
     OnStart: |-
       =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1));
       Set(varMonthEnd, DateAdd(DateAdd(Date(Year(Today()), Month(Today()), 1), 1, TimeUnit.Months), -1, TimeUnit.Days));
@@ -93,6 +96,30 @@ App:
       Set(varStuTeacherFilterId, ZeroGuid);
       Set(varStuReceipt, {Kind: "", Title: "", StudentId: ZeroGuid});
       ClearCollect(colStuReceiptLines, {Label: "", Value: ""});
-      Clear(colStuReceiptLines)
+      Clear(colStuReceiptLines);
+      Set(varAbsCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(Sort(Campuses, Name, SortOrder.Ascending)).Campus, ZeroGuid)));
+      Set(varAbsTeacherId, ZeroGuid);
+      Set(varAbsStatus, "Not classified");
+      Set(varAbsFrom, Coalesce(CurrentSchoolYear.'Start Date', Date(Year(Today()) - If(Month(Today()) < 7, 1, 0), 7, 1)));
+      Set(varAbsTo, Today());
+      Set(varAbsLoading, false);
+      Set(varAbsSaving, false);
+      Set(varAbsLoadError, "");
+      Set(varAbsSelId, ZeroGuid);
+      Set(varAbsSelId, Blank());
+      Set(varAbsReasonId, ZeroGuid);
+      Set(varAbsReasonId, Blank());
+      Set(varAbsBulkReasonId, ZeroGuid);
+      Set(varAbsBulkReasonId, Blank());
+      Set(varAbsReq, {Kind: "", Scope: "", ReasonId: ZeroGuid});
+      Set(varAbsReceipt, {Kind: "", Title: ""});
+      ClearCollect(colAbsTicked, {AttId: ZeroGuid});
+      Clear(colAbsTicked);
+      ClearCollect(colAbsWork, {AttId: ZeroGuid});
+      Clear(colAbsWork);
+      ClearCollect(colAbsLog, {AttId: ZeroGuid, StudentName: "", AbsDate: Today(), TeacherName: "", CampusName: "", OldClass: "", NewClass: "", ReasonName: "", ByName: "", OnText: "", Outcome: "", AuditOk: false});
+      Clear(colAbsLog);
+      ClearCollect(colAbsReceiptLines, {Label: "", Value: ""});
+      Clear(colAbsReceiptLines)
     StartScreen: =Screen1
     Theme: =PowerAppsTheme

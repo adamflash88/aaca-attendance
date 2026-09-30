@@ -109,7 +109,7 @@ Screens:
                               OnSelect: =Navigate(Screen1)
                               Size: =14
                               Text: ="Attendance"
-                              Width: =120
+                              Width: =110
                         - btnStuNavStudents:
                             Control: ModernButton
                             Properties:
@@ -124,7 +124,22 @@ Screens:
                               OnSelect: =Navigate(StudentsScreen)
                               Size: =14
                               Text: ="Students"
-                              Width: =120
+                              Width: =110
+                        - btnStuNavAbsences:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Absences"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(AbsencesScreen)
+                              Size: =14
+                              Text: ="Absences"
+                              Width: =110
             - conStuDenied:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -349,7 +364,7 @@ Screens:
                               PaddingBottom: =2
                               PaddingRight: =8
                               PaddingTop: =2
-                              Width: =Parent.TemplateWidth
+                              Width: =Parent.TemplateWidth - 16
                             Children:
                               - lblStuRcptLabel:
                                   Control: ModernText
@@ -785,7 +800,7 @@ Screens:
                                     RadiusBottomRight: =0
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
-                                    Width: =Parent.TemplateWidth
+                                    Width: =Parent.TemplateWidth - 16
                                   Children:
                                     - conStuRowTop:
                                         Control: GroupContainer
@@ -861,7 +876,7 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =12
-                                          Text: =ThisItem.StudentNumber & " · Grade " & ThisItem.GradeText & " · IEP " & ThisItem.RatioText
+                                          Text: =ThisItem.StudentNumber & If(IsBlank(ThisItem.GradeText), "", " · Grade " & ThisItem.GradeText) & " · IEP " & ThisItem.RatioText
                                           Wrap: =false
                                     - lblStuRowPlacement:
                                         Control: ModernText
@@ -907,11 +922,10 @@ Screens:
                                     {m: varStuMode, n: Self.Width < 700},
                                     16 + If(n, 56, 28) + 8 + If(n, 100, 60) + 8
                                     + If(m in ["add", "edit"], 306 + 8, 0)
-                                    + If(m in ["add", "transfer"], 120 + 8, 0)
-                                    + If(m = "add", 58 + 8, 0)
-                                    + If(m in ["add", "ratio"], 58 + 8, 0)
-                                    + If(m in ["add", "transfer", "ratio", "discharge"], 58 + 8, 0)
-                                    + If(m in ["transfer", "ratio", "discharge", "edit", "archive", "unarchive"], 86 + 8, 0)
+                                    + If(m in ["add", "transfer", "reenroll"], 120 + 8, 0)
+                                    + If(m in ["add", "ratio", "reenroll"], 58 + 8, 0)
+                                    + If(m in ["add", "transfer", "ratio", "end", "reenroll"], 58 + 8, 0)
+                                    + If(m in ["transfer", "ratio", "end", "edit", "reenroll"], 86 + 8, 0)
                                     + If(conStuDup.Visible, If(n, 176, 156) + 8, 0)
                                     + If(conStuBackdate.Visible, If(n, 124, 104) + 8, 0)
                                     + If(n, 60, 40) + 8 + 44 + 16
@@ -947,7 +961,7 @@ Screens:
                                     PaddingTop: =0
                                     Size: =18
                                     Text: |-
-                                      =With({n: LookUp(colStuList, StudentId = varStuSelId).DisplayName}, Switch(varStuMode, "add", "Add student", "edit", "Edit details — " & n, "transfer", "Change class — " & n, "ratio", "Change IEP ratio — " & n, "discharge", "Discharge — " & n, "archive", "Archive — " & n, "unarchive", "Unarchive — " & n, ""))
+                                      =With({n: LookUp(colStuList, StudentId = varStuSelId).DisplayName}, Switch(varStuMode, "add", "Add student", "edit", "Edit details — " & n, "transfer", "Change class — " & n, "ratio", "Change IEP ratio — " & n, "end", "End enrollment — " & n, "reenroll", "Re-enroll — " & n, ""))
                                     VerticalAlign: =VerticalAlign.Top
                               - lblStuFormContext:
                                   Control: ModernText
@@ -965,16 +979,15 @@ Screens:
                                     Size: =13
                                     Text: |-
                                       =With(
-                                          {sel: LookUp(colStuList, StudentId = varStuSelId), open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending))},
+                                          {sel: LookUp(colStuList, StudentId = varStuSelId), open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending)), lastEnd: First(Sort(Filter(colStuHistory, !IsBlank(EndDate)), EndDate, SortOrder.Descending))},
                                           Switch(
                                               varStuMode,
                                               "add", "Creates the student (Active, new student number), their enrollment and an audit entry. Fields marked * are required.",
                                               "edit", "Corrects name, date of birth, grade and external ID only. Enrollments are unchanged; the audit log keeps before and after values.",
                                               "transfer", "Now " & open.TeacherName & " · " & open.CampusName & " · IEP " & open.RatioText & " · since " & Text(open.StartDate, "mmm d, yyyy") & ". The current enrollment ends the day before the effective date; attendance before it stays with the old class.",
                                               "ratio", "Now IEP " & open.RatioText & " with " & open.TeacherName & " since " & Text(open.StartDate, "mmm d, yyyy") & ". The current enrollment ends the day before the effective date and a new one starts at the new ratio.",
-                                              "discharge", "Ends the open enrollment with " & open.TeacherName & " (since " & Text(open.StartDate, "mmm d, yyyy") & ") on the end date. The student becomes Inactive when nothing else is open; history is kept.",
-                                              "archive", "Hides " & sel.DisplayName & " from lists unless Include archived is on. Nothing is deleted.",
-                                              "unarchive", "Returns " & sel.DisplayName & " to Inactive and clears Archived On and Archived By.",
+                                              "end", "Ends the open enrollment with " & open.TeacherName & " (since " & Text(open.StartDate, "mmm d, yyyy") & ") on the end date, reason Archived. No enrollment follows, so the student becomes Archived and leaves the grids after that day.",
+                                              "reenroll", "Starts a new enrollment after the last end date" & If(IsBlank(lastEnd), "", " (" & Text(lastEnd.EndDate, "mmm d, yyyy") & ")") & ", linked to the last one. The student becomes Active and appears on the teacher's grid from the start date.",
                                               ""
                                           )
                                       )
@@ -1154,7 +1167,7 @@ Screens:
                                     LayoutGap: =4
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
-                                    Visible: =varStuMode in ["add", "transfer"]
+                                    Visible: =varStuMode in ["add", "transfer", "reenroll"]
                                   Children:
                                     - lblStuFormCampus:
                                         Control: ModernText
@@ -1274,7 +1287,7 @@ Screens:
                                     LayoutGap: =4
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
-                                    Visible: =varStuMode in ["add", "ratio"]
+                                    Visible: =varStuMode in ["add", "ratio", "reenroll"]
                                   Children:
                                     - lblStuFormRatio:
                                         Control: ModernText
@@ -1317,7 +1330,7 @@ Screens:
                                     LayoutGap: =4
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
-                                    Visible: =varStuMode in ["add", "transfer", "ratio", "discharge"]
+                                    Visible: =varStuMode in ["add", "transfer", "ratio", "end", "reenroll"]
                                   Children:
                                     - lblStuFormDate:
                                         Control: ModernText
@@ -1334,7 +1347,7 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =12
-                                          Text: =Switch(varStuMode, "add", "Start date *", "transfer", "Effective date (first day in the new class) *", "ratio", "Effective date (first day at the new ratio) *", "discharge", "End date (last day of service) *", "Date")
+                                          Text: =Switch(varStuMode, "add", "Start date *", "transfer", "Effective date (first day in the new class) *", "ratio", "Effective date (first day at the new ratio) *", "end", "End date (last day of service) *", "reenroll", "Start date (first day back, after the last end date) *", "Date")
                                           Wrap: =false
                                     - dpStuFormDate:
                                         Control: ModernDatePicker
@@ -1350,7 +1363,7 @@ Screens:
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           OnChange: |-
-                                            =Reset(chkStuBackdateAck); With({q: varStuSelId, d: Self.SelectedDate}, Set(varStuAttAfter, If(IsBlank(q) || IsBlank(d) || !(varStuMode in ["transfer", "ratio", "discharge"]), 0, varStuMode = "discharge", CountRows(Filter(Attendance, Student.Student = q && Date > d && 'Is Deleted' <> true)), CountRows(Filter(Attendance, Student.Student = q && Date >= d && 'Is Deleted' <> true)))))
+                                            =Reset(chkStuBackdateAck); With({q: varStuSelId, d: Self.SelectedDate}, Set(varStuAttAfter, If(IsBlank(q) || IsBlank(d) || !(varStuMode in ["transfer", "ratio", "end"]), 0, varStuMode = "end", CountRows(Filter(Attendance, Student.Student = q && Date > d && 'Is Deleted' <> true)), CountRows(Filter(Attendance, Student.Student = q && Date >= d && 'Is Deleted' <> true)))))
                                           StartDate: =Date(Year(Today()) - 1, 7, 1)
                               - conStuFormReason:
                                   Control: GroupContainer
@@ -1364,7 +1377,7 @@ Screens:
                                     LayoutGap: =4
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
-                                    Visible: =varStuMode in ["transfer", "ratio", "discharge", "edit", "archive", "unarchive"]
+                                    Visible: =varStuMode in ["transfer", "ratio", "end", "edit", "reenroll"]
                                   Children:
                                     - lblStuFormReason:
                                         Control: ModernText
@@ -1381,12 +1394,12 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =12
-                                          Text: =If(varStuMode = "discharge", "Reason for discharge *", "Note for the audit log (optional)")
+                                          Text: =If(varStuMode = "end", "Note for the audit log *", "Note for the audit log (optional)")
                                           Wrap: =false
                                     - txtStuFormReason:
                                         Control: ModernTextInput
                                         Properties:
-                                          AccessibleLabel: =If(varStuMode = "discharge", "Reason for discharge *", "Note for the audit log (optional)")
+                                          AccessibleLabel: =If(varStuMode = "end", "Note for the audit log *", "Note for the audit log (optional)")
                                           AlignInContainer: =AlignInContainer.Stretch
                                           Appearance: =Appearance.Outline
                                           Color: =ColorInk
@@ -1485,7 +1498,7 @@ Screens:
                                     RadiusBottomRight: =6
                                     RadiusTopLeft: =6
                                     RadiusTopRight: =6
-                                    Visible: =varStuMode in ["transfer", "ratio", "discharge"] && varStuAttAfter > 0
+                                    Visible: =varStuMode in ["transfer", "ratio", "end"] && varStuAttAfter > 0
                                   Children:
                                     - lblStuBackdateText:
                                         Control: ModernText
@@ -1501,7 +1514,7 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =13
-                                          Text: =varStuAttAfter & If(varStuAttAfter = 1, " attendance day", " attendance days") & If(varStuMode = "discharge", " after ", " on or after ") & Text(dpStuFormDate.SelectedDate, "mmm d, yyyy") & If(varStuMode = "discharge", " are already recorded and will stay recorded.", " will stay recorded under the old class.")
+                                          Text: =varStuAttAfter & If(varStuAttAfter = 1, " attendance day", " attendance days") & If(varStuMode = "end", " after ", " on or after ") & Text(dpStuFormDate.SelectedDate, "mmm d, yyyy") & If(varStuMode = "end", " are already recorded and will stay recorded.", " will stay recorded under the old class.")
                                           VerticalAlign: =VerticalAlign.Top
                                     - chkStuBackdateAck:
                                         Control: ModernCheckbox
@@ -1531,6 +1544,7 @@ Screens:
                                           {
                                               sel: LookUp(colStuList, StudentId = varStuSelId),
                                               open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending)),
+                                              lastEnd: First(Sort(Filter(colStuHistory, !IsBlank(EndDate)), EndDate, SortOrder.Descending)),
                                               fn: Trim(txtStuFormFirst.Text), ln: Trim(txtStuFormLast.Text),
                                               dob: dpStuFormDob.SelectedDate, eff: dpStuFormDate.SelectedDate,
                                               cmp: ddStuFormCampus.Selected, tch: ddStuFormTeacher.Selected
@@ -1541,7 +1555,6 @@ Screens:
                                                   oyr: LookUp(colStuYears, YearId = open.YearId),
                                                   dup: LookUp(colStuList, Lower(FirstName) = Lower(fn) && Lower(LastName) = Lower(ln) && Dob = dob),
                                                   overlap: CountRows(Filter(colStuHistory, EnrId <> open.EnrId && ServiceId = open.ServiceId && (IsBlank(EndDate) || EndDate >= eff))) > 0,
-                                                  live: CountRows(Filter(colStuHistory, IsBlank(EndDate) || EndDate >= Today())),
                                                   ackBad: varStuAttAfter > 0 && !chkStuBackdateAck.Checked
                                               },
                                               If(
@@ -1590,20 +1603,31 @@ Screens:
                                                       ackBad, "Tick the confirmation. " & varStuAttAfter & " recorded attendance days stay with the old class.",
                                                       "Ready to save."
                                                   ),
-                                                  varStuMode = "discharge",
+                                                  varStuMode = "end",
                                                   If(
+                                                      sel.StatusText <> "Active", "Only Active students can end an enrollment.",
                                                       IsBlank(open), "No open enrollment to end.",
-                                                      IsBlank(eff), "Choose the last day of service.",
+                                                      IsBlank(eff), "Choose the end date (last day of service).",
                                                       eff < open.StartDate, "The end date cannot be before " & Text(open.StartDate, "mmm d, yyyy") & ", when the enrollment started.",
-                                                      !IsBlank(oyr) && eff > oyr.YEnd, "The end date must be inside the " & oyr.YearName & " school year.",
-                                                      Trim(txtStuFormReason.Text) = "", "Enter the reason for discharge.",
+                                                      CountRows(Filter(colStuHistory, EnrId <> open.EnrId && (IsBlank(EndDate) || EndDate > eff))) > 0, "Another enrollment continues after this date. Use Change class or Change ratio instead.",
+                                                      Trim(txtStuFormReason.Text) = "", "Enter a note for the audit log.",
                                                       ackBad, "Tick the confirmation. " & varStuAttAfter & " attendance days after the end date stay recorded.",
                                                       "Ready to save."
                                                   ),
-                                                  varStuMode = "archive",
-                                                  If(sel.StatusText = "Archived", "Already archived.", live > 0, "Archive needs every enrollment closed. " & live & " open or future enrollment(s) remain.", "Ready to save."),
-                                                  varStuMode = "unarchive",
-                                                  If(sel.StatusText <> "Archived", "Only archived students can be unarchived.", "Ready to save."),
+                                                  varStuMode = "reenroll",
+                                                  If(
+                                                      sel.StatusText <> "Archived", "Only archived students can be re-enrolled.",
+                                                      CountRows(Filter(colStuHistory, IsBlank(EndDate))) > 0, "This student still has an open enrollment.",
+                                                      IsBlank(cmp), "Choose a campus.",
+                                                      StudentCampusLock <> ZeroGuid && cmp.Campus <> StudentCampusLock, "Office staff can re-enroll students only at their own campus.",
+                                                      IsBlank(tch) || tch.Campus.Campus <> cmp.Campus, "Choose a teacher at " & cmp.Name & ".",
+                                                      IsBlank(ddStuFormRatio.Selected), "Choose an IEP ratio.",
+                                                      IsBlank(eff), "Choose the start date.",
+                                                      !IsBlank(lastEnd) && eff <= lastEnd.EndDate, "The start date must be after " & Text(lastEnd.EndDate, "mmm d, yyyy") & ", the last end date.",
+                                                      IsBlank(yr), "The start date is not inside a school year.",
+                                                      IsBlank(ActiveService), "No active service is set up. Ask a System Admin.",
+                                                      "Ready to save."
+                                                  ),
                                                   ""
                                               )
                                           )
@@ -1627,7 +1651,7 @@ Screens:
                                         Properties:
                                           AccessibleLabel: =Self.Text
                                           AlignInContainer: =AlignInContainer.Center
-                                          BasePaletteColor: =If(varStuMode in ["discharge", "archive"], ColorUnexcused, ColorTeal)
+                                          BasePaletteColor: =If(varStuMode = "end", ColorUnexcused, ColorTeal)
                                           Color: =ColorWhite
                                           DisplayMode: =If(varStuMode <> "" && lblStuFormCheck.Text = "Ready to save." && !varStuSaving && !varStuLoading, DisplayMode.Edit, DisplayMode.Disabled)
                                           Height: =44
@@ -1852,40 +1876,54 @@ Screens:
                                                                     )
                                                                 )
                                                             ),
-                                                            "discharge",
+                                                            "end",
                                                             With(
                                                                 {old: With({qe: open.EnrId}, LookUp(Enrollments, ThisRecord.Enrollment = qe)), stu: LookUp(Students, ThisRecord.Student = q)},
-                                                                If(
-                                                                    IsBlank(old) || IsBlank(stu) || !IsBlank(old.'End Date'),
-                                                                    Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. This enrollment was changed by someone else. The list was reloaded; check the history and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Set(varStuMode, ""); Select(btnStuLoadEngine),
-                                                                    With(
-                                                                        {closed: IfError(Patch(Enrollments, old, {'End Date': eff, 'End Reason': 'End Reason (Enrollments)'.Archived, 'Status (aaca_status)': If(eff <= Today(), 'Status (Enrollments)'.Ended, old.'Status (aaca_status)')}), Blank())},
-                                                                        If(
-                                                                            IsBlank(closed),
-                                                                            Set(varStuReceipt, {Kind: "Failed", Title: "Failed. Nothing was saved for " & stu.'Display Name' & ". Press Discharge student to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                            With(
-                                                                                {others: With({qs: q, qe: closed.Enrollment}, CountRows(Filter(Enrollments, Student.Student = qs && ThisRecord.Enrollment <> qe && (IsBlank('End Date') || 'End Date' >= Today()))))},
+                                                                With(
+                                                                    {later: With({qs: q, qe: open.EnrId, qd: eff}, CountRows(Filter(Enrollments, Student.Student = qs && ThisRecord.Enrollment <> qe && (IsBlank('End Date') || 'End Date' > qd))))},
+                                                                    If(
+                                                                        IsBlank(old) || IsBlank(stu) || !IsBlank(old.'End Date'),
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. This enrollment was changed by someone else. The list was reloaded; check the history and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Set(varStuMode, ""); Select(btnStuLoadEngine),
+                                                                        stu.'Status (aaca_status)' <> 'Status (Students)'.Active,
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & stu.'Display Name' & " is not Active.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine),
+                                                                        later > 0,
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. Another enrollment continues after " & Text(eff, "mmm d, yyyy") & ". Use Change class or Change ratio instead.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
+                                                                        With(
+                                                                            {closed: IfError(Patch(Enrollments, old, {'End Date': eff, 'End Reason': 'End Reason (Enrollments)'.Archived, 'Status (aaca_status)': If(eff < Today(), 'Status (Enrollments)'.Ended, 'Status (Enrollments)'.Active)}), Blank())},
+                                                                            If(
+                                                                                IsBlank(closed),
+                                                                                Set(varStuReceipt, {Kind: "Failed", Title: "Failed. Nothing was saved for " & stu.'Display Name' & ". Press End enrollment to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
                                                                                 With(
-                                                                                    {s2: If(others = 0, IfError(Patch(Students, stu, {'Status (aaca_status)': 'Status (Students)'.Inactive}), Blank()), stu)},
-                                                                                    With(
-                                                                                        {audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: "Discharge " & stu.'Student Number' & " end " & Text(eff, "yyyy-mm-dd"), Action: 'Action (Audit Events)'.Discharge, Entity: "aaca_student", 'Entity ID': Text(stu.Student), Before: JSON({EnrollmentId: Text(old.Enrollment), EndDate: "", EnrollmentStatus: Text(old.'Status (aaca_status)'), StudentStatus: Text(stu.'Status (aaca_status)')}), After: JSON({EnrollmentId: Text(closed.Enrollment), EndDate: Text(closed.'End Date', "yyyy-mm-dd"), EndReason: Text(closed.'End Reason'), EnrollmentStatus: Text(closed.'Status (aaca_status)'), StudentStatus: If(IsBlank(s2), "update failed", Text(s2.'Status (aaca_status)')), AttendanceDaysAfterEnd: attAfter}), Reason: note}), Blank())},
-                                                                                        Set(varStuReceipt, {Kind: "Discharged", Title: "Discharged · " & stu.'Display Name' & " · " & stu.'Student Number', StudentId: stu.Student});
-                                                                                        ClearCollect(
-                                                                                            colStuReceiptLines,
-                                                                                            {Label: "Student number", Value: stu.'Student Number'},
-                                                                                            {Label: "Teacher", Value: closed.Teacher.Name},
-                                                                                            {Label: "Campus", Value: closed.Campus.Name},
-                                                                                            {Label: "Enrollment start", Value: Text(closed.'Start Date', "mmm d, yyyy")},
-                                                                                            {Label: "End date", Value: Text(closed.'End Date', "mmm d, yyyy")},
-                                                                                            {Label: "End reason", Value: Text(closed.'End Reason')},
-                                                                                            {Label: "Enrollment status", Value: Text(closed.'Status (aaca_status)')},
-                                                                                            {Label: "Student status", Value: If(IsBlank(s2), "Status update FAILED", Text(s2.'Status (aaca_status)'))},
-                                                                                            {Label: "Other open or planned enrollments", Value: Text(others)},
-                                                                                            {Label: "Recorded days after end date", Value: Text(attAfter)},
-                                                                                            {Label: "Reason", Value: noteShort},
-                                                                                            {Label: "Audit event", Value: If(IsBlank(audit), "NOT written", "Discharge written")}
-                                                                                        );
-                                                                                        Set(varStuSelId, stu.Student); Set(varStuMode, ""); Select(btnStuLoadEngine)
+                                                                                    {s2: IfError(Patch(Students, stu, {'Status (aaca_status)': 'Status (Students)'.Archived, 'Archived On': eff, 'Archived By': CurrentUserRow}), Blank())},
+                                                                                    If(
+                                                                                        IsBlank(s2),
+                                                                                        With(
+                                                                                            {rb: IfError(Patch(Enrollments, closed, {'End Date': Blank(), 'End Reason': Blank(), 'Status (aaca_status)': old.'Status (aaca_status)'}), Blank())},
+                                                                                            Set(varStuReceipt, {Kind: "Failed", Title: "Failed. " & stu.'Display Name' & " was not archived. " & If(IsBlank(rb), "The enrollment is still ended on " & Text(closed.'End Date', "mmm d, yyyy") & "; ask a System Admin.", "The enrollment was reopened; nothing changed."), StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine)
+                                                                                        ),
+                                                                                        With(
+                                                                                            {audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: "End enrollment " & stu.'Student Number' & " end " & Text(eff, "yyyy-mm-dd") & " (archived)", Action: 'Action (Audit Events)'.Archive, Entity: "aaca_student", 'Entity ID': Text(stu.Student), Before: JSON({EnrollmentId: Text(old.Enrollment), EndDate: "", EnrollmentStatus: Text(old.'Status (aaca_status)'), StudentStatus: Text(stu.'Status (aaca_status)'), ArchivedOn: ""}), After: JSON({EnrollmentId: Text(closed.Enrollment), EndDate: Text(closed.'End Date', "yyyy-mm-dd"), EndReason: Text(closed.'End Reason'), EnrollmentStatus: Text(closed.'Status (aaca_status)'), StudentStatus: Text(s2.'Status (aaca_status)'), ArchivedOn: Text(s2.'Archived On', "yyyy-mm-dd"), ArchivedBy: s2.'Archived By'.'Full Name', AttendanceDaysAfterEnd: attAfter}), Reason: note}), Blank())},
+                                                                                            Set(varStuReceipt, {Kind: "Ended", Title: "Enrollment ended · " & s2.'Display Name' & " · " & s2.'Student Number' & " · archived from " & Text(closed.'End Date', "mmm d, yyyy"), StudentId: s2.Student});
+                                                                                            ClearCollect(
+                                                                                                colStuReceiptLines,
+                                                                                                {Label: "Operation", Value: "End enrollment"},
+                                                                                                {Label: "Student number", Value: s2.'Student Number'},
+                                                                                                {Label: "Teacher", Value: closed.Teacher.Name},
+                                                                                                {Label: "Campus", Value: closed.Campus.Name},
+                                                                                                {Label: "Enrollment start", Value: Text(closed.'Start Date', "mmm d, yyyy")},
+                                                                                                {Label: "End date", Value: Text(closed.'End Date', "mmm d, yyyy")},
+                                                                                                {Label: "End reason", Value: Text(closed.'End Reason')},
+                                                                                                {Label: "Enrollment status", Value: Text(closed.'Status (aaca_status)') & If(closed.'Status (aaca_status)' = 'Status (Enrollments)'.Active, " (until the end date)", "")},
+                                                                                                {Label: "Previous student status", Value: Text(stu.'Status (aaca_status)')},
+                                                                                                {Label: "Student status", Value: Text(s2.'Status (aaca_status)')},
+                                                                                                {Label: "Archived on", Value: Text(s2.'Archived On', "mmm d, yyyy")},
+                                                                                                {Label: "Archived by", Value: s2.'Archived By'.'Full Name'},
+                                                                                                {Label: "Recorded days after end date", Value: Text(attAfter)},
+                                                                                                {Label: "Note", Value: noteShort},
+                                                                                                {Label: "Audit event", Value: If(IsBlank(audit), "NOT written", "Archive written")}
+                                                                                            );
+                                                                                            Set(varStuSelId, s2.Student); Set(varStuMode, ""); Select(btnStuLoadEngine)
+                                                                                        )
                                                                                     )
                                                                                 )
                                                                             )
@@ -1893,71 +1931,66 @@ Screens:
                                                                     )
                                                                 )
                                                             ),
-                                                            "archive",
+                                                            "reenroll",
                                                             With(
-                                                                {stu: LookUp(Students, ThisRecord.Student = q), liveOpen: With({qs: q}, CountRows(Filter(Enrollments, Student.Student = qs && (IsBlank('End Date') || 'End Date' >= Today()))))},
-                                                                If(
-                                                                    IsBlank(stu),
-                                                                    Set(varStuReceipt, {Kind: "Failed", Title: "Failed. The student could not be found. Reload and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                    stu.'Status (aaca_status)' = 'Status (Students)'.Archived,
-                                                                    Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & stu.'Display Name' & " is already archived.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine),
-                                                                    liveOpen > 0,
-                                                                    Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. Archive needs every enrollment closed. " & liveOpen & " open or future enrollment(s) remain.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                    With(
-                                                                        {s: IfError(Patch(Students, stu, {'Status (aaca_status)': 'Status (Students)'.Archived, 'Archived On': Today(), 'Archived By': CurrentUserRow}), Blank())},
-                                                                        If(
-                                                                            IsBlank(s),
-                                                                            Set(varStuReceipt, {Kind: "Failed", Title: "Failed. " & stu.'Display Name' & " was not archived. Press Archive student to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                            With(
-                                                                                {audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: "Archived " & s.'Student Number' & " " & s.'Display Name', Action: 'Action (Audit Events)'.Archive, Entity: "aaca_student", 'Entity ID': Text(s.Student), Before: JSON({Status: Text(stu.'Status (aaca_status)'), ArchivedOn: "", ArchivedBy: ""}), After: JSON({Status: Text(s.'Status (aaca_status)'), ArchivedOn: Text(s.'Archived On', "yyyy-mm-dd"), ArchivedBy: s.'Archived By'.'Full Name'}), Reason: If(note = "", "Archived", note)}), Blank())},
-                                                                                Set(varStuReceipt, {Kind: "Archived", Title: "Archived · " & s.'Display Name' & " · " & s.'Student Number', StudentId: s.Student});
-                                                                                ClearCollect(
-                                                                                    colStuReceiptLines,
-                                                                                    {Label: "Operation", Value: "Archive"},
-                                                                                    {Label: "Student number", Value: s.'Student Number'},
-                                                                                    {Label: "Previous status", Value: Text(stu.'Status (aaca_status)')},
-                                                                                    {Label: "Expected status", Value: "Archived"},
-                                                                                    {Label: "Status", Value: Text(s.'Status (aaca_status)')},
-                                                                                    {Label: "Archived on", Value: Text(s.'Archived On', "mmm d, yyyy")},
-                                                                                    {Label: "Archived by", Value: s.'Archived By'.'Full Name'},
-                                                                                    {Label: "Note", Value: noteShort},
-                                                                                    {Label: "Audit event", Value: If(IsBlank(audit), "NOT written", "Archive written")}
-                                                                                );
-                                                                                Set(varStuSelId, s.Student); Set(varStuMode, ""); Select(btnStuLoadEngine)
-                                                                            )
-                                                                        )
-                                                                    )
-                                                                )
-                                                            ),
-                                                            "unarchive",
-                                                            With(
-                                                                {stu: LookUp(Students, ThisRecord.Student = q)},
-                                                                If(
-                                                                    IsBlank(stu),
-                                                                    Set(varStuReceipt, {Kind: "Failed", Title: "Failed. The student could not be found. Reload and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                    stu.'Status (aaca_status)' <> 'Status (Students)'.Archived,
-                                                                    Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & stu.'Display Name' & " is not archived.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine),
-                                                                    With(
-                                                                        {s: IfError(Patch(Students, stu, {'Status (aaca_status)': 'Status (Students)'.Inactive, 'Archived On': Blank(), 'Archived By': Blank()}), Blank())},
-                                                                        If(
-                                                                            IsBlank(s),
-                                                                            Set(varStuReceipt, {Kind: "Failed", Title: "Failed. " & stu.'Display Name' & " was not unarchived. Press Unarchive student to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
-                                                                            With(
-                                                                                {audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: "Unarchived " & s.'Student Number' & " " & s.'Display Name', Action: 'Action (Audit Events)'.Unarchive, Entity: "aaca_student", 'Entity ID': Text(s.Student), Before: JSON({Status: Text(stu.'Status (aaca_status)'), ArchivedOn: Text(stu.'Archived On', "yyyy-mm-dd"), ArchivedBy: stu.'Archived By'.'Full Name'}), After: JSON({Status: Text(s.'Status (aaca_status)'), ArchivedOn: "", ArchivedBy: ""}), Reason: If(note = "", "Unarchived", note)}), Blank())},
-                                                                                Set(varStuReceipt, {Kind: "Unarchived", Title: "Unarchived · " & s.'Display Name' & " · " & s.'Student Number', StudentId: s.Student});
-                                                                                ClearCollect(
-                                                                                    colStuReceiptLines,
-                                                                                    {Label: "Operation", Value: "Unarchive"},
-                                                                                    {Label: "Student number", Value: s.'Student Number'},
-                                                                                    {Label: "Previous status", Value: Text(stu.'Status (aaca_status)')},
-                                                                                    {Label: "Expected status", Value: "Inactive"},
-                                                                                    {Label: "Status", Value: Text(s.'Status (aaca_status)')},
-                                                                                    {Label: "Archived on", Value: If(IsBlank(s.'Archived On'), "Cleared", Text(s.'Archived On', "mmm d, yyyy"))},
-                                                                                    {Label: "Archived by", Value: If(IsBlank(s.'Archived By'), "Cleared", s.'Archived By'.'Full Name')},
-                                                                                    {Label: "Note", Value: noteShort},
-                                                                                    {Label: "Audit event", Value: If(IsBlank(audit), "NOT written", "Unarchive written")}
-                                                                                );
-                                                                                Set(varStuSelId, s.Student); Set(varStuMode, ""); Select(btnStuLoadEngine)
+                                                                {stu: LookUp(Students, ThisRecord.Student = q), yr: LookUp('School Years', 'Start Date' <= eff && 'End Date' >= eff)},
+                                                                With(
+                                                                    {
+                                                                        liveOpen: With({qs: q}, CountRows(Filter(Enrollments, Student.Student = qs && IsBlank('End Date')))),
+                                                                        liveLast: With({qs: q}, First(Sort(Filter(Enrollments, Student.Student = qs && !IsBlank('End Date')), 'End Date', SortOrder.Descending)))
+                                                                    },
+                                                                    If(
+                                                                        IsBlank(stu),
+                                                                        Set(varStuReceipt, {Kind: "Failed", Title: "Failed. The student could not be found. Reload and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
+                                                                        stu.'Status (aaca_status)' <> 'Status (Students)'.Archived,
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & stu.'Display Name' & " is not archived.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine),
+                                                                        liveOpen > 0,
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & stu.'Display Name' & " still has an open enrollment.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines); Select(btnStuLoadEngine),
+                                                                        !IsBlank(liveLast) && eff <= liveLast.'End Date',
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. The start date must be after " & Text(liveLast.'End Date', "mmm d, yyyy") & ", the last end date.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
+                                                                        IsBlank(yr),
+                                                                        Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. The start date is not inside a school year.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
+                                                                        With(
+                                                                            {ne: IfError(Patch(Enrollments, Defaults(Enrollments), {Name: stu.'Student Number' & " " & Text(eff, "yyyy-mm-dd"), Student: stu, Campus: cmp, Teacher: tch, Service: ActiveService, 'School Year': yr, Program: prg, 'IEP Ratio': rat, 'Start Date': eff, 'Status (aaca_status)': If(eff <= Today(), 'Status (Enrollments)'.Active, 'Status (Enrollments)'.Planned), 'Previous Enrollment': liveLast}), Blank())},
+                                                                            If(
+                                                                                IsBlank(ne),
+                                                                                Set(varStuReceipt, {Kind: "Failed", Title: "Failed. Nothing was saved for " & stu.'Display Name' & ". Press Re-enroll student to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
+                                                                                With(
+                                                                                    {s2: IfError(Patch(Students, stu, {'Status (aaca_status)': 'Status (Students)'.Active, 'Archived On': Blank(), 'Archived By': Blank()}), Blank())},
+                                                                                    If(
+                                                                                        IsBlank(s2),
+                                                                                        Set(varStuReceipt, {Kind: "Failed", Title: "Partly saved. The enrollment from " & Text(ne.'Start Date', "mmm d, yyyy") & " was created but " & stu.'Display Name' & " is still Archived. Ask a System Admin.", StudentId: stu.Student}); Clear(colStuReceiptLines); Set(varStuSelId, stu.Student); Set(varStuMode, ""); Select(btnStuLoadEngine),
+                                                                                        With(
+                                                                                            {
+                                                                                                own: If(IsBlank(tch.User), false, !IsBlank(IfError(Patch(Students, s2, {Owner: tch.User}), Blank())) && !IsBlank(IfError(Patch(Enrollments, ne, {Owner: tch.User}), Blank()))),
+                                                                                                audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: "Re-enroll " & s2.'Student Number' & " from " & Text(eff, "yyyy-mm-dd"), Action: 'Action (Audit Events)'.Unarchive, Entity: "aaca_student", 'Entity ID': Text(s2.Student), Before: JSON({Status: Text(stu.'Status (aaca_status)'), ArchivedOn: Text(stu.'Archived On', "yyyy-mm-dd"), ArchivedBy: stu.'Archived By'.'Full Name', LastEnrollmentId: If(IsBlank(liveLast), "", Text(liveLast.Enrollment)), LastEndDate: Text(liveLast.'End Date', "yyyy-mm-dd")}), After: JSON({Status: Text(s2.'Status (aaca_status)'), ArchivedOn: "", ArchivedBy: "", NewEnrollmentId: Text(ne.Enrollment), CampusId: Text(cmp.Campus), Campus: cmp.Name, TeacherId: Text(tch.Staff), Teacher: tch.Name, IepRatio: Text(ne.'IEP Ratio'), StartDate: Text(ne.'Start Date', "yyyy-mm-dd"), EnrollmentStatus: Text(ne.'Status (aaca_status)'), SchoolYear: ne.'School Year'.Name}), Reason: If(note = "", "Re-enrolled", note)}), Blank())
+                                                                                            },
+                                                                                            Set(varStuReceipt, {Kind: "Reenrolled", Title: "Re-enrolled · " & s2.'Display Name' & " · " & s2.'Student Number' & " · from " & Text(ne.'Start Date', "mmm d, yyyy"), StudentId: s2.Student});
+                                                                                            ClearCollect(
+                                                                                                colStuReceiptLines,
+                                                                                                {Label: "Operation", Value: "Re-enroll"},
+                                                                                                {Label: "Student number", Value: s2.'Student Number'},
+                                                                                                {Label: "Previous status", Value: Text(stu.'Status (aaca_status)')},
+                                                                                                {Label: "Student status", Value: Text(s2.'Status (aaca_status)')},
+                                                                                                {Label: "Archived on", Value: If(IsBlank(s2.'Archived On'), "Cleared", Text(s2.'Archived On', "mmm d, yyyy"))},
+                                                                                                {Label: "Archived by", Value: If(IsBlank(s2.'Archived By'), "Cleared", s2.'Archived By'.'Full Name')},
+                                                                                                {Label: "Campus", Value: ne.Campus.Name},
+                                                                                                {Label: "Teacher", Value: ne.Teacher.Name},
+                                                                                                {Label: "IEP ratio", Value: Text(ne.'IEP Ratio')},
+                                                                                                {Label: "Start date", Value: Text(ne.'Start Date', "mmm d, yyyy")},
+                                                                                                {Label: "Enrollment status", Value: Text(ne.'Status (aaca_status)')},
+                                                                                                {Label: "School year", Value: ne.'School Year'.Name},
+                                                                                                {Label: "Service", Value: ne.Service.Name},
+                                                                                                {Label: "Previous enrollment", Value: If(IsBlank(liveLast), "None", "Linked · ended " & Text(liveLast.'End Date', "mmm d, yyyy") & If(ne.'Previous Enrollment'.Enrollment = liveLast.Enrollment, "", " (link NOT saved)"))},
+                                                                                                {Label: "Gap", Value: If(IsBlank(liveLast), "—", Text(DateDiff(liveLast.'End Date', ne.'Start Date', TimeUnit.Days) - 1) & " days without an enrollment")},
+                                                                                                {Label: "Record owner", Value: If(IsBlank(tch.User), "Unchanged (teacher has no linked user)", own, tch.User.'Full Name', "Owner update FAILED")},
+                                                                                                {Label: "Note", Value: noteShort},
+                                                                                                {Label: "Audit event", Value: If(IsBlank(audit), "NOT written", "Unarchive written")}
+                                                                                            );
+                                                                                            Set(varStuSelId, s2.Student); Set(varStuMode, ""); Select(btnStuLoadEngine)
+                                                                                        )
+                                                                                    )
+                                                                                )
                                                                             )
                                                                         )
                                                                     )
@@ -1969,7 +2002,7 @@ Screens:
                                                 Set(varStuSaving, false)
                                             )
                                           Size: =14
-                                          Text: =Switch(varStuMode, "add", "Add student", "edit", "Save details", "transfer", "Save class change", "ratio", "Save ratio change", "discharge", "Discharge student", "archive", "Archive student", "unarchive", "Unarchive student", "Save")
+                                          Text: =Switch(varStuMode, "add", "Add student", "edit", "Save details", "transfer", "Save class change", "ratio", "Save ratio change", "end", "End enrollment", "reenroll", "Re-enroll student", "Save")
                                           Width: =190
                                     - btnStuFormCancel:
                                         Control: ModernButton
@@ -1983,7 +2016,7 @@ Screens:
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           OnSelect: |-
-                                            =Set(varStuReceipt, {Kind: "Cancelled", Title: Switch(varStuMode, "add", "Add student", "edit", "Edit details", "transfer", "Change class", "ratio", "Change ratio", "discharge", "Discharge", "archive", "Archive", "unarchive", "Unarchive", "Form") & " cancelled · " & Coalesce(LookUp(colStuList, StudentId = varStuSelId).DisplayName, "no student selected") & " · nothing was changed", StudentId: Coalesce(varStuSelId, ZeroGuid)}); Clear(colStuReceiptLines); Set(varStuMode, ""); Select(btnStuFormResetEngine)
+                                            =Set(varStuReceipt, {Kind: "Cancelled", Title: Switch(varStuMode, "add", "Add student", "edit", "Edit details", "transfer", "Change class", "ratio", "Change ratio", "end", "End enrollment", "reenroll", "Re-enroll", "Form") & " cancelled · " & Coalesce(LookUp(colStuList, StudentId = varStuSelId).DisplayName, "no student selected") & " · nothing was changed", StudentId: Coalesce(varStuSelId, ZeroGuid)}); Clear(colStuReceiptLines); Set(varStuMode, ""); Select(btnStuFormResetEngine)
                                           Size: =14
                                           Text: ="Cancel"
                         - conStuDetail:
@@ -2211,10 +2244,10 @@ Screens:
                                                 Size: =14
                                                 Text: ="Change ratio"
                                                 Width: =120
-                                          - btnStuActDischarge:
+                                          - btnStuActEnd:
                                               Control: ModernButton
                                               Properties:
-                                                AccessibleLabel: ="Discharge student"
+                                                AccessibleLabel: ="End enrollment"
                                                 AlignInContainer: =AlignInContainer.Center
                                                 Appearance: =ButtonAppearance.Secondary
                                                 Color: =ColorInk
@@ -2225,46 +2258,29 @@ Screens:
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
                                                 OnSelect: |-
-                                                  =Set(varStuMode, "discharge"); Set(varStuAttAfter, With({q: varStuSelId, d: Today()}, CountRows(Filter(Attendance, Student.Student = q && Date > d && 'Is Deleted' <> true)))); Select(btnStuFormResetEngine)
+                                                  =Set(varStuMode, "end"); Set(varStuAttAfter, With({q: varStuSelId, d: Today()}, CountRows(Filter(Attendance, Student.Student = q && Date > d && 'Is Deleted' <> true)))); Select(btnStuFormResetEngine)
                                                 Size: =14
-                                                Text: ="Discharge"
-                                                Width: =104
-                                          - btnStuActArchive:
-                                              Control: ModernButton
-                                              Properties:
-                                                AccessibleLabel: ="Archive student"
-                                                AlignInContainer: =AlignInContainer.Center
-                                                Appearance: =ButtonAppearance.Secondary
-                                                Color: =ColorInk
-                                                DisplayMode: |-
-                                                  =With({sel: LookUp(colStuList, StudentId = varStuSelId)}, If(!IsBlank(sel) && (StudentCampusLock = ZeroGuid || sel.CampusId = StudentCampusLock) && !varStuSaving && !varStuLoading && CountRows(Filter(colStuHistory, IsBlank(EndDate) || EndDate >= Today())) = 0, DisplayMode.Edit, DisplayMode.Disabled))
-                                                Height: =44
-                                                Layout: =ButtonLayout.TextOnly
-                                                LayoutMinHeight: =0
-                                                LayoutMinWidth: =0
-                                                OnSelect: =Set(varStuMode, "archive"); Set(varStuAttAfter, 0); Select(btnStuFormResetEngine)
-                                                Size: =14
-                                                Text: ="Archive"
+                                                Text: ="End enrollment"
                                                 Visible: =LookUp(colStuList, StudentId = varStuSelId).StatusText <> "Archived"
-                                                Width: =104
-                                          - btnStuActUnarchive:
+                                                Width: =150
+                                          - btnStuActReenroll:
                                               Control: ModernButton
                                               Properties:
-                                                AccessibleLabel: ="Unarchive student"
+                                                AccessibleLabel: ="Re-enroll student"
                                                 AlignInContainer: =AlignInContainer.Center
                                                 Appearance: =ButtonAppearance.Secondary
                                                 Color: =ColorInk
                                                 DisplayMode: |-
-                                                  =With({sel: LookUp(colStuList, StudentId = varStuSelId)}, If(!IsBlank(sel) && (StudentCampusLock = ZeroGuid || sel.CampusId = StudentCampusLock) && !varStuSaving && !varStuLoading, DisplayMode.Edit, DisplayMode.Disabled))
+                                                  =With({sel: LookUp(colStuList, StudentId = varStuSelId)}, If(!IsBlank(sel) && (StudentCampusLock = ZeroGuid || sel.CampusId = StudentCampusLock) && !varStuSaving && !varStuLoading && sel.StatusText = "Archived" && CountRows(Filter(colStuHistory, IsBlank(EndDate))) = 0, DisplayMode.Edit, DisplayMode.Disabled))
                                                 Height: =44
                                                 Layout: =ButtonLayout.TextOnly
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
-                                                OnSelect: =Set(varStuMode, "unarchive"); Set(varStuAttAfter, 0); Select(btnStuFormResetEngine)
+                                                OnSelect: =Set(varStuMode, "reenroll"); Set(varStuFormCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, Coalesce(LookUp(colStuList, StudentId = varStuSelId).CampusId, varStuScopeCampusId))); Set(varStuAttAfter, 0); Select(btnStuFormResetEngine)
                                                 Size: =14
-                                                Text: ="Unarchive"
+                                                Text: ="Re-enroll"
                                                 Visible: =LookUp(colStuList, StudentId = varStuSelId).StatusText = "Archived"
-                                                Width: =104
+                                                Width: =110
                                     - lblStuActionHint:
                                         Control: ModernText
                                         Properties:
@@ -2281,13 +2297,12 @@ Screens:
                                           Size: =13
                                           Text: |-
                                             =With(
-                                                {sel: LookUp(colStuList, StudentId = varStuSelId), open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending)), live: CountRows(Filter(colStuHistory, IsBlank(EndDate) || EndDate >= Today()))},
+                                                {sel: LookUp(colStuList, StudentId = varStuSelId), open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending))},
                                                 If(
                                                     StudentCampusLock <> ZeroGuid && sel.CampusId <> StudentCampusLock, "View only. Office staff can change only students at their own campus.",
-                                                    sel.StatusText = "Archived", "Archived. Use Unarchive to return the student to Inactive; Edit details still works.",
-                                                    IsBlank(open), "No open enrollment, so Change class, Change ratio and Discharge are unavailable." & If(live = 0, " Archive is available.", ""),
-                                                    live > 0, "Archive needs every enrollment closed: " & live & " open or future enrollment" & If(live = 1, "", "s") & ".",
-                                                    "All actions available."
+                                                    sel.StatusText = "Archived", "Archived. Use Re-enroll to start a new enrollment after the last end date; Edit details still works.",
+                                                    IsBlank(open), "No open enrollment, so Change class, Change ratio and End enrollment are unavailable.",
+                                                    "End enrollment is for a student leaving AACA. Use Change class or Change ratio for moves."
                                                 )
                                             )
                                           VerticalAlign: =VerticalAlign.Top
@@ -2361,7 +2376,7 @@ Screens:
                                                 RadiusBottomRight: =0
                                                 RadiusTopLeft: =0
                                                 RadiusTopRight: =0
-                                                Width: =Parent.TemplateWidth
+                                                Width: =Parent.TemplateWidth - 16
                                               Children:
                                                 - conStuHistBar:
                                                     Control: GroupContainer

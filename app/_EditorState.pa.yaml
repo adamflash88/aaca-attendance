@@ -2,3 +2,4 @@ EditorState:
   ScreensOrder:
     - Screen1
     - StudentsScreen
+    - AbsencesScreen

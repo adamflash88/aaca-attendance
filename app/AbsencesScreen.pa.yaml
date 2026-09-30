@@ -1,0 +1,1524 @@
+Screens:
+  AbsencesScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varAbsSaving, false);
+        Set(varAbsSelId, Blank());
+        Set(varAbsReasonId, Blank());
+        Set(varAbsReceipt, {Kind: "", Title: ""});
+        Clear(colAbsReceiptLines);
+        If(StudentCampusLock <> ZeroGuid, Set(varAbsCampusId, StudentCampusLock));
+        IfError(
+            Concurrent(
+                ClearCollect(colAbsCampusOpts, ForAll(Sort(Campuses, Name, SortOrder.Ascending) As c, {CampusId: c.Campus, CampusName: c.Name})),
+                ClearCollect(colAbsTeacherSrc, ForAll(Sort(Filter(Staff, 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending) As t, {TeacherId: t.Staff, TeacherName: t.Name, CampusId: t.Campus.Campus})),
+                ClearCollect(colAbsReasons, ForAll(Sort(Filter('Absence Reasons', Active = true), 'Sort Order', SortOrder.Ascending) As a, {ReasonId: a.'Absence Reason', ReasonName: a.Name, SortOrder: a.'Sort Order'}))
+            ); true,
+            Set(varAbsLoadError, FirstError.Message)
+        );
+        ClearCollect(colAbsTeacherOpts, {TeacherId: ZeroGuid, TeacherName: "All teachers", CampusId: ZeroGuid}, colAbsTeacherSrc);
+        Select(btnAbsLoadEngine)
+    Children:
+      - conAbsRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =8
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conAbsHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conAbsRoot.Width < 640, 92, 76) + If(CanManageStudents, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblAbsTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Attendance"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Attendance"
+                        Wrap: =false
+                  - lblAbsIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conAbsRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =Coalesce(CurrentUserRow.'Full Name', User().FullName) & " · " & RoleLabel & " · " & If(!StaffReady, "no campus", IsBlank(CurrentStaff.Campus), "All campuses", CurrentStaff.Campus.Name)
+                        VerticalAlign: =VerticalAlign.Top
+                  - conAbsNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanManageStudents
+                      Children:
+                        - btnAbsNavAttendance:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Attendance"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(Screen1)
+                              Size: =14
+                              Text: ="Attendance"
+                              Width: =110
+                        - btnAbsNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnAbsNavAbsences:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Absences (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(AbsencesScreen)
+                              Size: =14
+                              Text: ="Absences"
+                              Width: =110
+            - conAbsDenied:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + If(conAbsRoot.Width < 640, 88, 48) + 8 + 44 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!CanClassify
+                Children:
+                  - lblAbsDeniedTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="Absences is not available for your role"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="Absences is not available for your role"
+                        Wrap: =false
+                  - lblAbsDeniedBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =If(conAbsRoot.Width < 640, 88, 48)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask a System Admin to set you up.", "Only the Attendance Office and System Admin roles classify absences. Teachers and Read-only users record and view attendance on the Attendance screen.")
+                        VerticalAlign: =VerticalAlign.Top
+                  - btnAbsDeniedBack:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Back to Attendance"
+                        AlignInContainer: =AlignInContainer.Start
+                        Appearance: =ButtonAppearance.Secondary
+                        Color: =ColorInk
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Navigate(Screen1)
+                        Size: =14
+                        Text: ="Back to Attendance"
+                        Width: =190
+            - conAbsNotice:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorErrorBg
+                  FillPortions: =0
+                  Height: =If(conAbsRoot.Width < 640, 68, 44)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =4
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =4
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =CanClassify && varAbsLoadError <> ""
+                Children:
+                  - lblAbsNotice:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FillPortions: =1
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: ="Could not load absences — " & varAbsLoadError & ". Use Reload to try again."
+            - spnAbsLoading:
+                Control: ModernSpinner
+                Properties:
+                  AccessibleLabel: =If(varAbsSaving, "Saving classifications", "Loading absences")
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =ColorInk
+                  Label: =If(varAbsSaving, "Saving classifications…", "Loading absences…")
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  SpinnerColor: =ColorTeal
+                  Visible: =varAbsLoading || varAbsSaving
+            - conAbsReceipt:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =Switch(varAbsReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, "Cancelled", ColorWarnBg, ColorInfoBg)
+                  FillPortions: =0
+                  Height: =8 + If(conAbsRoot.Width < 640, 84, 44) + If(CountRows(colAbsReceiptLines) > 0, 4 + galAbsReceipt.Height, 0) + 8
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =8
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =8
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =varAbsReceipt.Kind <> ""
+                Children:
+                  - conAbsReceiptTop:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conAbsRoot.Width < 640, 84, 44)
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lblAbsReceiptTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =varAbsReceipt.Title
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorInk
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              Height: =If(conAbsRoot.Width < 640, 84, 44)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: =varAbsReceipt.Title
+                        - btnAbsReceiptDismiss:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Dismiss result"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: |-
+                                =Set(varAbsReceipt, {Kind: "", Title: ""}); Clear(colAbsReceiptLines)
+                              Size: =14
+                              Text: ="Dismiss"
+                              Width: =88
+                  - galAbsReceipt:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        AccessibleLabel: ="Classification result details"
+                        FillPortions: =0
+                        Height: =Min(400, RoundUp(CountRows(colAbsReceiptLines) / If(conAbsRoot.Width < 640, 1, conAbsRoot.Width < 1024, 2, 3), 0) * 40)
+                        Items: =colAbsReceiptLines
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Selectable: =false
+                        TabIndex: =0
+                        TemplatePadding: =0
+                        TemplateSize: =40
+                        Visible: =CountRows(colAbsReceiptLines) > 0
+                        WrapCount: =If(conAbsRoot.Width < 640, 1, conAbsRoot.Width < 1024, 2, 3)
+                      Children:
+                        - conAbsRcptRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =Parent.TemplateHeight
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              PaddingBottom: =2
+                              PaddingRight: =8
+                              PaddingTop: =2
+                              Width: =Parent.TemplateWidth - 16
+                            Children:
+                              - lblAbsRcptLabel:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =ThisItem.Label
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: =ThisItem.Label
+                                    VerticalAlign: =VerticalAlign.Top
+                              - lblAbsRcptValue:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =ThisItem.Label & " " & ThisItem.Value
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: =ThisItem.Value
+                                    VerticalAlign: =VerticalAlign.Top
+            - conAbsBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conAbsRoot.Width >= 1024, Max(conAbsListPanel.Height, conAbsDecide.Height), If(conAbsListPanel.Visible, conAbsListPanel.Height, 0) + If(conAbsListPanel.Visible && conAbsDecide.Visible, 8, 0) + If(conAbsDecide.Visible, conAbsDecide.Height, 0))
+                  LayoutAlignItems: =If(conAbsRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                  LayoutDirection: =If(conAbsRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =CanClassify
+                Children:
+                  - conAbsListPanel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conAbsRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =If(conAbsRoot.Width >= 1024, 2, 0)
+                        Height: |-
+                          =With(
+                              {n: conAbsRoot.Width < 640, k: CountRows(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0},
+                              16 + 44 + 8 + 58 + 8 + 58 + 8 + If(n, 138, 58) + 8 + 44 + 8 + If(n, 110, 58) + 8 + If(n, 36, 18) + 8 + If(n, 60, 40) + If(k, 8 + 520, 0) + 16
+                          )
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =!(conAbsRoot.Width < 1024 && !IsBlank(varAbsSelId))
+                      Children:
+                        - conAbsListHead:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblAbsListTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Absences"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =30
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =80
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =20
+                                    Text: ="Absences"
+                                    Wrap: =false
+                              - btnAbsReload:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Reload absences"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varAbsLoading || varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: =Select(btnAbsLoadEngine)
+                                    Size: =14
+                                    Text: ="Reload"
+                                    Tooltip: ="Reload absences"
+                                    Width: =80
+                              - btnAbsClearFilters:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Clear filters"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAbsCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(colAbsCampusOpts).CampusId, ZeroGuid)));
+                                      Set(varAbsTeacherId, ZeroGuid);
+                                      Set(varAbsStatus, "Not classified");
+                                      Set(varAbsFrom, Coalesce(CurrentSchoolYear.'Start Date', Date(Year(Today()) - If(Month(Today()) < 7, 1, 0), 7, 1)));
+                                      Set(varAbsTo, Today());
+                                      Reset(ddAbsCampus); Reset(ddAbsTeacher); Reset(dpAbsFrom); Reset(dpAbsTo); Reset(rdoAbsStatus);
+                                      Select(btnAbsLoadEngine)
+                                    Size: =14
+                                    Text: ="Clear filters"
+                                    Width: =120
+                        - conAbsScopeRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =58
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - conAbsCampusField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =140
+                                  Children:
+                                    - lblAbsCampus:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Campus"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Campus"
+                                          Wrap: =false
+                                    - ddAbsCampus:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AccessibleLabel: ="Campus"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =LookUp(colAbsCampusOpts, CampusId = varAbsCampusId)
+                                          DisplayMode: =If(StudentCampusLock = ZeroGuid && !varAbsLoading && !varAbsSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.CampusName
+                                          Items: =colAbsCampusOpts
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsCampusId, Coalesce(Self.Selected.CampusId, ZeroGuid)); Set(varAbsTeacherId, ZeroGuid); Reset(ddAbsTeacher); Select(btnAbsLoadEngine)
+                              - conAbsTeacherField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =140
+                                  Children:
+                                    - lblAbsTeacher:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Teacher"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Teacher"
+                                          Wrap: =false
+                                    - ddAbsTeacher:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AccessibleLabel: ="Teacher"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =LookUp(colAbsTeacherOpts, TeacherId = varAbsTeacherId)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.TeacherName
+                                          Items: =Filter(colAbsTeacherOpts, TeacherId = ZeroGuid || CampusId = varAbsCampusId)
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsTeacherId, Coalesce(Self.Selected.TeacherId, ZeroGuid)); Set(varAbsSelId, Blank())
+                        - conAbsDateRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =58
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - conAbsFromField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =140
+                                  Children:
+                                    - lblAbsFrom:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="From date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="From date"
+                                          Wrap: =false
+                                    - dpAbsFrom:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: ="From date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =varAbsFrom
+                                          DisplayMode: =If(varAbsLoading || varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =Today()
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsFrom, Self.SelectedDate); Select(btnAbsLoadEngine)
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                              - conAbsToField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =140
+                                  Children:
+                                    - lblAbsTo:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="To date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="To date"
+                                          Wrap: =false
+                                    - dpAbsTo:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: ="To date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =varAbsTo
+                                          DisplayMode: =If(varAbsLoading || varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =Today()
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsTo, Self.SelectedDate); Select(btnAbsLoadEngine)
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                        - conAbsStatusField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conAbsRoot.Width < 640, 138, 58)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblAbsStatus:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Status"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Status"
+                                    Wrap: =false
+                              - rdoAbsStatus:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Status filter"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      ={Value: varAbsStatus}
+                                    DisplayMode: =If(varAbsLoading || varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =If(conAbsRoot.Width < 640, 116, 36)
+                                    Items: =["Not classified", "Excused", "Unexcused", "All"]
+                                    Layout: =If(conAbsRoot.Width < 640, OptionLayout.Vertical, OptionLayout.Horizontal)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnChange: =Set(varAbsStatus, Self.Selected.Value); Select(btnAbsLoadEngine)
+                        - conAbsTickRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - btnAbsSelectAll:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Select all shown absences"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(!varAbsSaving && !varAbsLoading && CountRows(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =ClearCollect(colAbsTicked, ForAll(Filter(colAbsList, !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus)) As r, {AttId: r.AttId}))
+                                    Size: =14
+                                    Text: ="Select all shown"
+                                    Width: =150
+                              - btnAbsClearTicks:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Clear ticks"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(CountRows(colAbsTicked) > 0 && !varAbsSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: =Clear(colAbsTicked)
+                                    Size: =14
+                                    Text: ="Clear ticks"
+                                    Width: =110
+                        - conAbsBulkRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conAbsRoot.Width < 640, 110, 58)
+                              LayoutAlignItems: =LayoutAlignItems.End
+                              LayoutDirection: =If(conAbsRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - conAbsBulkReasonField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =If(conAbsRoot.Width < 640, 0, 1)
+                                    Height: =58
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =140
+                                  Children:
+                                    - lblAbsBulkReason:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Reason for Mark Excused"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Reason for Mark Excused"
+                                          Wrap: =false
+                                    - ddAbsBulkReason:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AccessibleLabel: ="Reason for Mark Excused"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =LookUp(colAbsReasons, ReasonId = varAbsBulkReasonId)
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.ReasonName
+                                          Items: =colAbsReasons
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsBulkReasonId, Self.Selected.ReasonId)
+                              - conAbsBulkBtns:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.End
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =288
+                                  Children:
+                                    - btnAbsBulkExcused:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Mark ticked absences Excused"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorExcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varAbsSaving && !varAbsLoading && CountRows(Filter(colAbsList, AttId in colAbsTicked.AttId && !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0 && !IsBlank(LookUp(colAbsReasons, ReasonId = varAbsBulkReasonId)), DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =ClearCollect(colAbsWork, ForAll(Filter(colAbsList, AttId in colAbsTicked.AttId && !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus)) As r, {AttId: r.AttId}));
+                                            Set(varAbsReq, {Kind: "Excused", Scope: "bulk", ReasonId: varAbsBulkReasonId});
+                                            Select(btnAbsClassifyEngine)
+                                          Size: =14
+                                          Text: ="Mark Excused"
+                                          Width: =130
+                                    - btnAbsBulkUnexcused:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Mark ticked absences Unexcused"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorUnexcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varAbsSaving && !varAbsLoading && CountRows(Filter(colAbsList, AttId in colAbsTicked.AttId && !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =ClearCollect(colAbsWork, ForAll(Filter(colAbsList, AttId in colAbsTicked.AttId && !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus)) As r, {AttId: r.AttId}));
+                                            Set(varAbsReq, {Kind: "Unexcused", Scope: "bulk", ReasonId: ZeroGuid});
+                                            Select(btnAbsClassifyEngine)
+                                          Size: =14
+                                          Text: ="Mark Unexcused"
+                                          Width: =150
+                        - lblAbsBulkHint:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =If(conAbsRoot.Width < 640, 36, 18)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({t: CountRows(Filter(colAbsList, AttId in colAbsTicked.AttId && !Locked && (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus)))},
+                                    If(t = 0, "No absences ticked. Tick rows or use Select all shown.", t & " ticked" & If(IsBlank(LookUp(colAbsReasons, ReasonId = varAbsBulkReasonId)), " · choose a reason to use Mark Excused", " · ready")))
+                              VerticalAlign: =VerticalAlign.Top
+                              Wrap: =conAbsRoot.Width < 640
+                        - lblAbsCount:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Semibold
+                              Height: =If(conAbsRoot.Width < 640, 60, 40)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =With(
+                                    {n: CountRows(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))), word: Switch(varAbsStatus, "Not classified", "not classified", "Excused", "excused", "Unexcused", "unexcused", "absences")},
+                                    If(
+                                        varAbsLoading, "Loading absences…",
+                                        varAbsCampusId = ZeroGuid, "Choose a campus to load absences.",
+                                        IsBlank(varAbsFrom) || IsBlank(varAbsTo) || varAbsFrom > varAbsTo, "Choose a From date on or before the To date.",
+                                        n = 0, "0 " & word & ". Nothing matches these filters. Change the dates, teacher or status, or use Clear filters.",
+                                        n & " " & word & " · " & LookUp(colAbsCampusOpts, CampusId = varAbsCampusId).CampusName & " · " & LookUp(colAbsTeacherOpts, TeacherId = varAbsTeacherId).TeacherName & " · " & Text(varAbsFrom, "mmm d, yyyy") & " – " & Text(varAbsTo, "mmm d, yyyy") & If(CountRows(colAbsList) >= 2000, " · Only the first 2,000 were loaded; narrow the dates.", "")
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - galAbsList:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Absences queue"
+                              FillPortions: =0
+                              Height: =520
+                              Items: =SortByColumns(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus)), "AbsDate", SortOrder.Ascending, "StudentName", SortOrder.Ascending)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =If(conAbsRoot.Width < 640, 192, 130)
+                              Visible: =CountRows(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0
+                            Children:
+                              - conAbsRowShell:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.AttId = varAbsSelId, ColorInfoBg, ThisItem.Locked, ColorNonSchool, ColorWhite)
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - conAbsRowTop:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - chkAbsRowTick:
+                                              Control: ModernCheckbox
+                                              Properties:
+                                                AccessibleLabel: ="Tick " & ThisItem.StudentName & " " & Text(ThisItem.AbsDate, "mmm d")
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Default: =!IsBlank(LookUp(colAbsTicked, AttId = ThisItem.AttId))
+                                                DisplayMode: =If(ThisItem.Locked || varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                                Height: =44
+                                                Label: =""
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnCheck: |-
+                                                  =If(IsBlank(LookUp(colAbsTicked, AttId = ThisItem.AttId)), Collect(colAbsTicked, {AttId: ThisItem.AttId}))
+                                                OnUncheck: =RemoveIf(colAbsTicked, AttId = ThisItem.AttId)
+                                                Width: =44
+                                          - lblAbsRowName:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =42
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.StudentName & " · " & ThisItem.StudentNumber
+                                          - badgeAbsRowStatus:
+                                              Control: Badge
+                                              Properties:
+                                                AccessibleLabel: ="Status " & ThisItem.ClassText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                Content: =ThisItem.ClassText
+                                                FontColor: =ColorInk
+                                                FontSize: =12
+                                                Height: =24
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                Shape: ='BadgeCanvas.Shape'.Rounded
+                                                ThemeColor: =Switch(ThisItem.ClassText, "Excused", 'BadgeCanvas.ThemeColor'.Success, "Unexcused", 'BadgeCanvas.ThemeColor'.Danger, 'BadgeCanvas.ThemeColor'.Warning)
+                                                Width: =110
+                                    - lblAbsRowMeta:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Height: =If(conAbsRoot.Width < 640, 36, 18)
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =Text(ThisItem.AbsDate, "ddd mmm d, yyyy") & " · " & ThisItem.TeacherName & " · " & ThisItem.CampusName
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Wrap: =conAbsRoot.Width < 640
+                                    - conAbsRowBottom:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =If(conAbsRoot.Width < 640, 88, 44)
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =If(conAbsRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblAbsRowNote:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =If(ThisItem.Locked, ColorUnexcused, ColorMuted)
+                                                FillPortions: =1
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =If(ThisItem.Locked, "Month locked · cannot classify", ThisItem.ClassText = "Not classified", "Not classified yet", ThisItem.ClassText & If(ThisItem.ReasonName = "", "", " · " & ThisItem.ReasonName) & If(ThisItem.ClassifiedByName = "", "", " · " & ThisItem.ClassifiedByName & " " & Text(ThisItem.ClassifiedOn, "mmm d")))
+                                          - conAbsRowActions:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                AlignInContainer: =If(conAbsRoot.Width < 640, AlignInContainer.Start, AlignInContainer.Center)
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =44
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                Width: =218
+                                              Children:
+                                                - btnAbsRowExcused:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Mark " & ThisItem.StudentName & " " & Text(ThisItem.AbsDate, "mmm d") & " excused"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      BasePaletteColor: =ColorExcused
+                                                      Color: =ColorWhite
+                                                      DisplayMode: =If(CanClassify && !ThisItem.Locked && !varAbsSaving && !varAbsLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: =Set(varAbsSelId, ThisItem.AttId); Set(varAbsReasonId, ThisItem.ReasonId); Reset(rdoAbsReason)
+                                                      Size: =14
+                                                      Text: ="Excused…"
+                                                      Width: =100
+                                                - btnAbsRowUnexcused:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Mark " & ThisItem.StudentName & " " & Text(ThisItem.AbsDate, "mmm d") & " unexcused"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      BasePaletteColor: =ColorUnexcused
+                                                      Color: =ColorWhite
+                                                      DisplayMode: =If(CanClassify && !ThisItem.Locked && ThisItem.ClassText <> "Unexcused" && !varAbsSaving && !varAbsLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =ClearCollect(colAbsWork, {AttId: ThisItem.AttId}); Set(varAbsReq, {Kind: "Unexcused", Scope: "one", ReasonId: ZeroGuid}); Select(btnAbsClassifyEngine)
+                                                      Size: =14
+                                                      Text: ="Unexcused"
+                                                      Width: =110
+                  - conAbsDecide:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conAbsRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =If(conAbsRoot.Width >= 1024, 1, 0)
+                        Height: =16 + If(IsBlank(varAbsSelId), 28 + 8 + 60, 28 + 8 + 72 + 8 + 22 + Max(36, CountRows(colAbsReasons) * 32) + 8 + 36 + 8 + 44) + 16
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =conAbsRoot.Width >= 1024 || !IsBlank(varAbsSelId)
+                      Children:
+                        - lblAbsDecideTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Mark as Excused"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Bold
+                              Height: =28
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: ="Mark as Excused"
+                              Wrap: =false
+                        - lblAbsDecideEmpty:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =60
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: ="Choose Excused… on an absence to pick its reason here. Unexcused on a row saves straight away."
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =IsBlank(varAbsSelId)
+                        - lblAbsDecideWho:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              Height: =72
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =With({a: LookUp(colAbsList, AttId = varAbsSelId)}, a.StudentName & " · " & a.StudentNumber & " · " & Text(a.AbsDate, "ddd mmm d, yyyy") & " · " & a.TeacherName & " · " & a.CampusName & " · now " & a.ClassText & If(a.ReasonName = "", "", " (" & a.ReasonName & ")"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =!IsBlank(varAbsSelId)
+                        - conAbsReasonField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =22 + Max(36, CountRows(colAbsReasons) * 32)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =!IsBlank(varAbsSelId)
+                            Children:
+                              - lblAbsReason:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Reason, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Reason *"
+                                    Wrap: =false
+                              - rdoAbsReason:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Reason for excused absence"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: =LookUp(colAbsReasons, ReasonId = varAbsReasonId)
+                                    DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =Max(36, CountRows(colAbsReasons) * 32)
+                                    ItemDisplayText: =ThisItem.ReasonName
+                                    Items: =colAbsReasons
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnChange: =Set(varAbsReasonId, Self.Selected.ReasonId)
+                        - lblAbsDecideCheck:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =If(Self.Text = "Ready to save.", ColorExcused, ColorUnexcused)
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =With({a: LookUp(colAbsList, AttId = varAbsSelId)}, If(IsBlank(a), "That absence is no longer in the list. Cancel and reload.", a.Locked, "This month is locked for " & a.CampusName & ". It cannot be classified.", IsBlank(LookUp(colAbsReasons, ReasonId = varAbsReasonId)), "Choose a reason. Excused always needs one.", "Ready to save."))
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =!IsBlank(varAbsSelId)
+                        - conAbsDecideActions:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =!IsBlank(varAbsSelId)
+                            Children:
+                              - btnAbsDecideSave:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Save as Excused"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =ColorExcused
+                                    Color: =ColorWhite
+                                    DisplayMode: =If(CanClassify && lblAbsDecideCheck.Text = "Ready to save." && !varAbsSaving && !varAbsLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =ClearCollect(colAbsWork, {AttId: varAbsSelId}); Set(varAbsReq, {Kind: "Excused", Scope: "one", ReasonId: varAbsReasonId}); Select(btnAbsClassifyEngine)
+                                    Size: =14
+                                    Text: ="Save as Excused"
+                                    Width: =160
+                              - btnAbsDecideCancel:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Cancel excused"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =With({a: LookUp(colAbsList, AttId = varAbsSelId)}, Set(varAbsReceipt, {Kind: "Cancelled", Title: "Excused cancelled · " & Coalesce(a.StudentName, "no absence") & " · " & Text(a.AbsDate, "mmm d, yyyy") & " · nothing was changed"})); Clear(colAbsReceiptLines); Set(varAbsSelId, Blank()); Set(varAbsReasonId, Blank()); Reset(rdoAbsReason)
+                                    Size: =14
+                                    Text: ="Cancel"
+                                    Width: =100
+            - btnAbsLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varAbsLoading, true);
+                    Set(varAbsLoadError, "");
+                    Clear(colAbsTicked);
+                    Set(varAbsSelId, Blank());
+                    If(
+                        !CanClassify || varAbsCampusId = ZeroGuid || IsBlank(varAbsFrom) || IsBlank(varAbsTo) || varAbsFrom > varAbsTo,
+                        Clear(colAbsList),
+                        IfError(
+                            ClearCollect(colAbsLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month})); true,
+                            Set(varAbsLoadError, FirstError.Message)
+                        );
+                        IfError(
+                            With(
+                                {c0: varAbsCampusId, d0: varAbsFrom, d1: varAbsTo},
+                                ClearCollect(
+                                    colAbsList,
+                                    ForAll(
+                                        Switch(
+                                            varAbsStatus,
+                                            "Not classified", Filter(Attendance, Present = false && 'Is Deleted' = false && 'Absence Classification' = Blank() && Campus.Campus = c0 && Date >= d0 && Date <= d1),
+                                            "Excused", Filter(Attendance, Present = false && 'Is Deleted' = false && 'Absence Classification' = 'Absence Classification (Attendance)'.Excused && Campus.Campus = c0 && Date >= d0 && Date <= d1),
+                                            "Unexcused", Filter(Attendance, Present = false && 'Is Deleted' = false && 'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused && Campus.Campus = c0 && Date >= d0 && Date <= d1),
+                                            Filter(Attendance, Present = false && 'Is Deleted' = false && Campus.Campus = c0 && Date >= d0 && Date <= d1)
+                                        ) As r,
+                                        {
+                                            AttId: r.Attendance, RecordKey: r.'Record Key',
+                                            StudentId: r.Student.Student, StudentName: Coalesce(r.Student.'Display Name', "Unknown student"), StudentNumber: Coalesce(r.Student.'Student Number', "—"),
+                                            AbsDate: r.Date,
+                                            TeacherId: r.Teacher.Staff, TeacherName: Coalesce(r.Teacher.Name, "No teacher"),
+                                            CampusId: r.Campus.Campus, CampusName: Coalesce(r.Campus.Name, "No campus"),
+                                            ClassText: If(r.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Excused", r.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Unexcused", "Not classified"),
+                                            ReasonId: r.'Absence Reason'.'Absence Reason', ReasonName: Coalesce(r.'Absence Reason'.Name, ""),
+                                            ClassifiedByName: Coalesce(r.'Classified By'.'Full Name', ""), ClassifiedOn: r.'Classified On',
+                                            Locked: !IsBlank(LookUp(colAbsLocks, CampusId = r.Campus.Campus && MonthStart = Date(Year(r.Date), Month(r.Date), 1))),
+                                            ModifiedOn: r.'Modified On'
+                                        }
+                                    )
+                                )
+                            ); true,
+                            Set(varAbsLoadError, FirstError.Message)
+                        )
+                    );
+                    Set(varAbsLoading, false)
+                  Text: ="load"
+                  Visible: =false
+            - btnAbsClassifyEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =With(
+                        {req: varAbsReq, rsn: With({qr: varAbsReq.ReasonId}, LookUp('Absence Reasons', ThisRecord.'Absence Reason' = qr && Active = true)), n: CountRows(colAbsWork)},
+                        If(
+                            !CanClassify,
+                            Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Only the Attendance Office and System Admin can classify absences."}); Clear(colAbsReceiptLines),
+                            !(req.Kind in ["Excused", "Unexcused"]),
+                            Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Choose Excused or Unexcused."}); Clear(colAbsReceiptLines),
+                            n = 0,
+                            Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. No absences ticked. Tick rows or use Select all shown."}); Clear(colAbsReceiptLines),
+                            req.Kind = "Excused" && IsBlank(rsn),
+                            Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Excused needs a reason from Absence Reasons."}); Clear(colAbsReceiptLines),
+                            Set(varAbsSaving, true);
+                            Clear(colAbsLog);
+                            ClearCollect(colAbsLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month}));
+                            ForAll(
+                                colAbsWork As w,
+                                With(
+                                    {c: LookUp(colAbsList, AttId = w.AttId), live: With({qid: w.AttId}, LookUp(Attendance, ThisRecord.Attendance = qid))},
+                                    With(
+                                        {
+                                            oldText: If(live.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Excused", live.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Unexcused", "Not classified") & If(IsBlank(live.'Absence Reason'), "", " (" & live.'Absence Reason'.Name & ")"),
+                                            outcome: If(
+                                                IsBlank(live), "failed",
+                                                live.Present = true || live.'Is Deleted' = true, "not an absence",
+                                                !IsBlank(LookUp(colAbsLocks, CampusId = live.Campus.Campus && MonthStart = Date(Year(live.Date), Month(live.Date), 1))), "locked",
+                                                !IsBlank(c) && live.'Modified On' <> c.ModifiedOn, "changed",
+                                                "ok"
+                                            )
+                                        },
+                                        With(
+                                            {
+                                                wr: If(
+                                                    outcome = "ok",
+                                                    IfError(
+                                                        Switch(
+                                                            req.Kind,
+                                                            "Excused", Patch(Attendance, live, {'Absence Classification': 'Absence Classification (Attendance)'.Excused, 'Absence Reason': rsn, 'Classified By': CurrentUserRow, 'Classified On': Now()}),
+                                                            "Unexcused", Patch(Attendance, live, {'Absence Classification': 'Absence Classification (Attendance)'.Unexcused, 'Absence Reason': Blank(), 'Classified By': CurrentUserRow, 'Classified On': Now()})
+                                                        ),
+                                                        Blank()
+                                                    )
+                                                )
+                                            },
+                                            With(
+                                                {newText: If(IsBlank(wr), "", If(wr.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Excused", wr.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Unexcused", "Not classified") & If(IsBlank(wr.'Absence Reason'), "", " (" & wr.'Absence Reason'.Name & ")"))},
+                                                With(
+                                                    {au: If(!IsBlank(wr), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Reclassify " & wr.'Record Key' & " " & oldText & " to " & newText, 100), Action: 'Action (Audit Events)'.Reclassify, Entity: "aaca_attendance", 'Entity ID': Text(wr.Attendance), Before: JSON({Classification: oldText, ClassifiedBy: Coalesce(live.'Classified By'.'Full Name', ""), ClassifiedOn: Text(live.'Classified On', "yyyy-mm-dd hh:mm")}), After: JSON({Classification: newText, ClassifiedBy: Coalesce(wr.'Classified By'.'Full Name', ""), ClassifiedOn: Text(wr.'Classified On', "yyyy-mm-dd hh:mm")}), Reason: If(req.Scope = "bulk", "Bulk classification in Absences queue", "Classified in Absences queue")}), Blank()))},
+                                                    If(!IsBlank(wr) && !IsBlank(c), Patch(colAbsList, c, {ClassText: If(wr.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Excused", "Unexcused"), ReasonId: wr.'Absence Reason'.'Absence Reason', ReasonName: Coalesce(wr.'Absence Reason'.Name, ""), ClassifiedByName: Coalesce(wr.'Classified By'.'Full Name', ""), ClassifiedOn: wr.'Classified On', ModifiedOn: wr.'Modified On'}));
+                                                    If(outcome = "locked" && !IsBlank(c), Patch(colAbsList, c, {Locked: true}));
+                                                    If(outcome = "changed" && !IsBlank(c), Patch(colAbsList, c, {ClassText: If(live.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Excused", live.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Unexcused", "Not classified"), ReasonId: live.'Absence Reason'.'Absence Reason', ReasonName: Coalesce(live.'Absence Reason'.Name, ""), ClassifiedByName: Coalesce(live.'Classified By'.'Full Name', ""), ClassifiedOn: live.'Classified On', ModifiedOn: live.'Modified On'}));
+                                                    Collect(colAbsLog, {AttId: w.AttId, StudentName: Coalesce(c.StudentName, live.Student.'Display Name', "Unknown student"), AbsDate: Coalesce(c.AbsDate, live.Date), TeacherName: Coalesce(c.TeacherName, ""), CampusName: Coalesce(c.CampusName, ""), OldClass: oldText, NewClass: newText, ReasonName: If(IsBlank(wr), "", Coalesce(wr.'Absence Reason'.Name, "")), ByName: If(IsBlank(wr), "", Coalesce(wr.'Classified By'.'Full Name', "")), OnText: If(IsBlank(wr), "", Text(wr.'Classified On', "mmm d, yyyy h:mm AM/PM")), Outcome: If(!IsBlank(wr), "marked", outcome = "ok", "failed", outcome), AuditOk: !IsBlank(au)})
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            );
+                            With(
+                                {
+                                    mk: CountRows(Filter(colAbsLog, Outcome = "marked")),
+                                    fl: CountRows(Filter(colAbsLog, Outcome = "failed")),
+                                    sk: CountRows(Filter(colAbsLog, Outcome in ["locked", "changed", "not an absence"])),
+                                    g: First(colAbsLog)
+                                },
+                                If(
+                                    req.Scope = "one",
+                                    Set(varAbsReceipt, {Kind: If(mk = 1, "Classified", g.Outcome = "failed", "Failed", "Blocked"), Title: If(mk = 1, "Marked " & g.NewClass & " · " & g.StudentName & " · " & Text(g.AbsDate, "ddd mmm d, yyyy"), "Not saved · " & g.StudentName & " · " & Text(g.AbsDate, "ddd mmm d, yyyy") & " · " & Switch(g.Outcome, "locked", "the month is locked for this campus", "changed", "someone else changed this absence; the row was refreshed", "not an absence", "this day is no longer an absence", "the save failed; try again"))});
+                                    ClearCollect(
+                                        colAbsReceiptLines,
+                                        {Label: "Student", Value: g.StudentName},
+                                        {Label: "Date", Value: Text(g.AbsDate, "ddd mmm d, yyyy")},
+                                        {Label: "Teacher", Value: g.TeacherName},
+                                        {Label: "Campus", Value: g.CampusName},
+                                        {Label: "Before", Value: g.OldClass},
+                                        {Label: "Classification", Value: If(mk = 1, g.NewClass, "Unchanged")},
+                                        {Label: "Reason", Value: If(mk = 1, If(g.ReasonName = "", "None (cleared)", g.ReasonName), "Unchanged")},
+                                        {Label: "Classified by", Value: If(mk = 1, g.ByName, "—")},
+                                        {Label: "Classified on", Value: If(mk = 1, g.OnText, "—")},
+                                        {Label: "Audit event", Value: If(g.AuditOk, "Reclassify written", mk = 1, "NOT written", "Not needed")}
+                                    );
+                                    If(mk = 1, Set(varAbsSelId, Blank()); Set(varAbsReasonId, Blank()); Reset(rdoAbsReason)),
+                                    Set(varAbsReceipt, {Kind: If(mk = 0, "Failed", "Classified"), Title: mk & " marked " & req.Kind & If(req.Kind = "Excused", " (" & rsn.Name & ")", "") & ", " & fl & " failed" & If(sk > 0, ", " & sk & " skipped", "")});
+                                    ClearCollect(
+                                        colAbsReceiptLines,
+                                        {Label: "Operation", Value: "Mark " & req.Kind},
+                                        {Label: "Reason", Value: If(req.Kind = "Excused", rsn.Name, "None (cleared)")},
+                                        {Label: "Ticked", Value: Text(n)},
+                                        {Label: "Marked", Value: Text(mk)},
+                                        {Label: "Failed", Value: Text(fl)},
+                                        {Label: "Skipped", Value: Text(sk) & " (locked month, changed by someone else, or no longer an absence)"},
+                                        ForAll(colAbsLog As g2, {Label: g2.StudentName & " · " & Text(g2.AbsDate, "mmm d"), Value: If(g2.Outcome = "marked", g2.NewClass & " · " & g2.ByName & If(g2.AuditOk, "", " · audit NOT written"), g2.Outcome = "failed", "FAILED · not changed", "Skipped · " & g2.Outcome)})
+                                    )
+                                );
+                                RemoveIf(colAbsTicked, AttId in Filter(colAbsLog, Outcome = "marked").AttId)
+                            );
+                            Clear(colAbsWork);
+                            Set(varAbsSaving, false)
+                        )
+                    )
+                  Text: ="classify"
+                  Visible: =false

@@ -1,0 +1,7 @@
+# Keep app source and scripts byte-stable across Windows checkouts (the canvas service writes LF)
+*.pa.yaml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ps1 text eol=lf
+*.py text eol=lf
+*.xlsx binary

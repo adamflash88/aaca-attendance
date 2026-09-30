@@ -127,7 +127,7 @@ Screens:
                               OnSelect: =Navigate(Screen1)
                               Size: =14
                               Text: ="Attendance"
-                              Width: =120
+                              Width: =110
                         - btnAttNavStudents:
                             Control: ModernButton
                             Properties:
@@ -142,7 +142,22 @@ Screens:
                               OnSelect: =Navigate(StudentsScreen)
                               Size: =14
                               Text: ="Students"
-                              Width: =120
+                              Width: =110
+                        - btnAttNavAbsences:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Absences"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(AbsencesScreen)
+                              Size: =14
+                              Text: ="Absences"
+                              Width: =110
             - conAttNotSetUp:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -1523,7 +1538,7 @@ Screens:
                               RadiusBottomRight: =6
                               RadiusTopLeft: =6
                               RadiusTopRight: =6
-                              Width: =Parent.TemplateWidth
+                              Width: =Parent.TemplateWidth - 16
                             Children:
                               - lblAttDayName:
                                   Control: ModernText
