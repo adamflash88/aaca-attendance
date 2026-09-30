@@ -3,7 +3,8 @@ Screens:
     Properties:
       Fill: =ColorPaper
       OnVisible: |-
-        =Set(varAbsNrSaving, false);
+        =Set(varAbsApSaving, false);
+        Set(varAbsNrSaving, false);
         Set(varAbsSaving, false);
         Set(varAbsSelId, Blank());
         Set(varAbsReasonId, Blank());
@@ -20,7 +21,8 @@ Screens:
         );
         ClearCollect(colAbsTeacherOpts, {TeacherId: ZeroGuid, TeacherName: "All teachers", CampusId: ZeroGuid}, colAbsTeacherSrc);
         Select(btnAbsLoadEngine);
-        Select(btnAbsNrEngine)
+        Select(btnAbsNrEngine);
+        Select(btnAbsApEngine)
     Children:
       - conAbsRoot:
           Control: GroupContainer
@@ -164,9 +166,9 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =If(conAbsRoot.Width < 640, 96, 44)
-                  LayoutAlignItems: =If(conAbsRoot.Width < 640, LayoutAlignItems.Stretch, LayoutAlignItems.Center)
-                  LayoutDirection: =If(conAbsRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                  Height: =If(conAbsRoot.Width < 1024, 148, 44)
+                  LayoutAlignItems: =If(conAbsRoot.Width < 1024, LayoutAlignItems.Stretch, LayoutAlignItems.Center)
+                  LayoutDirection: =If(conAbsRoot.Width < 1024, LayoutDirection.Vertical, LayoutDirection.Horizontal)
                   LayoutGap: =8
                   LayoutMinHeight: =0
                   LayoutMinWidth: =0
@@ -182,7 +184,7 @@ Screens:
                       Control: ModernButton
                       Properties:
                         AccessibleLabel: ="Classify absences" & If(varAbsView = "classify", " (current view)", "")
-                        AlignInContainer: =If(conAbsRoot.Width < 640, AlignInContainer.Stretch, AlignInContainer.Center)
+                        AlignInContainer: =If(conAbsRoot.Width < 1024, AlignInContainer.Stretch, AlignInContainer.Center)
                         Appearance: =If(varAbsView = "classify", ButtonAppearance.Primary, ButtonAppearance.Secondary)
                         BasePaletteColor: =ColorTeal
                         Color: =If(varAbsView = "classify", ColorWhite, ColorInk)
@@ -193,12 +195,12 @@ Screens:
                         OnSelect: =Set(varAbsView, "classify")
                         Size: =14
                         Text: ="Classify absences"
-                        Width: =If(conAbsRoot.Width < 640, Parent.Width - 32, 170)
+                        Width: =If(conAbsRoot.Width < 1024, Parent.Width - 32, 170)
                   - btnAbsViewNr:
                       Control: ModernButton
                       Properties:
                         AccessibleLabel: =Self.Text & If(varAbsView = "nr", " (current view)", "")
-                        AlignInContainer: =If(conAbsRoot.Width < 640, AlignInContainer.Stretch, AlignInContainer.Center)
+                        AlignInContainer: =If(conAbsRoot.Width < 1024, AlignInContainer.Stretch, AlignInContainer.Center)
                         Appearance: =If(varAbsView = "nr", ButtonAppearance.Primary, ButtonAppearance.Secondary)
                         BasePaletteColor: =ColorTeal
                         Color: =If(varAbsView = "nr", ColorWhite, ColorInk)
@@ -209,7 +211,23 @@ Screens:
                         OnSelect: =Set(varAbsView, "nr"); If(!varAbsNrLoaded && !varAbsNrLoading, Select(btnAbsNrEngine))
                         Size: =14
                         Text: ="Parent reports – Needs review (" & If(varAbsNrLoaded, Text(CountRows(colAbsNr)), "…") & ")"
-                        Width: =If(conAbsRoot.Width < 640, Parent.Width - 32, 320)
+                        Width: =If(conAbsRoot.Width < 1024, Parent.Width - 32, 320)
+                  - btnAbsApViewReady:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: =Self.Text & If(varAbsView = "ready", " (current view)", "")
+                        AlignInContainer: =If(conAbsRoot.Width < 1024, AlignInContainer.Stretch, AlignInContainer.Center)
+                        Appearance: =If(varAbsView = "ready", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                        BasePaletteColor: =ColorTeal
+                        Color: =If(varAbsView = "ready", ColorWhite, ColorInk)
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Set(varAbsView, "ready"); If(!varAbsApLoaded && !varAbsApLoading, Select(btnAbsApEngine))
+                        Size: =14
+                        Text: ="Parent reports – Ready to approve (" & If(varAbsApLoaded, Text(CountRows(colAbsAp)), "…") & ")"
+                        Width: =If(conAbsRoot.Width < 1024, Parent.Width - 32, 310)
             - conAbsDenied:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -598,7 +616,7 @@ Screens:
                                             =Set(varAbsCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(colAbsCampusOpts).CampusId, ZeroGuid)));
                                             Set(varAbsTeacherId, ZeroGuid);
                                             Set(varAbsStatus, "Not classified");
-                                            Set(varAbsFrom, Coalesce(CurrentSchoolYear.'Start Date', Date(Year(Today()) - If(Month(Today()) < 7, 1, 0), 7, 1)));
+                                            Set(varAbsFrom, ParentReportCutover);
                                             Set(varAbsTo, Today());
                                             Reset(ddAbsCampusV); Reset(ddAbsTeacherV); Reset(dpAbsFromV); Reset(dpAbsToV); Reset(rdoAbsStatusV);
                                             Select(btnAbsLoadEngine)
@@ -2326,6 +2344,1273 @@ Screens:
                     )
                   Text: ="classify"
                   Visible: =false
+            - conAbsApView:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(spnAbsApBusy.Visible, 48 + 8, 0) + If(conAbsApReceipt.Visible, conAbsApReceipt.Height + 8, 0) + conAbsApBody.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =CanClassify && varAbsView = "ready"
+                Children:
+                  - spnAbsApBusy:
+                      Control: ModernSpinner
+                      Properties:
+                        AccessibleLabel: =Self.Label
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Label: =If(varAbsApSaving, "Saving decision…", "Loading parent reports…")
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        SpinnerColor: =ColorTeal
+                        Visible: =varAbsApLoading || varAbsApSaving
+                  - conAbsApReceipt:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =Switch(varAbsApReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, "Dismissed", ColorWarnBg, ColorInfoBg)
+                        FillPortions: =0
+                        Height: =8 + conAbsApReceiptTop.Height + If(lblAbsApReceiptBody.Visible, 4 + lblAbsApReceiptBody.Height, 0) + If(galAbsApRcptDays.Visible, 4 + galAbsApRcptDays.Height, 0) + If(btnAbsApShowGrid.Visible, 4 + 44, 0) + 8
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =8
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =varAbsApReceipt.Kind <> ""
+                      Children:
+                        - conAbsApReceiptTop:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conAbsRoot.Width < 640, 84, 44)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                              - lblAbsApReceiptTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conAbsRoot.Width < 640, 84, 44)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: =varAbsApReceipt.Title
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnAbsApReceiptDismiss:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Dismiss approval result"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAbsApReceipt, {Kind: "", Title: "", Body: "", ItemId: 0}); Clear(colAbsApLog); Set(varAbsApGridLink, {StudentId: ZeroGuid, TeacherId: ZeroGuid, CampusId: ZeroGuid, FirstDay: Today()})
+                                    Size: =14
+                                    Text: ="Dismiss"
+                                    Width: =88
+                        - lblAbsApReceiptBody:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              Height: =If(conAbsRoot.Width < 640, 240, conAbsRoot.Width < 1024, 180, 150)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: =varAbsApReceipt.Body
+                              VerticalAlign: =VerticalAlign.Top
+                              Visible: =varAbsApReceipt.Body <> ""
+                        - galAbsApRcptDays:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Day-by-day result"
+                              FillPortions: =0
+                              Height: =Min(If(conAbsRoot.Width < 640, 352, conAbsRoot.Width < 1024, 260, 216), If(conAbsRoot.Width < 640, 88, conAbsRoot.Width < 1024, 52, 36) * CountRows(colAbsApLog))
+                              Items: =SortByColumns(colAbsApLog, "DayDate", SortOrder.Ascending)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =If(conAbsRoot.Width < 640, 88, conAbsRoot.Width < 1024, 52, 36)
+                              Visible: =CountRows(colAbsApLog) > 0
+                            Children:
+                              - conAbsApRcptRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    PaddingBottom: =2
+                                    PaddingTop: =2
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - lblAbsApRcptLine:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =If(ThisItem.Outcome = "failed" || ThisItem.Outcome = "skip-present", ColorUnexcused, StartsWith(ThisItem.Outcome, "skip"), ColorMuted, ColorInk)
+                                          FillPortions: =1
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =Text(ThisItem.DayDate, "ddd m/d/yyyy") & " · " & ThisItem.Detail
+                                          VerticalAlign: =VerticalAlign.Top
+                        - btnAbsApShowGrid:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Show the first changed day on the Attendance grid"
+                              AlignInContainer: =AlignInContainer.Start
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: |-
+                                =With(
+                                    {g: varAbsApGridLink},
+                                    Set(varCampus, With({c: g.CampusId}, LookUp(Campuses, ThisRecord.Campus = c)));
+                                    Set(varTeacher, With({t: g.TeacherId}, LookUp(Staff, ThisRecord.Staff = t)));
+                                    Set(varMonthStart, Date(Year(g.FirstDay), Month(g.FirstDay), 1));
+                                    Set(varViewDate, g.FirstDay);
+                                    Set(varLastAction, {Kind: "Report", Message: varAbsApReceipt.Title, StudentId: g.StudentId, DayNum: Day(g.FirstDay)});
+                                    Navigate(Screen1)
+                                )
+                              Size: =14
+                              Text: ="Show on grid"
+                              Visible: =varAbsApReceipt.Kind = "Approved" && varAbsApGridLink.TeacherId <> ZeroGuid
+                              Width: =140
+                  - conAbsApBody:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conAbsRoot.Width >= 1024, Max(conAbsApListPanel.Height, conAbsApDetail.Height), If(conAbsApListPanel.Visible, conAbsApListPanel.Height, 0) + If(conAbsApListPanel.Visible && conAbsApDetail.Visible, 8, 0) + If(conAbsApDetail.Visible, conAbsApDetail.Height, 0))
+                        LayoutAlignItems: =If(conAbsRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                        LayoutDirection: =If(conAbsRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                      Children:
+                        - conAbsApListPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conAbsRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conAbsRoot.Width >= 1024, 1, 0)
+                              Height: =16 + 44 + 8 + If(conAbsRoot.Width < 640, 54, 36) + If(CountRows(colAbsAp) > 0, 8 + 520, 0) + 16
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!(conAbsRoot.Width < 1024 && !IsBlank(varAbsApSelId))
+                            Children:
+                              - conAbsApListHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                  Children:
+                                    - lblAbsApListTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =80
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: ="Ready to approve (" & CountRows(colAbsAp) & ")"
+                                          Wrap: =false
+                                    - btnAbsApReload:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Reload ready parent reports"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varAbsApLoading || varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Select(btnAbsApEngine)
+                                          Size: =14
+                                          Text: ="Reload"
+                                          Width: =80
+                              - lblAbsApCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(varAbsApLoadError <> "", ColorUnexcused, ColorInk)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conAbsRoot.Width < 640, 54, 36)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: =If(varAbsApLoadError <> "", "Could not load parent reports — " & varAbsApLoadError & ". Use Reload to try again.", varAbsApLoading, "Loading parent reports…", CountRows(colAbsAp) = 0, "No parent reports are ready to approve. Matched website reports dated " & Text(ParentReportCutover, "m/d/yyyy") & " or later appear here after Reload.", CountRows(colAbsAp) & If(CountRows(colAbsAp) = 1, " report is", " reports are") & " ready · oldest absence first · " & If(StudentCampusLock = ZeroGuid, "all campuses", "your campus") & If(CountRows(colAbsApR1) >= 2000 || CountRows(colAbsApR2) >= 2000 || CountRows(colAbsApR3) >= 2000, " · list may be incomplete (2,000-item limit)", ""))
+                                    VerticalAlign: =VerticalAlign.Top
+                              - galAbsApList:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Parent reports ready to approve"
+                                    FillPortions: =0
+                                    Height: =520
+                                    Items: =SortByColumns(colAbsAp, "AbsDate", SortOrder.Ascending, "ID", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conAbsRoot.Width < 640, 200, 150)
+                                    Visible: =CountRows(colAbsAp) > 0
+                                  Children:
+                                    - conAbsApRowShell:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.ID = varAbsApSelId, ColorInfoBg, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =4
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - conAbsApRowTop:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =44
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                              Children:
+                                                - lblAbsApRowName:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =ColorInk
+                                                      FillPortions: =1
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =42
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =14
+                                                      Text: =If(ThisItem.StudentId = ZeroGuid, "No app student · Student_ID " & ThisItem.StudentKey, ThisItem.StudentName & " · " & ThisItem.StudentKey)
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                - btnAbsApRowOpen:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: |-
+                                                        ="Open parent report #" & ThisItem.ID
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      DisplayMode: =If(varAbsApLoading || varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =Set(varAbsApSelId, ThisItem.ID);
+                                                        Set(varAbsApClass, "");
+                                                        Set(varAbsApReasonId, Blank());
+                                                        Set(varAbsApDismissOpen, false);
+                                                        Reset(rdoAbsApClass);
+                                                        Reset(ddAbsApReason);
+                                                        Reset(txtAbsApNote);
+                                                        Reset(txtAbsApDismissNote);
+                                                        Select(btnAbsApPlanEngine)
+                                                      Size: =14
+                                                      Text: ="Open"
+                                                      Width: =90
+                                          - lblAbsApRowMeta:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                Height: =If(conAbsRoot.Width < 640, 54, 36)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="#" & ThisItem.ID & " · parent typed " & ThisItem.FirstName & " " & ThisItem.LastName & " · " & If(ThisItem.CampusName = "", ThisItem.SchoolSite, ThisItem.CampusName) & " · absent " & ThisItem.AbsenceDateText & If(Trim(ThisItem.ReturnDateText) = "", "", " · back " & ThisItem.ReturnDateText) & " · " & ThisItem.MatchStatus
+                                                VerticalAlign: =VerticalAlign.Top
+                                          - lblAbsApRowSub:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorMuted
+                                                Height: =If(conAbsRoot.Width < 640, 54, 36)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="Reason " & If(ThisItem.Reason = "", "—", If(Len(ThisItem.Reason) > 80, Left(ThisItem.Reason, 80) & "…", ThisItem.Reason)) & " · submitted by " & ThisItem.SubmittedBy & " · notified " & ThisItem.DateNotified
+                                                VerticalAlign: =VerticalAlign.Top
+                        - conAbsApDetail:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conAbsRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conAbsRoot.Width >= 1024, 1, 0)
+                              Height: =16 + 28 + 8 + If(IsBlank(varAbsApSelId), 60, lblAbsApFacts.Height + 8 + lblAbsApDaysHead.Height + If(galAbsApDays.Visible, 8 + galAbsApDays.Height, 0) + 8 + 58 + 8 + 58 + 8 + 94 + 8 + lblAbsApCheck.Height + 8 + 44 + If(conAbsApDismissPanel.Visible, 8 + 170, 0)) + 16
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =conAbsRoot.Width >= 1024 || !IsBlank(varAbsApSelId)
+                            Children:
+                              - lblAbsApDetailTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Approve a parent report"
+                                    Wrap: =false
+                              - lblAbsApDetailEmpty:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =60
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: ="Choose Open on a report to see its school days, then pick Excused or Unexcused and a reason."
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =IsBlank(varAbsApSelId)
+                              - lblAbsApFacts:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =If(conAbsRoot.Width < 640, 220, conAbsRoot.Width < 1280, 190, 150)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {it: LookUp(colAbsAp, ID = varAbsApSelId)},
+                                          "Report #" & it.ID & If(it.Title = "", "", " · " & it.Title) & " · " & it.MatchStatus & Char(10) &
+                                          "App student: " & If(it.StudentId = ZeroGuid, "none found for Student_ID " & it.StudentKey, it.StudentName & " · " & it.StudentKey & " · " & it.StudentNumber) & Char(10) &
+                                          "Parent typed: " & it.FirstName & " " & it.LastName & " · school site " & it.SchoolSite & Char(10) &
+                                          "Campus: " & If(it.CampusName = "", "—", it.CampusName) & Char(10) &
+                                          "Absence date: " & it.AbsenceDateText & " · Return date: " & If(Trim(it.ReturnDateText) = "", "—", it.ReturnDateText) & Char(10) &
+                                          "Reason: " & If(it.Reason = "", "—", If(Len(it.Reason) > 120, Left(it.Reason, 120) & "…", it.Reason)) & Char(10) &
+                                          "Submitted by " & it.SubmittedBy & " · notified " & it.DateNotified
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =!IsBlank(varAbsApSelId)
+                              - lblAbsApDaysHead:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(varAbsApPlanErr <> "" || CountRows(Filter(colAbsApPlan, Outcome = "skip-present")) > 0, ColorUnexcused, ColorInk)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conAbsRoot.Width < 640, 60, 40)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {n: CountRows(colAbsApPlan), w: CountRows(Filter(colAbsApPlan, Outcome in ["create", "restore", "classify"])), pr: CountRows(Filter(colAbsApPlan, Outcome = "skip-present"))},
+                                          If(
+                                              varAbsApPlanErr <> "", "Days can't be worked out — " & varAbsApPlanErr & ".",
+                                              varAbsApPlanFor <> varAbsApSelId, "Working out the school days…",
+                                              n = 0, "No school days in this range (weekends, holidays or outside a term). Approve records the decision only.",
+                                              n & If(n = 1, " school day", " school days") & " · " & w & " will get a 0 · " & (n - w) & " skipped" & If(pr > 0, " · " & pr & " marked present by the teacher, check with them", "")
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =!IsBlank(varAbsApSelId)
+                              - galAbsApDays:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="School days in this report"
+                                    FillPortions: =0
+                                    Height: =If(conAbsRoot.Width < 640, 260, 216)
+                                    Items: =SortByColumns(colAbsApPlan, "DayDate", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conAbsRoot.Width < 640, 52, 36)
+                                    Visible: =!IsBlank(varAbsApSelId) && varAbsApPlanFor = varAbsApSelId && CountRows(colAbsApPlan) > 0
+                                  Children:
+                                    - conAbsApDayRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          PaddingBottom: =2
+                                          PaddingTop: =2
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblAbsApDayLine:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =If(ThisItem.Outcome = "skip-present", ColorUnexcused, StartsWith(ThisItem.Outcome, "skip"), ColorMuted, ColorInk)
+                                                FillPortions: =1
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: =Text(ThisItem.DayDate, "ddd m/d/yyyy") & " · " & ThisItem.OutcomeText & If(ThisItem.TeacherName = "", "", " · " & ThisItem.TeacherName)
+                                                VerticalAlign: =VerticalAlign.Top
+                              - conAbsApClassField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =58
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =!IsBlank(varAbsApSelId)
+                                  Children:
+                                    - lblAbsApClass:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Classification, required"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Classification *"
+                                          Wrap: =false
+                                    - rdoAbsApClass:
+                                        Control: ModernRadio
+                                        Properties:
+                                          AccessibleLabel: ="Classification"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Default: |-
+                                            ={Value: varAbsApClass}
+                                          DisplayMode: =If(varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          Items: =["Excused", "Unexcused"]
+                                          Layout: =OptionLayout.Horizontal
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsApClass, Self.Selected.Value)
+                              - conAbsApReasonField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =58
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =!IsBlank(varAbsApSelId)
+                                  Children:
+                                    - lblAbsApReason:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Absence reason, required"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Absence reason *"
+                                          Wrap: =false
+                                    - ddAbsApReason:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AccessibleLabel: ="Absence reason"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =LookUp(colAbsReasons, ReasonId = varAbsApReasonId)
+                                          DisplayMode: =If(varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.ReasonName
+                                          Items: =colAbsReasons
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsApReasonId, Self.Selected.ReasonId)
+                              - conAbsApNoteField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =94
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =!IsBlank(varAbsApSelId)
+                                  Children:
+                                    - lblAbsApNote:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Note for the attendance record (optional, 200 max)"
+                                          Wrap: =false
+                                    - txtAbsApNote:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Note"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =Left(LookUp(colAbsAp, ID = varAbsApSelId).Reason, 200)
+                                          DisplayMode: =If(varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =72
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          MaxLength: =200
+                                          Placeholder: ="Brief reason, pre-filled from the parent's reason"
+                                          Type: =TextInputType.Multiline
+                              - lblAbsApCheck:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(StartsWith(Self.Text, "Ready"), ColorExcused, ColorUnexcused)
+                                    Height: =If(conAbsRoot.Width < 640, 54, 36)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {it: LookUp(colAbsAp, ID = varAbsApSelId), rs: LookUp(colAbsReasons, ReasonId = varAbsApReasonId)},
+                                          If(
+                                              IsBlank(it), "That report is no longer in the queue. Use Reload.",
+                                              it.StudentId = ZeroGuid, "No app student has Student Key " & it.StudentKey & ". Fix the key on the Students screen and Reload, or Dismiss.",
+                                              varAbsApPlanErr <> "", "Approve is off until the dates can be worked out. Dismiss if the report is wrong.",
+                                              varAbsApPlanFor <> varAbsApSelId, "Working out the school days…",
+                                              !(varAbsApClass in ["Excused", "Unexcused"]), "Choose Excused or Unexcused.",
+                                              IsBlank(rs), "Choose an absence reason.",
+                                              "Ready: Approve writes " & CountRows(Filter(colAbsApPlan, Outcome in ["create", "restore", "classify"])) & " day(s) as " & varAbsApClass & " (" & rs.ReasonName & ") and records the decision."
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =!IsBlank(varAbsApSelId)
+                              - conAbsApActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =!IsBlank(varAbsApSelId)
+                                  Children:
+                                    - btnAbsApApprove:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Approve parent report"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varAbsApSaving && !varAbsApLoading && !IsBlank(LookUp(colAbsAp, ID = varAbsApSelId)) && LookUp(colAbsAp, ID = varAbsApSelId).StudentId <> ZeroGuid && varAbsApPlanFor = varAbsApSelId && varAbsApPlanErr = "" && varAbsApClass in ["Excused", "Unexcused"] && !IsBlank(LookUp(colAbsReasons, ReasonId = varAbsApReasonId)), DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =With(
+                                                {
+                                                    qid: varAbsApSelId,
+                                                    it: LookUp(colAbsAp, ID = varAbsApSelId),
+                                                    cls: varAbsApClass,
+                                                    note: Left(Trim(txtAbsApNote.Text), 200),
+                                                    rsn: With({qr: varAbsApReasonId}, LookUp('Absence Reasons', ThisRecord.'Absence Reason' = qr && Active = true))
+                                                },
+                                                If(
+                                                    !CanClassify || varAbsApSaving || IsBlank(it),
+                                                    Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · choose a report in Ready to approve first", Body: "", ItemId: Coalesce(qid, 0)}),
+                                                    !(cls in ["Excused", "Unexcused"]),
+                                                    Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · choose Excused or Unexcused", Body: "Report #" & qid & " was not changed.", ItemId: qid}),
+                                                    IsBlank(rsn),
+                                                    Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · choose an absence reason", Body: "Report #" & qid & " was not changed.", ItemId: qid}),
+                                                    it.StudentId = ZeroGuid || varAbsApPlanFor <> qid || varAbsApPlanErr <> "",
+                                                    Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · report #" & qid & " has no app student or its days could not be worked out", Body: "", ItemId: qid}),
+                                                    Set(varAbsApSaving, true);
+                                                    Clear(colAbsApLog);
+                                                    With(
+                                                        {
+                                                            prior: With({q: qid}, LookUp('Report Decisions', 'Report Item ID' = q)),
+                                                            live: With({q: qid}, LookUp('Student Absence Log', ID = q))
+                                                        },
+                                                        If(
+                                                            !IsBlank(prior),
+                                                            Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · report #" & qid & " was already " & Lower(Text(prior.Decision)), Body: "Decided by " & Coalesce(prior.'Created By'.'Full Name', "another user") & " on " & Text(prior.'Created On', "mmm d, yyyy h:mm AM/PM") & ". Nothing was written, and the report has been removed from this queue.", ItemId: qid});
+                                                            RemoveIf(colAbsAp, ID = qid);
+                                                            Collect(colAbsApDecided, {ItemId: qid});
+                                                            Set(varAbsApSelId, Blank());
+                                                            Set(varAbsApPlanFor, Blank()),
+                                                            IsBlank(live) || !(live.Match_Status.Value in ["Exact", "Approved Variation", "Manually Resolved"]) || Trim(Coalesce(live.Student_ID, "")) <> it.StudentKey,
+                                                            Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not approved · report #" & qid & " changed in SharePoint", Body: "The report was deleted, or its match status or Student_ID changed since the queue loaded. Nothing was written. Use Reload.", ItemId: qid}),
+                                                            ClearCollect(colAbsApLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month}));
+                                                            ForAll(
+                                                                colAbsApPlan As p,
+                                                                With(
+                                                                    {
+                                                                        seg: LookUp(colAbsApEnr, EnrId = p.EnrId),
+                                                                        term: LookUp(colAbsApTerms, ThisRecord.'Term (aaca_termid)' = p.TermId),
+                                                                        srv: With({qs: it.StudentId, qv: p.ServiceId, qd: p.DayDate}, LookUp(Attendance, Student.Student = qs && Service.Service = qv && Date = qd))
+                                                                    },
+                                                                    With(
+                                                                        {
+                                                                            oc: If(
+                                                                                p.EnrId = ZeroGuid, "skip-notenrolled",
+                                                                                !IsBlank(LookUp(colAbsApLocks, CampusId = p.CampusId && MonthStart = Date(Year(p.DayDate), Month(p.DayDate), 1))), "skip-locked",
+                                                                                IsError(srv), "failed",
+                                                                                IsBlank(srv), "create",
+                                                                                srv.'Is Deleted' = true, "restore",
+                                                                                srv.Present = true, "skip-present",
+                                                                                IsBlank(srv.'Absence Classification'), "classify",
+                                                                                "skip-classified"
+                                                                            )
+                                                                        },
+                                                                        With(
+                                                                            {
+                                                                                wr: If(
+                                                                                    oc = "create" || oc = "restore",
+                                                                                    IfError(
+                                                                                        Patch(
+                                                                                            Attendance,
+                                                                                            Coalesce(srv, Defaults(Attendance)),
+                                                                                            {
+                                                                                                'Record Key': Text(p.DayDate, "yyyymmdd") & "|" & seg.StudentNumber & "|" & seg.ServiceCode,
+                                                                                                Date: p.DayDate,
+                                                                                                Student: seg.EnrRec.Student,
+                                                                                                Service: seg.EnrRec.Service,
+                                                                                                Enrollment: seg.EnrRec,
+                                                                                                Teacher: seg.EnrRec.Teacher,
+                                                                                                Campus: seg.EnrRec.Campus,
+                                                                                                'School Year': seg.EnrRec.'School Year',
+                                                                                                Term: term,
+                                                                                                'IEP Ratio': Switch(
+                                                                                                    seg.EnrRec.'IEP Ratio',
+                                                                                                    'IEP Ratio (Enrollments)'.'No Aide', 'IEP Ratio (Attendance)'.'No Aide',
+                                                                                                    'IEP Ratio (Enrollments)'.'1:1', 'IEP Ratio (Attendance)'.'1:1',
+                                                                                                    'IEP Ratio (Enrollments)'.'2:1', 'IEP Ratio (Attendance)'.'2:1',
+                                                                                                    'IEP Ratio (Enrollments)'.'3:1', 'IEP Ratio (Attendance)'.'3:1',
+                                                                                                    'IEP Ratio (Enrollments)'.'4:1', 'IEP Ratio (Attendance)'.'4:1'
+                                                                                                ),
+                                                                                                Present: false,
+                                                                                                'Is Deleted': false,
+                                                                                                'Absence Classification': If(cls = "Excused", 'Absence Classification (Attendance)'.Excused, cls = "Unexcused", 'Absence Classification (Attendance)'.Unexcused),
+                                                                                                'Absence Reason': rsn,
+                                                                                                'Classified By': CurrentUserRow,
+                                                                                                'Classified On': Now(),
+                                                                                                Notes: note,
+                                                                                                'Source Report ID': qid
+                                                                                            }
+                                                                                        ),
+                                                                                        Blank()
+                                                                                    ),
+                                                                                    oc = "classify",
+                                                                                    IfError(
+                                                                                        Patch(
+                                                                                            Attendance,
+                                                                                            srv,
+                                                                                            {
+                                                                                                'Absence Classification': If(cls = "Excused", 'Absence Classification (Attendance)'.Excused, cls = "Unexcused", 'Absence Classification (Attendance)'.Unexcused),
+                                                                                                'Absence Reason': rsn,
+                                                                                                'Classified By': CurrentUserRow,
+                                                                                                'Classified On': Now(),
+                                                                                                Notes: If(note = "", srv.Notes, note),
+                                                                                                'Source Report ID': qid
+                                                                                            }
+                                                                                        ),
+                                                                                        Blank()
+                                                                                    )
+                                                                                )
+                                                                            },
+                                                                            Collect(
+                                                                                colAbsApLog,
+                                                                                {
+                                                                                    DayDate: p.DayDate,
+                                                                                    Outcome: If((oc in ["create", "restore", "classify"]) && IsBlank(wr), "failed", oc),
+                                                                                    Detail: If(
+                                                                                        !IsBlank(wr),
+                                                                                        Switch(oc, "create", "New 0 created", "restore", "Deleted row restored as 0", "Existing 0 classified") & " · 0 · " & Text(wr.'Absence Classification') & " (" & wr.'Absence Reason'.Name & ") · parent report #" & wr.'Source Report ID' & " · by " & Coalesce(wr.'Classified By'.'Full Name', "") & " · Teacher " & Coalesce(wr.Teacher.Name, p.TeacherName) & " · Key " & wr.'Record Key',
+                                                                                        oc in ["create", "restore", "classify", "failed"], "FAILED · not changed, press Approve to retry",
+                                                                                        Switch(oc, "skip-classified", "Skipped · already classified", "skip-present", "Skipped · marked present by teacher", "skip-notenrolled", "Skipped · not enrolled that day", "skip-locked", "Skipped · month locked", oc)
+                                                                                    ),
+                                                                                    AttId: If(!IsBlank(wr), wr.Attendance, IsError(srv) || IsBlank(srv), ZeroGuid, srv.Attendance)
+                                                                                }
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            );
+                                                            With(
+                                                                {
+                                                                    nC: CountRows(Filter(colAbsApLog, Outcome in ["create", "restore"])),
+                                                                    nK: CountRows(Filter(colAbsApLog, Outcome = "classify")),
+                                                                    nS: CountRows(Filter(colAbsApLog, StartsWith(Outcome, "skip"))),
+                                                                    nF: CountRows(Filter(colAbsApLog, Outcome = "failed"))
+                                                                },
+                                                                If(
+                                                                    nF > 0,
+                                                                    Set(varAbsApReceipt, {Kind: "Failed", Title: "Partly applied · report #" & qid & " · " & nF & " day(s) failed", Body: "Written: " & nC & " created or restored, " & nK & " classified · " & nS & " skipped · " & nF & " failed." & Char(10) & "No decision was recorded, so the report stays in Ready to approve. Press Approve to retry; days already written will show as already classified.", ItemId: qid}),
+                                                                    With(
+                                                                        {
+                                                                            dec: IfError(
+                                                                                Patch(
+                                                                                    'Report Decisions',
+                                                                                    Defaults('Report Decisions'),
+                                                                                    {
+                                                                                        Summary: Left("Approved parent report #" & qid & " · " & it.StudentName & " · " & cls, 100),
+                                                                                        'Report Item ID': qid,
+                                                                                        Decision: 'Decision (Report Decisions)'.Approved,
+                                                                                        Classification: If(cls = "Excused", 'Classification (Report Decisions)'.Excused, cls = "Unexcused", 'Classification (Report Decisions)'.Unexcused),
+                                                                                        'Absence Reason': rsn,
+                                                                                        Student: With({qs: it.StudentId}, LookUp(Students, ThisRecord.Student = qs)),
+                                                                                        Campus: With({qc: it.CampusId}, LookUp(Campuses, ThisRecord.Campus = qc)),
+                                                                                        'Student Key': it.StudentKey,
+                                                                                        Note: note,
+                                                                                        'Days Created': nC,
+                                                                                        'Days Classified': nK,
+                                                                                        'Days Skipped': nS
+                                                                                    }
+                                                                                ),
+                                                                                Blank()
+                                                                            )
+                                                                        },
+                                                                        If(
+                                                                            IsBlank(dec),
+                                                                            Set(varAbsApReceipt, {Kind: "Failed", Title: "Attendance written but the decision was NOT recorded · report #" & qid, Body: "Written: " & nC & " created or restored, " & nK & " classified · " & nS & " skipped." & Char(10) & "The Report Decisions row could not be saved (someone may have decided this report at the same moment). The report stays in the queue; press Approve to retry recording the decision, or Reload.", ItemId: qid}),
+                                                                            With(
+                                                                                {
+                                                                                    au: IfError(
+                                                                                        Patch(
+                                                                                            'Audit Events',
+                                                                                            Defaults('Audit Events'),
+                                                                                            {
+                                                                                                Summary: Left("Parent report #" & qid & " approved " & cls & " · " & nC & " created, " & nK & " classified, " & nS & " skipped", 100),
+                                                                                                Action: 'Action (Audit Events)'.Reclassify,
+                                                                                                Entity: "aaca_reportdecision",
+                                                                                                'Entity ID': Text(dec.'Report Decision'),
+                                                                                                Before: JSON({ReportItemId: qid, StudentKey: it.StudentKey, AbsenceDate: it.AbsenceDateText, ReturnDate: it.ReturnDateText}),
+                                                                                                After: Left(JSON(ForAll(colAbsApLog As g, {Date: Text(g.DayDate, "yyyy-mm-dd"), Outcome: g.Outcome, AttId: Text(g.AttId)})), 2000),
+                                                                                                Reason: Left("Approved in Absences, Ready to approve: " & cls & " · " & rsn.Name & If(note = "", "", " · " & note), 500)
+                                                                                            }
+                                                                                        ),
+                                                                                        Blank()
+                                                                                    )
+                                                                                },
+                                                                                Set(
+                                                                                    varAbsApReceipt,
+                                                                                    {
+                                                                                        Kind: "Approved",
+                                                                                        Title: "Approved · parent report #" & dec.'Report Item ID' & " · " & it.StudentName & " · " & Text(dec.Classification),
+                                                                                        Body: "Report: #" & dec.'Report Item ID' & If(it.Title = "", "", " · " & it.Title) & Char(10) &
+                                                                                            "Student: " & it.StudentName & " · " & dec.'Student Key' & " · " & Coalesce(dec.Campus.Name, it.CampusName, "—") & Char(10) &
+                                                                                            "Decision: " & Text(dec.Decision) & " (Report Decisions row recorded)" & Char(10) &
+                                                                                            "Classification: " & Text(dec.Classification) & " · Reason: " & dec.'Absence Reason'.Name & Char(10) &
+                                                                                            "Note: " & If(Coalesce(dec.Note, "") = "", "—", dec.Note) & Char(10) &
+                                                                                            "Days: " & dec.'Days Created' & " created or restored as 0 · " & dec.'Days Classified' & " classified · " & dec.'Days Skipped' & " skipped" & Char(10) &
+                                                                                            "Audit event: " & If(IsBlank(au), "NOT written", "written"),
+                                                                                        ItemId: dec.'Report Item ID'
+                                                                                    }
+                                                                                );
+                                                                                With(
+                                                                                    {g: First(Sort(Filter(colAbsApLog, Outcome in ["create", "restore", "classify"]), DayDate, SortOrder.Ascending))},
+                                                                                    With(
+                                                                                        {pp: LookUp(colAbsApPlan, DayDate = g.DayDate)},
+                                                                                        Set(varAbsApGridLink, {StudentId: it.StudentId, TeacherId: If(IsBlank(g), ZeroGuid, Coalesce(pp.TeacherId, ZeroGuid)), CampusId: Coalesce(pp.CampusId, ZeroGuid), FirstDay: Coalesce(g.DayDate, it.AbsDate)})
+                                                                                    )
+                                                                                );
+                                                                                RemoveIf(colAbsAp, ID = qid);
+                                                                                Collect(colAbsApDecided, {ItemId: qid});
+                                                                                Set(varAbsApSelId, Blank());
+                                                                                Set(varAbsApPlanFor, Blank());
+                                                                                Set(varAbsApClass, "");
+                                                                                Set(varAbsApReasonId, Blank());
+                                                                                Set(varAbsApDismissOpen, false);
+                                                                                Reset(rdoAbsApClass);
+                                                                                Reset(ddAbsApReason);
+                                                                                Reset(txtAbsApNote)
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    );
+                                                    Set(varAbsApSaving, false)
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Approve"
+                                          Width: =120
+                                    - btnAbsApDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss parent report"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(CanClassify && !varAbsApSaving && !IsBlank(LookUp(colAbsAp, ID = varAbsApSelId)), DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varAbsApDismissOpen, true); Reset(txtAbsApDismissNote)
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =110
+                                    - btnAbsApCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel and return to the list"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =Set(varAbsApSelId, Blank());
+                                            Set(varAbsApPlanFor, Blank());
+                                            Set(varAbsApClass, "");
+                                            Set(varAbsApReasonId, Blank());
+                                            Set(varAbsApDismissOpen, false);
+                                            Clear(colAbsApPlan);
+                                            Reset(rdoAbsApClass);
+                                            Reset(ddAbsApReason);
+                                            Reset(txtAbsApNote);
+                                            Reset(txtAbsApDismissNote)
+                                          Size: =14
+                                          Text: ="Cancel"
+                              - conAbsApDismissPanel:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorWarnBg
+                                    FillPortions: =0
+                                    Height: =170
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =12
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =12
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varAbsApDismissOpen && !IsBlank(varAbsApSelId)
+                                  Children:
+                                    - conAbsApDismissField:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =94
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =4
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - lblAbsApDismissNote:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =18
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="Why dismiss? (required)"
+                                                Wrap: =false
+                                          - txtAbsApDismissNote:
+                                              Control: ModernTextInput
+                                              Properties:
+                                                AccessibleLabel: ="Dismiss note"
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Appearance: =Appearance.Outline
+                                                Color: =ColorInk
+                                                DisplayMode: =If(varAbsApSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                                Height: =72
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                MaxLength: =1000
+                                                Placeholder: ="e.g. duplicate submission or wrong student"
+                                                Type: =TextInputType.Multiline
+                                    - conAbsApDismissActions:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - btnAbsApDismissConfirm:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Confirm dismiss"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                BasePaletteColor: =ColorUnexcused
+                                                Color: =ColorWhite
+                                                DisplayMode: =If(CanClassify && !varAbsApSaving && !IsBlank(LookUp(colAbsAp, ID = varAbsApSelId)) && Trim(txtAbsApDismissNote.Text) <> "", DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =With(
+                                                      {qid: varAbsApSelId, it: LookUp(colAbsAp, ID = varAbsApSelId), dnote: Left(Trim(txtAbsApDismissNote.Text), 1000)},
+                                                      If(
+                                                          !CanClassify || varAbsApSaving || IsBlank(it) || dnote = "",
+                                                          Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not dismissed · choose a report and type why it is dismissed", Body: "", ItemId: Coalesce(qid, 0)}),
+                                                          Set(varAbsApSaving, true);
+                                                          With(
+                                                              {prior: With({q: qid}, LookUp('Report Decisions', 'Report Item ID' = q))},
+                                                              If(
+                                                                  !IsBlank(prior),
+                                                                  Set(varAbsApReceipt, {Kind: "Blocked", Title: "Not dismissed · report #" & qid & " was already " & Lower(Text(prior.Decision)), Body: "Nothing was written, and the report has been removed from this queue.", ItemId: qid});
+                                                                  RemoveIf(colAbsAp, ID = qid);
+                                                                  Collect(colAbsApDecided, {ItemId: qid});
+                                                                  Set(varAbsApSelId, Blank());
+                                                                  Set(varAbsApPlanFor, Blank());
+                                                                  Set(varAbsApDismissOpen, false),
+                                                                  With(
+                                                                      {
+                                                                          dec: IfError(
+                                                                              Patch(
+                                                                                  'Report Decisions',
+                                                                                  Defaults('Report Decisions'),
+                                                                                  {
+                                                                                      Summary: Left("Dismissed parent report #" & qid & " · " & If(it.StudentName = "", it.StudentKey, it.StudentName), 100),
+                                                                                      'Report Item ID': qid,
+                                                                                      Decision: 'Decision (Report Decisions)'.Dismissed,
+                                                                                      Student: With({qs: it.StudentId}, LookUp(Students, ThisRecord.Student = qs)),
+                                                                                      Campus: With({qc: it.CampusId}, LookUp(Campuses, ThisRecord.Campus = qc)),
+                                                                                      'Student Key': it.StudentKey,
+                                                                                      Note: dnote,
+                                                                                      'Days Created': 0,
+                                                                                      'Days Classified': 0,
+                                                                                      'Days Skipped': 0
+                                                                                  }
+                                                                              ),
+                                                                              Blank()
+                                                                          )
+                                                                      },
+                                                                      If(
+                                                                          IsBlank(dec),
+                                                                          Set(varAbsApReceipt, {Kind: "Failed", Title: "Not dismissed · the decision could not be saved for report #" & qid, Body: "Nothing was written. The report is still selected; press Confirm dismiss to retry.", ItemId: qid}),
+                                                                          With(
+                                                                              {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Parent report #" & qid & " dismissed", 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_reportdecision", 'Entity ID': Text(dec.'Report Decision'), Before: JSON({ReportItemId: qid, StudentKey: it.StudentKey, AbsenceDate: it.AbsenceDateText}), After: JSON({Decision: "Dismissed"}), Reason: Left(dnote, 500)}), Blank())},
+                                                                              Set(varAbsApReceipt, {Kind: "Dismissed", Title: "Dismissed · parent report #" & dec.'Report Item ID' & If(it.StudentName = "", "", " · " & it.StudentName), Body: "Report: #" & dec.'Report Item ID' & If(it.Title = "", "", " · " & it.Title) & Char(10) & "Student: " & If(it.StudentName = "", "no app student", it.StudentName) & " · " & dec.'Student Key' & Char(10) & "Decision: " & Text(dec.Decision) & " (Report Decisions row recorded)" & Char(10) & "Note: " & dec.Note & Char(10) & "Attendance: not changed (no rows written)" & Char(10) & "Audit event: " & If(IsBlank(au), "NOT written", "written"), ItemId: dec.'Report Item ID'});
+                                                                              Clear(colAbsApLog);
+                                                                              Set(varAbsApGridLink, {StudentId: ZeroGuid, TeacherId: ZeroGuid, CampusId: ZeroGuid, FirstDay: Today()});
+                                                                              RemoveIf(colAbsAp, ID = qid);
+                                                                              Collect(colAbsApDecided, {ItemId: qid});
+                                                                              Set(varAbsApSelId, Blank());
+                                                                              Set(varAbsApPlanFor, Blank());
+                                                                              Set(varAbsApClass, "");
+                                                                              Set(varAbsApReasonId, Blank());
+                                                                              Set(varAbsApDismissOpen, false);
+                                                                              Clear(colAbsApPlan);
+                                                                              Reset(rdoAbsApClass);
+                                                                              Reset(ddAbsApReason);
+                                                                              Reset(txtAbsApNote);
+                                                                              Reset(txtAbsApDismissNote)
+                                                                          )
+                                                                      )
+                                                                  )
+                                                              )
+                                                          );
+                                                          Set(varAbsApSaving, false)
+                                                      )
+                                                  )
+                                                Size: =14
+                                                Text: ="Confirm dismiss"
+                                                Width: =150
+                                          - btnAbsApDismissCancel:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Keep the report and close dismiss"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: =Set(varAbsApDismissOpen, false); Reset(txtAbsApDismissNote)
+                                                Size: =14
+                                                Text: ="Keep report"
+                                                Width: =120
             - btnAbsNrEngine:
                 Control: Classic/Button
                 Properties:
@@ -2385,4 +3670,157 @@ Screens:
                     Set(varAbsNrLoaded, true);
                     Set(varAbsNrLoading, false)
                   Text: ="nr load"
+                  Visible: =false
+            - btnAbsApEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varAbsApLoading, true);
+                    Set(varAbsApLoadError, "");
+                    Set(varAbsApSelId, Blank());
+                    Set(varAbsApPlanFor, Blank());
+                    Set(varAbsApDismissOpen, false);
+                    Clear(colAbsApPlan);
+                    If(
+                        !CanClassify,
+                        Clear(colAbsAp),
+                        IfError(
+                            Concurrent(
+                                ClearCollect(colAbsApR1, ForAll(Filter('Student Absence Log', Match_Status.Value = "Exact") As r, {ID: r.ID, Title: Coalesce(r.Title, ""), Created: r.Created, MatchStatus: "Exact", StudentKey: Trim(Coalesce(r.Student_ID, "")), FirstName: Coalesce(r.'Student First Name', ""), LastName: Coalesce(r.'Student Last Name', ""), SchoolSite: Coalesce(r.'School Site', ""), AbsenceDateText: Coalesce(r.'Absence Date', ""), ReturnDateText: Coalesce(r.'Return Date', ""), Reason: Coalesce(r.Reason, ""), SubmittedBy: Coalesce(r.'Submitted By', ""), DateNotified: Coalesce(r.'Date Notified', "")})),
+                                ClearCollect(colAbsApR2, ForAll(Filter('Student Absence Log', Match_Status.Value = "Approved Variation") As r, {ID: r.ID, Title: Coalesce(r.Title, ""), Created: r.Created, MatchStatus: "Approved Variation", StudentKey: Trim(Coalesce(r.Student_ID, "")), FirstName: Coalesce(r.'Student First Name', ""), LastName: Coalesce(r.'Student Last Name', ""), SchoolSite: Coalesce(r.'School Site', ""), AbsenceDateText: Coalesce(r.'Absence Date', ""), ReturnDateText: Coalesce(r.'Return Date', ""), Reason: Coalesce(r.Reason, ""), SubmittedBy: Coalesce(r.'Submitted By', ""), DateNotified: Coalesce(r.'Date Notified', "")})),
+                                ClearCollect(colAbsApR3, ForAll(Filter('Student Absence Log', Match_Status.Value = "Manually Resolved") As r, {ID: r.ID, Title: Coalesce(r.Title, ""), Created: r.Created, MatchStatus: "Manually Resolved", StudentKey: Trim(Coalesce(r.Student_ID, "")), FirstName: Coalesce(r.'Student First Name', ""), LastName: Coalesce(r.'Student Last Name', ""), SchoolSite: Coalesce(r.'School Site', ""), AbsenceDateText: Coalesce(r.'Absence Date', ""), ReturnDateText: Coalesce(r.'Return Date', ""), Reason: Coalesce(r.Reason, ""), SubmittedBy: Coalesce(r.'Submitted By', ""), DateNotified: Coalesce(r.'Date Notified', "")})),
+                                ClearCollect(colAbsApCampuses, ForAll(Campuses As c, {CampusId: c.Campus, CampusName: c.Name, CampusCode: Coalesce(c.Code, "")})),
+                                ClearCollect(colAbsApStu, ForAll(Students As s, {StudentId: s.Student, DisplayName: Coalesce(s.'Display Name', "Unnamed student"), StudentKey: Trim(Coalesce(s.'External Client ID', "")), StudentNumber: Coalesce(s.'Student Number', "")})),
+                                ClearCollect(colAbsApEnr, ForAll(Enrollments As e, {EnrId: e.Enrollment, StudentId: e.Student.Student, CampusId: e.Campus.Campus, CampusName: Coalesce(e.Campus.Name, ""), TeacherId: e.Teacher.Staff, TeacherName: Coalesce(e.Teacher.Name, ""), ServiceId: e.Service.Service, ServiceCode: Coalesce(e.Service.'Service Code', ""), StudentNumber: Coalesce(e.Student.'Student Number', ""), StartDate: e.'Start Date', EndDate: e.'End Date', EnrRec: e}))
+                            ); true,
+                            Set(varAbsApLoadError, FirstError.Message)
+                        );
+                        ClearCollect(colAbsApSrc, colAbsApR1, colAbsApR2, colAbsApR3);
+                        IfError(
+                            With({minId: Coalesce(Min(colAbsApSrc, ID), 0)}, ClearCollect(colAbsApDecided, ForAll(Filter('Report Decisions', 'Report Item ID' >= minId) As d, {ItemId: d.'Report Item ID'}))); true,
+                            Set(varAbsApLoadError, "Report Decisions could not be read (" & FirstError.Message & ")")
+                        );
+                        If(
+                            varAbsApLoadError <> "",
+                            Clear(colAbsAp),
+                            ClearCollect(
+                                colAbsAp,
+                                Filter(
+                                    ForAll(
+                                        colAbsApSrc As s,
+                                        With(
+                                            {
+                                                d0: IfError(DateValue(s.AbsenceDateText, "en-US"), Blank()),
+                                                stu: LookUp(colAbsApStu, s.StudentKey <> "" && StudentKey = s.StudentKey),
+                                                site: LookUp(colAbsApCampuses, CampusName = Trim(s.SchoolSite))
+                                            },
+                                            With(
+                                                {seg: First(Sort(Filter(colAbsApEnr, StudentId = stu.StudentId), StartDate, SortOrder.Descending))},
+                                                {
+                                                    ID: s.ID, Title: s.Title, Created: s.Created, MatchStatus: s.MatchStatus, StudentKey: s.StudentKey,
+                                                    FirstName: s.FirstName, LastName: s.LastName, SchoolSite: s.SchoolSite,
+                                                    AbsenceDateText: s.AbsenceDateText, ReturnDateText: s.ReturnDateText, Reason: s.Reason,
+                                                    SubmittedBy: s.SubmittedBy, DateNotified: s.DateNotified,
+                                                    AbsDate: d0,
+                                                    StudentId: Coalesce(stu.StudentId, ZeroGuid), StudentName: Coalesce(stu.DisplayName, ""), StudentNumber: Coalesce(stu.StudentNumber, ""),
+                                                    CampusId: Coalesce(seg.CampusId, site.CampusId, ZeroGuid), CampusName: Coalesce(seg.CampusName, site.CampusName, ""),
+                                                    SiteCampusId: Coalesce(site.CampusId, ZeroGuid),
+                                                    Decided: s.ID in colAbsApDecided.ItemId
+                                                }
+                                            )
+                                        )
+                                    ),
+                                    !IsBlank(AbsDate) && AbsDate >= ParentReportCutover && !Decided && (StudentCampusLock = ZeroGuid || CampusId = StudentCampusLock || SiteCampusId = StudentCampusLock)
+                                )
+                            )
+                        )
+                    );
+                    Set(varAbsApLoaded, true);
+                    Set(varAbsApLoading, false)
+                  Text: ="ap load"
+                  Visible: =false
+            - btnAbsApPlanEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varAbsApPlanFor, Blank());
+                    Set(varAbsApPlanErr, "");
+                    Clear(colAbsApPlan);
+                    With(
+                        {it: LookUp(colAbsAp, ID = varAbsApSelId)},
+                        With(
+                            {d0: it.AbsDate, r0: IfError(DateValue(it.ReturnDateText, "en-US"), Blank())},
+                            With(
+                                {dEnd: If(IsBlank(r0) || r0 <= d0, d0, DateAdd(r0, -1, TimeUnit.Days))},
+                                If(
+                                    IsBlank(it),
+                                    Set(varAbsApPlanErr, "that report is no longer in the queue; use Reload"),
+                                    it.StudentId = ZeroGuid,
+                                    Set(varAbsApPlanErr, "no app student has Student Key " & it.StudentKey),
+                                    Trim(it.ReturnDateText) <> "" && IsBlank(r0),
+                                    Set(varAbsApPlanErr, "the Return Date """ & it.ReturnDateText & """ can't be read as M/D/YYYY"),
+                                    DateDiff(d0, dEnd, TimeUnit.Days) > 180,
+                                    Set(varAbsApPlanErr, "the span from " & it.AbsenceDateText & " to " & it.ReturnDateText & " is over 180 days"),
+                                    IfError(
+                                        With(
+                                            {qs: it.StudentId, a: d0, b: dEnd},
+                                            Concurrent(
+                                                ClearCollect(colAbsApTerms, Filter(Terms, 'Start Date' <= b && 'End Date' >= a)),
+                                                ClearCollect(colAbsApExc, ForAll(Filter('Calendar Exceptions', Date >= a && Date <= b) As x, {XDate: x.Date, CampusId: x.Campus.Campus, IsClosed: x.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day', IsMakeup: x.Type = 'Type (Calendar Exceptions)'.'Make-up School Day'})),
+                                                ClearCollect(colAbsApLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month})),
+                                                ClearCollect(colAbsApAtt, ForAll(Filter(Attendance, Student.Student = qs && Date >= a && Date <= b) As r, {AttId: r.Attendance, ServiceId: r.Service.Service, AttDate: r.Date, Present: r.Present = true, IsDeleted: r.'Is Deleted' = true, Classified: !IsBlank(r.'Absence Classification')}))
+                                            )
+                                        ); true,
+                                        Set(varAbsApPlanErr, "the calendar or attendance could not be loaded (" & FirstError.Message & ")")
+                                    );
+                                    If(
+                                        varAbsApPlanErr = "",
+                                        ForAll(
+                                            Sequence(DateDiff(d0, dEnd, TimeUnit.Days) + 1, 0) As k,
+                                            With(
+                                                {D: DateAdd(d0, k.Value, TimeUnit.Days)},
+                                                With(
+                                                    {seg: First(Sort(Filter(colAbsApEnr, StudentId = it.StudentId && StartDate <= D && (IsBlank(EndDate) || EndDate >= D)), StartDate, SortOrder.Descending))},
+                                                    With(
+                                                        {cid: Coalesce(seg.CampusId, it.CampusId)},
+                                                        With(
+                                                            {
+                                                                t: First(Filter(colAbsApTerms, ThisRecord.'Start Date' <= D && ThisRecord.'End Date' >= D && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = cid))),
+                                                                closed: !IsBlank(LookUp(colAbsApExc, XDate = D && (IsBlank(CampusId) || CampusId = cid) && IsClosed)),
+                                                                mk: !IsBlank(LookUp(colAbsApExc, XDate = D && (IsBlank(CampusId) || CampusId = cid) && IsMakeup)),
+                                                                wk: Weekday(D, StartOfWeek.Monday) >= 6
+                                                            },
+                                                            If(
+                                                                !IsBlank(t) && !closed && (!wk || mk),
+                                                                With(
+                                                                    {
+                                                                        att: LookUp(colAbsApAtt, AttDate = D && ServiceId = seg.ServiceId),
+                                                                        locked: !IsBlank(LookUp(colAbsApLocks, CampusId = cid && MonthStart = Date(Year(D), Month(D), 1)))
+                                                                    },
+                                                                    With(
+                                                                        {oc: If(IsBlank(seg), "skip-notenrolled", locked, "skip-locked", IsBlank(att), "create", att.IsDeleted, "restore", att.Present, "skip-present", !att.Classified, "classify", "skip-classified")},
+                                                                        Collect(colAbsApPlan, {DayDate: D, EnrId: Coalesce(seg.EnrId, ZeroGuid), TermId: t.'Term (aaca_termid)', CampusId: Coalesce(cid, ZeroGuid), ServiceId: Coalesce(seg.ServiceId, ZeroGuid), TeacherId: Coalesce(seg.TeacherId, ZeroGuid), TeacherName: Coalesce(seg.TeacherName, ""), Outcome: oc, OutcomeText: Switch(oc, "create", "New 0 will be created", "restore", "Deleted row will be restored as 0", "classify", "Existing 0 will be classified", "skip-classified", "Skip · already classified", "skip-present", "Skip · marked present by teacher", "skip-notenrolled", "Skip · not enrolled that day", "skip-locked", "Skip · month locked", oc)})
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        );
+                                        Set(varAbsApPlanFor, varAbsApSelId)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  Text: ="ap plan"
                   Visible: =false

@@ -43,6 +43,8 @@ App:
       // ---------- Absence classification (build 3) ----------
       CanClassify = IsOfficeRole || IsAdminRole;
       CurrentSchoolYear = LookUp('School Years', 'Start Date' <= Today() && 'End Date' >= Today());
+      // ---------- Parent-report approval (build 5) ----------
+      ParentReportCutover = With({v: Trim(Coalesce(LookUp('App Settings', Key = "ParentReportCutoverDate").Value, ""))}, If(Len(v) = 10, IfError(Date(Value(Left(v, 4)), Value(Mid(v, 6, 2)), Value(Mid(v, 9, 2))), Date(2026, 1, 1)), Date(2026, 1, 1)));
     OnStart: |-
       =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1));
       Set(varMonthEnd, DateAdd(DateAdd(Date(Year(Today()), Month(Today()), 1), 1, TimeUnit.Months), -1, TimeUnit.Days));
@@ -100,7 +102,7 @@ App:
       Set(varAbsCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(Sort(Campuses, Name, SortOrder.Ascending)).Campus, ZeroGuid)));
       Set(varAbsTeacherId, ZeroGuid);
       Set(varAbsStatus, "Not classified");
-      Set(varAbsFrom, Coalesce(CurrentSchoolYear.'Start Date', Date(Year(Today()) - If(Month(Today()) < 7, 1, 0), 7, 1)));
+      Set(varAbsFrom, ParentReportCutover);
       Set(varAbsTo, Today());
       Set(varAbsLoading, false);
       Set(varAbsSaving, false);
@@ -134,6 +136,25 @@ App:
       Set(varAbsNrCalFor, Blank());
       Set(varAbsNrPickId, ZeroGuid);
       Set(varAbsNrPickId, Blank());
-      Set(varAbsNrReceipt, {Kind: "", Title: "", Body: "", ItemId: 0})
+      Set(varAbsNrReceipt, {Kind: "", Title: "", Body: "", ItemId: 0});
+      Set(varAbsApLoading, false);
+      Set(varAbsApLoaded, false);
+      Set(varAbsApSaving, false);
+      Set(varAbsApLoadError, "");
+      Set(varAbsApPlanErr, "");
+      Set(varAbsApSelId, 0);
+      Set(varAbsApSelId, Blank());
+      Set(varAbsApPlanFor, 0);
+      Set(varAbsApPlanFor, Blank());
+      Set(varAbsApClass, "");
+      Set(varAbsApReasonId, ZeroGuid);
+      Set(varAbsApReasonId, Blank());
+      Set(varAbsApDismissOpen, false);
+      Set(varAbsApReceipt, {Kind: "", Title: "", Body: "", ItemId: 0});
+      Set(varAbsApGridLink, {StudentId: ZeroGuid, TeacherId: ZeroGuid, CampusId: ZeroGuid, FirstDay: Today()});
+      ClearCollect(colAbsApPlan, {DayDate: Today(), EnrId: ZeroGuid, TermId: ZeroGuid, CampusId: ZeroGuid, ServiceId: ZeroGuid, TeacherId: ZeroGuid, TeacherName: "", Outcome: "", OutcomeText: ""});
+      Clear(colAbsApPlan);
+      ClearCollect(colAbsApLog, {DayDate: Today(), Outcome: "", Detail: "", AttId: ZeroGuid});
+      Clear(colAbsApLog)
     StartScreen: =Screen1
     Theme: =PowerAppsTheme

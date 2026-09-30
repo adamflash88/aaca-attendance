@@ -37,23 +37,29 @@ function Grant([hashtable] $m, [string[]] $tables, [string[]] $access, [string] 
 
 $roles = [ordered]@{}
 
-# Teacher: own students/enrollments/attendance only. No delete anywhere (soft delete only).
+# Teacher (build 5 rules): READ their campus's students, enrollments and attendance (other teachers' grids are
+# view-only); CREATE/WRITE only attendance rows they own (their 1s and undo). Absences (0) are created by office
+# staff on approval and owned by them, so a teacher's Basic write cannot change them. No delete anywhere.
 $m = @{}
 Grant $m $reference 'Read', 'AppendTo' 'Global'
-Grant $m 'aaca_student', 'aaca_enrollment' 'Read', 'AppendTo' 'Basic'
-Grant $m 'aaca_attendance' 'Create', 'Read', 'Write', 'Append' 'Basic'
+Grant $m 'aaca_student', 'aaca_enrollment' 'Read', 'AppendTo' 'Local'
+Grant $m 'aaca_attendance' 'Read' 'Local'
+Grant $m 'aaca_attendance' 'Create', 'Write', 'Append' 'Basic'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Basic'
-$roles['AACA Teacher'] = @{ Description = 'Records attendance for own students only.'; Matrix = $m }
+$roles['AACA Teacher'] = @{ Description = 'Marks students present (1) and undoes own marks; views campus attendance.'; Matrix = $m }
 
-# Attendance Office: everything for their campus; classifies absences (with the Classifiers profile).
+# Attendance Office: their campus; manages students; approves parent absence reports (creates/classifies absences,
+# with the Classifiers column profile). Does not edit the grid in the app (enforced by the app; the attendance Write
+# privilege is needed to create and classify absences on approval).
 $m = @{}
 Grant $m $reference 'Read', 'AppendTo' 'Global'
 Grant $m 'aaca_student', 'aaca_enrollment' 'Create', 'Read', 'Write', 'Append', 'AppendTo', 'Assign' 'Local'
 Grant $m 'aaca_attendance' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 Grant $m 'aaca_calendarexception', 'aaca_monthlock' 'Create', 'Write', 'Append' 'Local'
 Grant $m 'aaca_absencereason' 'Create', 'Write' 'Global'
+Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Append' 'Local'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Local'
-$roles['AACA Attendance Office'] = @{ Description = 'Campus office: students, assignments, ratios, absence classification, month locks.'; Matrix = $m }
+$roles['AACA Attendance Office'] = @{ Description = 'Campus office: students, assignments, ratios, parent-report approval and absence classification, month locks.'; Matrix = $m }
 
 # Read-only / billing / executive.
 $m = @{}

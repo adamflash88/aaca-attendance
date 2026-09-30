@@ -6,6 +6,7 @@ Screens:
         =// Self-heal on every visit: never leave the controls locked by an interrupted load, and never keep a
         // remembered campus/teacher that no longer exists (e.g. after a data reset).
         Set(varLoading, false);
+        If(IsTeacherRole && !IsBlank(CurrentStaff.Campus), Set(varCampus, CurrentStaff.Campus));
         // Years offered by the year picker: first school year through next calendar year
         ClearCollect(colAttYears, ForAll(Sequence(Year(Today()) + 2 - FirstSchoolYear, FirstSchoolYear), {YearNum: Value}));
         With(
@@ -515,7 +516,7 @@ Screens:
                                     Appearance: =Appearance.Outline
                                     Color: =ColorInk
                                     Default: =varTeacher
-                                    DisplayMode: =If(CanPickTeacher && !varLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                    DisplayMode: =If((CanPickTeacher || IsTeacherRole) && !varLoading, DisplayMode.Edit, DisplayMode.Disabled)
                                     Height: =36
                                     ItemDisplayText: =ThisItem.Name
                                     Items: =Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending)
@@ -557,7 +558,14 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =13
-                        Text: =If(varLoadError <> "", "Could not load attendance — " & varLoadError & ". Use ↻ to try again.", !IsBlank(varMonthLock), Text(varMonthStart, "mmmm yyyy") & " is locked for " & varCampus.Name & " — " & Coalesce(varMonthLock.Reason, "no reason given") & ". Cells are read-only.", IsReadOnlyRole, "View only — the Read-only role cannot change attendance.", "")
+                        Text: |-
+                          =If(
+                              varLoadError <> "", "Could not load attendance — " & varLoadError & ". Use Reload to try again.",
+                              !(IsTeacherRole && !IsBlank(varTeacher) && varTeacher.Staff = CurrentStaff.Staff),
+                              "View only — " & If(IsTeacherRole, "this is " & varTeacher.Name & "'s grid. You can mark attendance only on your own grid.", IsOfficeRole, "teachers mark attendance. Absences (0) come from parent reports you approve on the Absences screen.", "attendance is marked by each teacher on their own grid."),
+                              !IsBlank(varMonthLock), Text(varMonthStart, "mmmm yyyy") & " is locked for " & varCampus.Name & " — " & Coalesce(varMonthLock.Reason, "no reason given") & ". Cells are read-only.",
+                              ""
+                          )
             - spnAttLoading:
                 Control: ModernSpinner
                 Properties:
@@ -661,7 +669,7 @@ Screens:
                         PaddingTop: =0
                         Size: =14
                         Text: |-
-                          =With({a: LookUp(colMonthAtt, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum && !IsDeleted), c: LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum)}, "Clear " & Switch(a.Letter, "P", "Present", "E", "Absent (excused)", "U", "Absent (unexcused)", "Absent") & " for " & c.StudentName & " on " & Text(c.CellDate, "dddd mmmm d") & "? The row is kept and marked deleted (audit logged); marking the day again restores it.")
+                          =With({a: LookUp(colMonthAtt, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum && !IsDeleted), c: LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum)}, "Undo the 1 (present) for " & c.StudentName & " on " & Text(c.CellDate, "dddd mmmm d") & "? The row is kept and marked deleted (audit logged); you can mark the day again later.")
                   - conAttConfirmActions:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -677,7 +685,7 @@ Screens:
                         - btnAttConfirmClear:
                             Control: ModernButton
                             Properties:
-                              AccessibleLabel: ="Confirm clear"
+                              AccessibleLabel: ="Confirm undo"
                               AlignInContainer: =AlignInContainer.Center
                               BasePaletteColor: =ColorUnexcused
                               Color: =ColorWhite
@@ -688,7 +696,7 @@ Screens:
                               OnSelect: |-
                                 =Set(varConfirmOpen, false); Set(varSaveReq, {StudentId: varClearKey.StudentId, DayNum: varClearKey.DayNum, Target: "clear"}); Select(btnAttSaveEngine)
                               Size: =14
-                              Text: ="Confirm clear"
+                              Text: ="Confirm undo"
                               Width: =132
                         - btnAttConfirmCancel:
                             Control: ModernButton
@@ -702,7 +710,7 @@ Screens:
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
                               OnSelect: |-
-                                =Set(varConfirmOpen, false); Set(varLastAction, {Kind: "Cancelled", Message: "Clear cancelled · " & LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum).StudentName & " · " & Text(Date(Year(varMonthStart), Month(varMonthStart), varClearKey.DayNum), "ddd mmm d") & " · record unchanged", StudentId: varClearKey.StudentId, DayNum: varClearKey.DayNum})
+                                =Set(varConfirmOpen, false); Set(varLastAction, {Kind: "Cancelled", Message: "Undo cancelled · " & LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum).StudentName & " · " & Text(Date(Year(varMonthStart), Month(varMonthStart), varClearKey.DayNum), "ddd mmm d") & " · record unchanged", StudentId: varClearKey.StudentId, DayNum: varClearKey.DayNum})
                               Size: =14
                               Text: ="Cancel"
             - conAttDetail:
@@ -761,7 +769,7 @@ Screens:
                         PaddingTop: =0
                         Size: =13
                         Text: |-
-                          =With({a: LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted)}, If(IsBlank(a), "No attendance record for this cell.", "Status " & Switch(a.Letter, "P", "Present", "E", "Absent (excused)", "U", "Absent (unexcused)", "Absent (not classified)") & "  ·  IEP ratio " & Coalesce(a.IepText, "—") & "  ·  Classification " & a.ClassText & " (read-only)  ·  Reason " & Coalesce(With({qAttId: a.AttId}, LookUp(Attendance, ThisRecord.Attendance = qAttId)).'Absence Reason'.Name, "—") & "  ·  Key " & a.RecordKey))
+                          =With({a: LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted)}, If(IsBlank(a), "No attendance record for this cell.", If(a.Letter = "P", "Status Present (1)", "Status Absent (0) – " & a.ClassText & If(a.ReasonName <> "", ": " & a.ReasonName, "") & If(IsBlank(a.SourceReportId), " · no parent report linked", " · from parent report #" & a.SourceReportId) & " · locked") & "  ·  IEP ratio " & Coalesce(a.IepText, "—") & "  ·  Key " & a.RecordKey))
                   - conAttDetailNotesField:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -799,7 +807,7 @@ Screens:
                               Appearance: =Appearance.Outline
                               Color: =ColorInk
                               Default: =LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted).Notes
-                              DisplayMode: =If(varCanEditMonth, DisplayMode.Edit, DisplayMode.View)
+                              DisplayMode: =If(varCanEditMonth && LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted).Letter = "P", DisplayMode.Edit, DisplayMode.View)
                               Height: =72
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
@@ -825,7 +833,7 @@ Screens:
                               AlignInContainer: =AlignInContainer.Center
                               BasePaletteColor: =ColorTeal
                               Color: =ColorWhite
-                              DisplayMode: =If(varCanEditMonth && !IsBlank(LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted)), DisplayMode.Edit, DisplayMode.Disabled)
+                              DisplayMode: =If(varCanEditMonth && LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted).Letter = "P", DisplayMode.Edit, DisplayMode.Disabled)
                               Height: =44
                               Layout: =ButtonLayout.TextOnly
                               LayoutMinHeight: =0
@@ -839,8 +847,8 @@ Screens:
                                         newNotes: txtAttDetailNotes.Text
                                     },
                                     If(
-                                        IsBlank(a) || !varCanEditMonth,
-                                        Set(varLastAction, {Kind: "Blocked", Message: "Notes not saved · " & nm & " · " & dt & " · no record, month locked or view-only role", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
+                                        IsBlank(a) || !varCanEditMonth || a.Letter <> "P",
+                                        Set(varLastAction, {Kind: "Blocked", Message: "Notes not saved · " & nm & " · " & dt & " · only a teacher's own 1s can take notes here", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
                                         With(
                                             {server: With({qAttId: a.AttId}, LookUp(Attendance, ThisRecord.Attendance = qAttId))},
                                             If(
@@ -848,7 +856,7 @@ Screens:
                                                 Set(varLastAction, {Kind: "Failed", Message: "Failed · " & nm & " · " & dt & " · notes were not saved — press Save notes to retry", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
                                                 IsBlank(server) || server.'Modified On' <> a.ModifiedOn,
                                                 RemoveIf(colMonthAtt, AttId = a.AttId);
-                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On', SourceReportId: server.'Source Report ID', ReasonName: Coalesce(server.'Absence Reason'.Name, "")}));
                                                 Reset(txtAttDetailNotes);
                                                 Set(varLastAction, {Kind: "Conflict", Message: "Changed by someone else — reloaded · " & nm & " · " & dt & " · your notes were not saved", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
                                                 With(
@@ -857,7 +865,7 @@ Screens:
                                                         IsBlank(written),
                                                         Set(varLastAction, {Kind: "Failed", Message: "Failed · " & nm & " · " & dt & " · notes were not saved — press Save notes to retry", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
                                                         RemoveIf(colMonthAtt, AttId = a.AttId);
-                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On', SourceReportId: written.'Source Report ID', ReasonName: Coalesce(written.'Absence Reason'.Name, "")});
                                                         Set(varLastAction, {Kind: "Notes", Message: "Notes saved · " & nm & " · " & dt & " · Notes """ & Left(written.Notes, 80) & If(Len(written.Notes) > 80, "…", "") & """ · Key " & written.'Record Key', StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum})
                                                     )
                                                 )
@@ -892,7 +900,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorWhite
                   FillPortions: =0
-                  Height: =16 + If(conAttRoot.Width < 640, 84, conAttRoot.Width < 1340, 44, 24) + 8 + If(CountRows(colMonthStudents) = 0, 48, 64 + Min(528, Max(132, 44 * CountRows(colMonthStudents))) + 36 + 14) + 16
+                  Height: =16 + If(conAttRoot.Width < 640, 104, conAttRoot.Width < 1340, 44, 24) + 8 + If(CountRows(colMonthStudents) = 0, 48, 64 + Min(528, Max(132, 44 * CountRows(colMonthStudents))) + 36 + 14) + 16
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
@@ -914,7 +922,7 @@ Screens:
                         AccessibleLabel: ="Legend " & Self.Text
                         AlignInContainer: =AlignInContainer.Stretch
                         Color: =ColorMuted
-                        Height: =If(conAttRoot.Width < 640, 84, conAttRoot.Width < 1340, 44, 24)
+                        Height: =If(conAttRoot.Width < 640, 104, conAttRoot.Width < 1340, 44, 24)
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
                         PaddingBottom: =0
@@ -923,7 +931,7 @@ Screens:
                         PaddingTop: =0
                         Size: =12
                         Text: |-
-                          ="1 present · 0 absent (uncoloured = not classified, green = excused, red = unexcused) · grey = no school, weekend or holiday · – not enrolled · dashed = future · … saving · ✓ saved · ! save failed, tap to retry · Details mode: tap a marked cell for notes"
+                          ="1 present (tap a blank cell on your own grid; tap a 1 to undo) · 0 absent, from approved parent reports: uncoloured = not classified, green = excused, red = unexcused · grey = no school · – not enrolled · dashed = future · ! failed, tap to retry · Details mode shows notes and the absence source"
                   - lblAttEmpty:
                       Control: ModernText
                       Properties:
@@ -1181,12 +1189,12 @@ Screens:
                                                               Letter: Coalesce(a.Letter, ""),
                                                               SaveState: Coalesce(s.SaveState, ""),
                                                               Target: Coalesce(s.Target, ""),
-                                                              Editable: varCanEditMonth && c.State = "Open",
-                                                              Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open"),
+                                                              Editable: varCanEditMonth && c.State = "Open" && (IsBlank(a) || a.Letter = "P"),
+                                                              Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open" && (IsBlank(a) || a.Letter = "P")),
                                                               StatusWord: If(
                                                                   Coalesce(s.SaveState, "") = "failed", "Save failed – tap to retry",
                                                                   Coalesce(s.SaveState, "") = "saving", "Saving",
-                                                                  !IsBlank(a), Switch(a.Letter, "P", "Present", "E", "Absent, excused", "U", "Absent, unexcused", "Absent, not classified"),
+                                                                  !IsBlank(a), If(a.Letter = "P", "Present", "Absent – " & Switch(a.Letter, "E", "Excused", "U", "Unexcused", "not classified") & If(a.ReasonName <> "", ": " & a.ReasonName, "") & If(IsBlank(a.SourceReportId), "", " (parent report #" & a.SourceReportId & ")")),
                                                                   c.State = "NotEnrolled", "Not enrolled",
                                                                   c.State = "NonSchool", "Not a school day",
                                                                   c.State = "Future", "Future date",
@@ -1230,13 +1238,13 @@ Screens:
                                                             If(ThisItem.HasRecord, Set(varDetailKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varConfirmOpen, false); Reset(txtAttDetailNotes); Set(varDetailOpen, true)),
                                                             !ThisItem.Editable || ThisItem.SaveState = "saving",
                                                             false,
-                                                            ThisItem.SaveState = "failed",
+                                                            ThisItem.SaveState = "failed" && ThisItem.Target in ["P", "clear"],
                                                             Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: ThisItem.Target}); Select(btnAttSaveEngine),
                                                             !ThisItem.HasRecord,
                                                             Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "P"}); Select(btnAttSaveEngine),
                                                             ThisItem.Letter = "P",
-                                                            Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "A"}); Select(btnAttSaveEngine),
-                                                            Set(varClearKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varDetailOpen, false); Set(varConfirmOpen, true)
+                                                            Set(varClearKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varDetailOpen, false); Set(varConfirmOpen, true),
+                                                            false
                                                         )
                                                       PaddingBottom: =0
                                                       PaddingLeft: =1
@@ -1357,7 +1365,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorWhite
                   FillPortions: =0
-                  Height: =16 + 44 + 8 + If(lblAttDayNotice.Text <> "", 56, 0) + If(CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) = 0, 0, Min(620, Max(124, 124 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))) + 16
+                  Height: =16 + 44 + 8 + If(lblAttDayNotice.Text <> "", 56, 0) + If(CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) = 0, 0, Min(620, Max(140, 140 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))) + 16
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
@@ -1477,7 +1485,7 @@ Screens:
                       Properties:
                         AccessibleLabel: ="Students for " & Text(varViewDate, "dddd mmmm d")
                         FillPortions: =0
-                        Height: =Min(620, Max(124, 124 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))
+                        Height: =Min(620, Max(140, 140 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))
                         Items: |-
                           =ForAll(
                               Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")) As c,
@@ -1497,12 +1505,12 @@ Screens:
                                       Letter: Coalesce(a.Letter, ""),
                                       SaveState: Coalesce(s.SaveState, ""),
                                       Target: Coalesce(s.Target, ""),
-                                      Editable: varCanEditMonth && c.State = "Open",
-                                      Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open"),
+                                      Editable: varCanEditMonth && c.State = "Open" && (IsBlank(a) || a.Letter = "P"),
+                                      Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open" && (IsBlank(a) || a.Letter = "P")),
                                       StatusWord: If(
                                           Coalesce(s.SaveState, "") = "failed", "Save failed – tap to retry",
                                           Coalesce(s.SaveState, "") = "saving", "Saving",
-                                          !IsBlank(a), Switch(a.Letter, "P", "Present", "E", "Absent, excused", "U", "Absent, unexcused", "Absent, not classified"),
+                                          !IsBlank(a), If(a.Letter = "P", "Present", "Absent – " & Switch(a.Letter, "E", "Excused", "U", "Unexcused", "not classified") & If(a.ReasonName <> "", ": " & a.ReasonName, "") & If(IsBlank(a.SourceReportId), "", " (parent report #" & a.SourceReportId & ")")),
                                           c.State = "NotEnrolled", "Not enrolled",
                                           c.State = "NonSchool", "Not a school day",
                                           c.State = "Future", "Future date",
@@ -1516,7 +1524,7 @@ Screens:
                         Selectable: =false
                         TabIndex: =0
                         TemplatePadding: =4
-                        TemplateSize: =116
+                        TemplateSize: =132
                         Visible: =CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) > 0
                       Children:
                         - conAttDayRow:
@@ -1563,7 +1571,7 @@ Screens:
                                     AccessibleLabel: ="Status for " & ThisItem.StudentName & " " & Self.Text
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =If(ThisItem.SaveState = "failed", ColorUnexcused, ColorMuted)
-                                    Height: =20
+                                    Height: =36
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                     PaddingBottom: =0
@@ -1571,8 +1579,8 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =12
-                                    Text: =Switch(ThisItem.SaveState, "failed", "Save failed – press Present or Absent to retry", "saving", "Saving…", If(ThisItem.HasRecord, ThisItem.StatusWord & If(ThisItem.SaveState = "saved", " ✓ saved", ""), ThisItem.State = "Future", "Future date – locked", "Not recorded"))
-                                    Wrap: =false
+                                    Text: =Switch(ThisItem.SaveState, "failed", "Save failed – press the button again to retry", "saving", "Saving…", If(ThisItem.HasRecord, ThisItem.StatusWord & If(ThisItem.SaveState = "saved", " ✓ saved", ""), ThisItem.State = "Future", "Future date – locked", "Not recorded"))
+                                    VerticalAlign: =VerticalAlign.Top
                               - conAttDayActions:
                                   Control: GroupContainer
                                   Variant: AutoLayout
@@ -1592,7 +1600,7 @@ Screens:
                                           AlignInContainer: =AlignInContainer.Center
                                           BasePaletteColor: =ColorTeal
                                           Color: =ColorWhite
-                                          DisplayMode: =If(ThisItem.Editable && ThisItem.SaveState <> "saving" && (ThisItem.Letter <> "P" || ThisItem.SaveState = "failed"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          DisplayMode: =If(ThisItem.Editable && ThisItem.SaveState <> "saving" && (!ThisItem.HasRecord || ThisItem.SaveState = "failed"), DisplayMode.Edit, DisplayMode.Disabled)
                                           Height: =44
                                           Layout: =ButtonLayout.TextOnly
                                           LayoutMinHeight: =0
@@ -1609,20 +1617,19 @@ Screens:
                                           AlignInContainer: =AlignInContainer.Center
                                           BasePaletteColor: =ColorInk
                                           Color: =ColorWhite
-                                          DisplayMode: =If(ThisItem.Editable && ThisItem.SaveState <> "saving" && (!(ThisItem.Letter in ["A", "E", "U"]) || ThisItem.SaveState = "failed"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          DisplayMode: =DisplayMode.Disabled
                                           Height: =44
                                           Layout: =ButtonLayout.TextOnly
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
-                                          OnSelect: |-
-                                            =Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "A"}); Select(btnAttSaveEngine)
                                           Size: =14
                                           Text: ="Absent"
+                                          Visible: =false
                                           Width: =100
                                     - btnAttDayClear:
                                         Control: ModernButton
                                         Properties:
-                                          AccessibleLabel: ="Clear the record for " & ThisItem.StudentName
+                                          AccessibleLabel: ="Undo present for " & ThisItem.StudentName
                                           AlignInContainer: =AlignInContainer.Center
                                           Appearance: =ButtonAppearance.Secondary
                                           Color: =ColorInk
@@ -1634,8 +1641,8 @@ Screens:
                                           OnSelect: |-
                                             =Set(varClearKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varDetailOpen, false); Set(varConfirmOpen, true)
                                           Size: =14
-                                          Text: ="Clear"
-                                          Visible: =ThisItem.HasRecord
+                                          Text: ="Undo"
+                                          Visible: =ThisItem.HasRecord && ThisItem.Letter = "P"
                                           Width: =88
             - btnAttSaveEngine:
                 Control: Classic/Button
@@ -1658,8 +1665,8 @@ Screens:
                                 dateText: Text(cell.CellDate, "ddd mmm d")
                             },
                             If(
-                                IsBlank(cell) || cell.State <> "Open" || !varCanEditMonth || IsBlank(req.Target) || (req.Target = "clear" && (IsBlank(local) || local.IsDeleted)),
-                                Set(varLastAction, {Kind: "Blocked", Message: "Not saved · " & cell.StudentName & " · " & dateText & " · " & If(!varCanEditMonth, "month locked or view-only role", Coalesce(cell.Reason, "cell not editable")), StudentId: req.StudentId, DayNum: req.DayNum}),
+                                IsBlank(cell) || cell.State <> "Open" || !varCanEditMonth || !(req.Target in ["P", "clear"]) || (req.Target = "clear" && (IsBlank(local) || local.IsDeleted || !local.Present)) || (req.Target = "P" && !IsBlank(local) && !local.IsDeleted && !local.Present),
+                                Set(varLastAction, {Kind: "Blocked", Message: "Not saved · " & cell.StudentName & " · " & dateText & " · " & If(!varCanEditMonth, "view only — teachers mark only their own grid, and not in a locked month", !IsBlank(local) && !local.IsDeleted && !local.Present, "absences (0) come from approved parent reports and can't be changed here", Coalesce(cell.Reason, "cell not editable")), StudentId: req.StudentId, DayNum: req.DayNum}),
                                 RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
                                 Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "saving", Target: req.Target});
                                 With(
@@ -1668,10 +1675,10 @@ Screens:
                                         IsError(server),
                                         RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
                                         Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "failed", Target: req.Target});
-                                        Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "A", "Absent", "Clear") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
+                                        Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "Undo") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
                                         (!IsBlank(local) && local.ModifiedOn <> server.'Modified On') || (IsBlank(local) && !IsBlank(server) && server.'Is Deleted' <> true),
                                         RemoveIf(colMonthAtt, StudentId = req.StudentId && DayNum = req.DayNum);
-                                        If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                        If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On', SourceReportId: server.'Source Report ID', ReasonName: Coalesce(server.'Absence Reason'.Name, "")}));
                                         RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
                                         Set(varLastAction, {Kind: "Conflict", Message: "Changed by someone else — reloaded · " & cell.StudentName & " · " & dateText & " · now " & If(IsBlank(server) || server.'Is Deleted' = true, "Not recorded", If(server.Present = true, "Present", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Absent (excused)", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Absent (unexcused)", "Absent (not classified)")) & " · your change was not saved", StudentId: req.StudentId, DayNum: req.DayNum}),
                                         With(
@@ -1714,7 +1721,7 @@ Screens:
                                                 IsBlank(written),
                                                 RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
                                                 Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "failed", Target: req.Target});
-                                                Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "A", "Absent", "Clear") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
+                                                Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "Undo") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
                                                 With(
                                                     {
                                                         audit: If(
@@ -1739,7 +1746,7 @@ Screens:
                                                         )
                                                     },
                                                     RemoveIf(colMonthAtt, StudentId = req.StudentId && DayNum = req.DayNum);
-                                                    Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                    Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On', SourceReportId: written.'Source Report ID', ReasonName: Coalesce(written.'Absence Reason'.Name, "")});
                                                     RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
                                                     Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "saved", Target: req.Target});
                                                     Set(
@@ -1748,7 +1755,7 @@ Screens:
                                                             Kind: If(req.Target = "clear", "Cleared", wasDeleted, "Restored", "Saved"),
                                                             Message: If(
                                                                 req.Target = "clear",
-                                                                "Cleared · " & cell.StudentName & " · " & dateText & " · Is Deleted = Yes · Key " & written.'Record Key' & If(IsBlank(audit), " · audit event NOT written", " · audit event written"),
+                                                                "Undone · " & cell.StudentName & " · " & dateText & " · Is Deleted = Yes · Key " & written.'Record Key' & If(IsBlank(audit), " · audit event NOT written", " · audit event written"),
                                                                 If(wasDeleted, "Restored · ", "Saved · ") & cell.StudentName & " · " & dateText & " · Status " & If(written.Present = true, "Present", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Absent (excused)", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Absent (unexcused)", "Absent (not classified)") & " · IEP " & Text(written.'IEP Ratio') & " · Teacher " & varTeacher.Name & " · Term " & term.Name & " · Key " & written.'Record Key'
                                                             ),
                                                             StudentId: req.StudentId,
@@ -1802,7 +1809,7 @@ Screens:
                                                 Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "failed"}),
                                                 (!IsBlank(local) && local.ModifiedOn <> server.'Modified On') || (IsBlank(local) && !IsBlank(server) && server.'Is Deleted' <> true),
                                                 RemoveIf(colMonthAtt, StudentId = c.StudentId && DayNum = dn);
-                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On', SourceReportId: server.'Source Report ID', ReasonName: Coalesce(server.'Absence Reason'.Name, "")}));
                                                 Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "skipped"}),
                                                 With(
                                                     {
@@ -1841,7 +1848,7 @@ Screens:
                                                         Collect(colCellState, {StudentId: c.StudentId, DayNum: dn, SaveState: "failed", Target: "P"});
                                                         Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "failed"}),
                                                         RemoveIf(colMonthAtt, StudentId = c.StudentId && DayNum = dn);
-                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On', SourceReportId: written.'Source Report ID', ReasonName: Coalesce(written.'Absence Reason'.Name, "")});
                                                         RemoveIf(colCellState, StudentId = c.StudentId && DayNum = dn);
                                                         Collect(colCellState, {StudentId: c.StudentId, DayNum: dn, SaveState: "saved", Target: "P"});
                                                         Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "marked"})
@@ -1900,7 +1907,7 @@ Screens:
                                     colMonthAtt,
                                     ForAll(
                                         Filter(Attendance, Teacher.Staff = varTeacher.Staff && Date >= varMonthStart && Date <= varMonthEnd) As r,
-                                        {AttId: r.Attendance, StudentId: r.Student.Student, DayNum: Day(r.Date), AttDate: r.Date, Present: r.Present = true, IsDeleted: r.'Is Deleted' = true, Letter: If(r.Present = true, "P", r.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", r.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(r.Present = true, "—", IsBlank(r.'Absence Classification'), "Not classified", Text(r.'Absence Classification')), IepText: Text(r.'IEP Ratio'), Notes: r.Notes, RecordKey: r.'Record Key', ModifiedOn: r.'Modified On'}
+                                        {AttId: r.Attendance, StudentId: r.Student.Student, DayNum: Day(r.Date), AttDate: r.Date, Present: r.Present = true, IsDeleted: r.'Is Deleted' = true, Letter: If(r.Present = true, "P", r.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", r.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(r.Present = true, "—", IsBlank(r.'Absence Classification'), "Not classified", Text(r.'Absence Classification')), IepText: Text(r.'IEP Ratio'), Notes: r.Notes, RecordKey: r.'Record Key', ModifiedOn: r.'Modified On', SourceReportId: r.'Source Report ID', ReasonName: Coalesce(r.'Absence Reason'.Name, "")}
                                     )
                                 ),
                                 ClearCollect(colMonthExceptions, Filter('Calendar Exceptions', Date >= varMonthStart && Date <= varMonthEnd)),
@@ -1970,7 +1977,7 @@ Screens:
                             )
                         )
                     );
-                    Set(varCanEditMonth, CanEditRole && IsBlank(varMonthLock) && varLoadError = "");
+                    Set(varCanEditMonth, IsTeacherRole && !IsBlank(varTeacher) && varTeacher.Staff = CurrentStaff.Staff && IsBlank(varMonthLock) && varLoadError = "");
                     If(
                         varViewDate < varMonthStart || varViewDate > varMonthEnd,
                         Set(varViewDate, If(Today() >= varMonthStart && Today() <= varMonthEnd, Today(), varMonthStart))
