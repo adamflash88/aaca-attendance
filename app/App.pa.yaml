@@ -120,6 +120,20 @@ App:
       ClearCollect(colAbsLog, {AttId: ZeroGuid, StudentName: "", AbsDate: Today(), TeacherName: "", CampusName: "", OldClass: "", NewClass: "", ReasonName: "", ByName: "", OnText: "", Outcome: "", AuditOk: false});
       Clear(colAbsLog);
       ClearCollect(colAbsReceiptLines, {Label: "", Value: ""});
-      Clear(colAbsReceiptLines)
+      Clear(colAbsReceiptLines);
+      Set(varAbsView, "classify");
+      Set(varAbsNrLoading, false);
+      Set(varAbsNrSaving, false);
+      Set(varAbsNrLoaded, false);
+      Set(varAbsNrLoadError, "");
+      Set(varAbsNrErr, "");
+      Set(varAbsNrAllCampuses, false);
+      Set(varAbsNrSelId, 0);
+      Set(varAbsNrSelId, Blank());
+      Set(varAbsNrCalFor, 0);
+      Set(varAbsNrCalFor, Blank());
+      Set(varAbsNrPickId, ZeroGuid);
+      Set(varAbsNrPickId, Blank());
+      Set(varAbsNrReceipt, {Kind: "", Title: "", Body: "", ItemId: 0})
     StartScreen: =Screen1
     Theme: =PowerAppsTheme

@@ -49,12 +49,15 @@
         { "logicalName": "aaca_dateofbirth", "type": "date", "displayName": "Date of Birth" },
         { "logicalName": "aaca_grade", "type": "choice", "displayName": "Grade",
           "options": [ [582100000, "K"], [582100001, "1"], [582100002, "2"], [582100003, "3"], [582100004, "4"], [582100005, "5"], [582100006, "6"], [582100007, "7"], [582100008, "8"], [582100009, "9"], [582100010, "10"], [582100011, "11"], [582100012, "12"], [582100013, "12+"] ] },
-        { "logicalName": "aaca_externalclientid", "type": "text", "displayName": "External Client ID", "maxLength": 50 },
+        { "logicalName": "aaca_keysequence", "type": "autonumber", "displayName": "Key Sequence", "format": "{SEQNUM:4}", "maxLength": 20,
+          "description": "Server-assigned number used to build the Student Key (campus code at intake + '-' + this). Seed set above the highest existing key (1128 on 2026-10-01)." },
+        { "logicalName": "aaca_externalclientid", "type": "text", "displayName": "External Client ID", "maxLength": 50, "description": "Student Key (e.g. CW-1083). Required, unique, read-only after creation; used by the SharePoint Student Directory and parent absence form." },
         { "logicalName": "aaca_status", "type": "choice", "displayName": "Status", "required": true, "default": 582100000,
           "options": [ [582100000, "Active"], [582100001, "Inactive"], [582100002, "Archived"] ] },
         { "logicalName": "aaca_archivedon", "type": "date", "displayName": "Archived On" }
       ],
-      "keys": [ { "logicalName": "aaca_student_number", "displayName": "Student Number", "columns": [ "aaca_studentnumber" ] } ]
+      "keys": [ { "logicalName": "aaca_student_number", "displayName": "Student Number", "columns": [ "aaca_studentnumber" ] },
+               { "logicalName": "aaca_student_key", "displayName": "Student Key", "columns": [ "aaca_externalclientid" ] } ]
     },
     {
       "logicalName": "aaca_service",

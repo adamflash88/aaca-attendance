@@ -192,6 +192,16 @@ foreach ($a in $plan.attendance) {
 New-DvRows 'aaca_attendance' $targets | Out-Null
 #endregion
 
+#region Student Key counter -----------------------------------------------------------
+# New students get "<campus code>-<Key Sequence>" from the app; the autonumber seed is per environment and does
+# not travel with the solution, so set it just above the highest imported key number.
+$maxKey = ($plan.students | ForEach-Object { if ($_.key -match '^[A-Z]{2,3}-(\d+)$') { [int]$Matches[1] } } | Measure-Object -Maximum).Maximum
+if ($maxKey) {
+    Invoke-Dv -Method Post -Path 'SetAutoNumberSeed' -Body @{ EntityName = 'aaca_student'; AttributeName = 'aaca_keysequence'; Value = [int]$maxKey + 1 } | Out-Null
+    Write-Host "  Student Key counter set to start at $([int]$maxKey + 1)"
+}
+#endregion
+
 Step 'Done'
 $check = foreach ($t in 'aaca_campus', 'aaca_staff', 'aaca_student', 'aaca_enrollment', 'aaca_schoolyear', 'aaca_term', 'aaca_calendarexception', 'aaca_attendance') {
     [pscustomobject]@{ Table = $t; Rows = (Get-DvAll "$(Set-Of $t)?`$select=createdon").Count }

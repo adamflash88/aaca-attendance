@@ -921,7 +921,7 @@ Screens:
                                 =With(
                                     {m: varStuMode, n: Self.Width < 700},
                                     16 + If(n, 56, 28) + 8 + If(n, 100, 60) + 8
-                                    + If(m in ["add", "edit"], 306 + 8, 0)
+                                    + If(m in ["add", "edit"], If(n, 364, 346) + 8, 0)
                                     + If(m in ["add", "transfer", "reenroll"], 120 + 8, 0)
                                     + If(m in ["add", "ratio", "reenroll"], 58 + 8, 0)
                                     + If(m in ["add", "transfer", "ratio", "end", "reenroll"], 58 + 8, 0)
@@ -982,8 +982,8 @@ Screens:
                                           {sel: LookUp(colStuList, StudentId = varStuSelId), open: First(Sort(Filter(colStuHistory, IsBlank(EndDate)), StartDate, SortOrder.Descending)), lastEnd: First(Sort(Filter(colStuHistory, !IsBlank(EndDate)), EndDate, SortOrder.Descending))},
                                           Switch(
                                               varStuMode,
-                                              "add", "Creates the student (Active, new student number), their enrollment and an audit entry. Fields marked * are required.",
-                                              "edit", "Corrects name, date of birth, grade and external ID only. Enrollments are unchanged; the audit log keeps before and after values.",
+                                              "add", "Creates the student (Active, new student number, Student Key), their enrollment and an audit entry. Fields marked * are required.",
+                                              "edit", "Corrects name, date of birth and grade only. The Student Key can't be changed. Enrollments are unchanged; the audit log keeps before and after values.",
                                               "transfer", "Now " & open.TeacherName & " · " & open.CampusName & " · IEP " & open.RatioText & " · since " & Text(open.StartDate, "mmm d, yyyy") & ". The current enrollment ends the day before the effective date; attendance before it stays with the old class.",
                                               "ratio", "Now IEP " & open.RatioText & " with " & open.TeacherName & " since " & Text(open.StartDate, "mmm d, yyyy") & ". The current enrollment ends the day before the effective date and a new one starts at the new ratio.",
                                               "end", "Ends the open enrollment with " & open.TeacherName & " (since " & Text(open.StartDate, "mmm d, yyyy") & ") on the end date, reason Archived. No enrollment follows, so the student becomes Archived and leaves the grids after that day.",
@@ -998,7 +998,7 @@ Screens:
                                   Properties:
                                     DropShadow: =DropShadow.None
                                     FillPortions: =0
-                                    Height: =306
+                                    Height: =If(conStuForm.Width < 700, 364, 346)
                                     LayoutAlignItems: =LayoutAlignItems.Stretch
                                     LayoutDirection: =LayoutDirection.Vertical
                                     LayoutGap: =4
@@ -1129,7 +1129,7 @@ Screens:
                                     - lblStuFormExt:
                                         Control: ModernText
                                         Properties:
-                                          AccessibleLabel: ="External client ID, optional"
+                                          AccessibleLabel: =Self.Text
                                           AlignInContainer: =AlignInContainer.Stretch
                                           Color: =ColorMuted
                                           FontWeight: =FontWeight.Semibold
@@ -1141,20 +1141,39 @@ Screens:
                                           PaddingRight: =0
                                           PaddingTop: =0
                                           Size: =12
-                                          Text: ="External client ID (optional)"
+                                          Text: =If(varStuMode = "edit", "Student Key (read-only)", "Student Key")
                                           Wrap: =false
                                     - txtStuFormExt:
                                         Control: ModernTextInput
                                         Properties:
-                                          AccessibleLabel: ="External client ID (optional)"
+                                          AccessibleLabel: =lblStuFormExt.Text
                                           AlignInContainer: =AlignInContainer.Stretch
                                           Appearance: =Appearance.Outline
                                           Color: =ColorInk
-                                          Default: =If(varStuMode = "edit", Coalesce(varStuEditBase.'External Client ID', ""), "")
+                                          Default: =If(varStuMode = "edit", Coalesce(varStuEditBase.'External Client ID', ""), "Assigned automatically when saved")
+                                          DisplayMode: =DisplayMode.View
                                           Height: =36
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           MaxLength: =100
+                                          Placeholder: ="e.g. CW-1083"
+                                    - lblStuFormExtNote:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          Height: =If(conStuForm.Width < 700, 54, 36)
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: |-
+                                            =If(varStuMode = "edit", "Student Key can't be changed. It stays the same if the student moves campus.", "Assigned by the app when you save: campus code + the next number (e.g. CW-1128). It never changes, even if the student later moves campus.")
+                                          VerticalAlign: =VerticalAlign.Top
                               - conStuFormPlace:
                                   Control: GroupContainer
                                   Variant: AutoLayout
@@ -1547,10 +1566,12 @@ Screens:
                                               lastEnd: First(Sort(Filter(colStuHistory, !IsBlank(EndDate)), EndDate, SortOrder.Descending)),
                                               fn: Trim(txtStuFormFirst.Text), ln: Trim(txtStuFormLast.Text),
                                               dob: dpStuFormDob.SelectedDate, eff: dpStuFormDate.SelectedDate,
-                                              cmp: ddStuFormCampus.Selected, tch: ddStuFormTeacher.Selected
+                                              cmp: ddStuFormCampus.Selected, tch: ddStuFormTeacher.Selected,
+                                              key: Trim(txtStuFormExt.Text)
                                           },
                                           With(
                                               {
+                                                  keyUsed: If(key = "", Blank(), LookUp(colStuList, Lower(Coalesce(ExternalId, "")) = Lower(key))),
                                                   yr: LookUp(colStuYears, YStart <= eff && YEnd >= eff),
                                                   oyr: LookUp(colStuYears, YearId = open.YearId),
                                                   dup: LookUp(colStuList, Lower(FirstName) = Lower(fn) && Lower(LastName) = Lower(ln) && Dob = dob),
@@ -1686,7 +1707,7 @@ Screens:
                                                                     liveDup > 0 && !dupAck,
                                                                     Set(varStuReceipt, {Kind: "Blocked", Title: "Not saved. " & ln & ", " & fn & " born " & Text(dob, "mmm d, yyyy") & " already exists. Open it, or tick This is a different person.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
                                                                     With(
-                                                                        {s: IfError(Patch(Students, Defaults(Students), {'First Name': fn, 'Last Name': ln, 'Display Name': ln & ", " & fn, 'Date of Birth': dob, Grade: gr, 'External Client ID': If(ext = "", Blank(), ext), 'Status (aaca_status)': 'Status (Students)'.Active}), Blank())},
+                                                                        {s: IfError(With({s0: Patch(Students, Defaults(Students), {'First Name': fn, 'Last Name': ln, 'Display Name': ln & ", " & fn, 'Date of Birth': dob, Grade: gr, 'Status (aaca_status)': 'Status (Students)'.Active})}, Patch(Students, s0, {'External Client ID': cmp.Code & "-" & Text(Value(s0.'Key Sequence'))})), Blank())},
                                                                         If(
                                                                             IsBlank(s),
                                                                             Set(varStuReceipt, {Kind: "Failed", Title: "Failed. " & ln & ", " & fn & " was not created and nothing was saved. Press Add student to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
@@ -1706,7 +1727,7 @@ Screens:
                                                                                         {Label: "Last name", Value: s.'Last Name'},
                                                                                         {Label: "Date of birth", Value: Text(s.'Date of Birth', "mmm d, yyyy")},
                                                                                         {Label: "Grade", Value: Text(s.Grade)},
-                                                                                        {Label: "External client ID", Value: Coalesce(s.'External Client ID', "—")},
+                                                                                        {Label: "Student Key", Value: Coalesce(s.'External Client ID', "—")},
                                                                                         {Label: "Student status", Value: Text(s.'Status (aaca_status)')},
                                                                                         {Label: "Campus", Value: Coalesce(e.Campus.Name, "NOT saved")},
                                                                                         {Label: "Teacher", Value: Coalesce(e.Teacher.Name, "NOT saved")},
@@ -1733,7 +1754,7 @@ Screens:
                                                                     IsBlank(old),
                                                                     Set(varStuReceipt, {Kind: "Failed", Title: "Failed. The student could not be found. Reload and try again.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
                                                                     With(
-                                                                        {s: IfError(Patch(Students, old, {'First Name': fn, 'Last Name': ln, 'Display Name': ln & ", " & fn, 'Date of Birth': dob, Grade: gr, 'External Client ID': If(ext = "", Blank(), ext)}), Blank())},
+                                                                        {s: IfError(Patch(Students, old, {'First Name': fn, 'Last Name': ln, 'Display Name': ln & ", " & fn, 'Date of Birth': dob, Grade: gr}), Blank())},
                                                                         If(
                                                                             IsBlank(s),
                                                                             Set(varStuReceipt, {Kind: "Failed", Title: "Failed. Details for " & old.'Display Name' & " were not saved. Press Save details to retry.", StudentId: Coalesce(q, ZeroGuid)}); Clear(colStuReceiptLines),
@@ -1748,7 +1769,7 @@ Screens:
                                                                                     {Label: "Display name", Value: s.'Display Name'},
                                                                                     {Label: "Date of birth", Value: Text(s.'Date of Birth', "mmm d, yyyy")},
                                                                                     {Label: "Grade", Value: Text(s.Grade)},
-                                                                                    {Label: "External client ID", Value: Coalesce(s.'External Client ID', "—")},
+                                                                                    {Label: "Student Key", Value: Coalesce(s.'External Client ID', "—") & " (unchanged)"},
                                                                                     {Label: "Before", Value: old.'Display Name' & " · " & Text(old.'Date of Birth', "mmm d, yyyy") & " · Grade " & Text(old.Grade) & " · ID " & Coalesce(old.'External Client ID', "—")},
                                                                                     {Label: "Student status", Value: Text(s.'Status (aaca_status)') & " (unchanged)"},
                                                                                     {Label: "Note", Value: noteShort},
@@ -2151,7 +2172,7 @@ Screens:
                                           PaddingTop: =0
                                           Size: =13
                                           Text: |-
-                                            =With({s: LookUp(colStuList, StudentId = varStuSelId)}, "Student number " & s.StudentNumber & " · Grade " & s.GradeText & " · Born " & Text(s.Dob, "mmm d, yyyy") & " · External ID " & Coalesce(s.ExternalId, "—") & If(s.StatusText = "Archived", " · Archived " & Text(s.ArchivedOn, "mmm d, yyyy"), ""))
+                                            =With({s: LookUp(colStuList, StudentId = varStuSelId)}, "Student number " & s.StudentNumber & " · Grade " & s.GradeText & " · Born " & Text(s.Dob, "mmm d, yyyy") & " · Student Key " & Coalesce(s.ExternalId, "—") & If(s.StatusText = "Archived", " · Archived " & Text(s.ArchivedOn, "mmm d, yyyy"), ""))
                                           VerticalAlign: =VerticalAlign.Top
                                     - lblStuDetailPlacement:
                                         Control: ModernText
