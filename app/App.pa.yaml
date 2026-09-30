@@ -1,0 +1,98 @@
+App:
+  Properties:
+    Formulas: |-
+      =// ---------- Identity and role (Staff row for the signed-in user) ----------
+      CurrentUserRow = LookUp(Users, 'Primary Email' = User().Email);
+      CurrentStaff = LookUp(Staff, User.User = CurrentUserRow.User);
+      StaffReady = !IsBlank(CurrentStaff) && CurrentStaff.Active <> false;
+      IsTeacherRole = StaffReady && CurrentStaff.'App Role' = 'App Role (Staff)'.Teacher;
+      IsOfficeRole = StaffReady && CurrentStaff.'App Role' = 'App Role (Staff)'.'Attendance Office';
+      IsAdminRole = StaffReady && CurrentStaff.'App Role' = 'App Role (Staff)'.'System Admin';
+      IsReadOnlyRole = StaffReady && CurrentStaff.'App Role' = 'App Role (Staff)'.'Read-only';
+      CanEditRole = IsTeacherRole || IsOfficeRole || IsAdminRole;
+      CanPickCampus = IsAdminRole || IsReadOnlyRole;
+      CanPickTeacher = IsOfficeRole || IsAdminRole || IsReadOnlyRole;
+      RoleLabel = If(StaffReady, Text(CurrentStaff.'App Role'), "Not set up");
+      // ---------- Settings ----------
+      AllowFutureDates = Lower(Trim(LookUp('App Settings', Key = "AllowFutureDates").Value)) = "true";
+      ZeroGuid = GUID("00000000-0000-0000-0000-000000000000");
+      // ---------- Palette: classroom register ----------
+      ColorPaper = RGBA(247, 245, 240, 1);
+      ColorInk = RGBA(27, 42, 65, 1);
+      ColorInkSoft = RGBA(206, 216, 230, 1);
+      ColorWhite = RGBA(255, 255, 255, 1);
+      ColorTeal = RGBA(0, 110, 97, 1);
+      ColorRule = RGBA(214, 209, 199, 1);
+      ColorMuted = RGBA(92, 86, 77, 1);
+      ColorExcused = RGBA(46, 125, 50, 1);   // green = excused absence
+      ColorUnexcused = RGBA(183, 28, 28, 1); // red = unexcused absence
+      ColorNonSchool = RGBA(222, 219, 212, 1);
+      ColorNotEnrolled = RGBA(238, 236, 231, 1);
+      ColorSaving = RGBA(230, 242, 240, 1);
+      ColorInfoBg = RGBA(224, 240, 237, 1);
+      ColorWarnBg = RGBA(252, 240, 220, 1);
+      ColorErrorBg = RGBA(250, 228, 228, 1);
+      // ---------- Student management (build 2) ----------
+      CanManageStudents = IsOfficeRole || IsAdminRole;
+      StudentCampusLock = If(IsOfficeRole && !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, ZeroGuid);
+      StudentDefaultScope = If(!StaffReady || IsBlank(CurrentStaff.Campus), ZeroGuid, CurrentStaff.Campus.Campus);
+      ActiveService = First(Filter(Services, Active = true));
+      // ---------- Month / year pickers (Attendance toolbar) ----------
+      MonthOptions = ForAll(Sequence(12), {MonthNum: Value, MonthName: Text(Date(2000, Value, 1), "mmmm")});
+      FirstSchoolYear = Coalesce(Year(First(Sort('School Years', 'Start Date', SortOrder.Ascending)).'Start Date'), Year(Today()));
+    OnStart: |-
+      =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1));
+      Set(varMonthEnd, DateAdd(DateAdd(Date(Year(Today()), Month(Today()), 1), 1, TimeUnit.Months), -1, TimeUnit.Days));
+      Set(varViewDate, Today());
+      Set(
+          varCampus,
+          If(
+              IsBlank(CurrentStaff.Campus),
+              First(Sort(Campuses, Name, SortOrder.Ascending)),
+              CurrentStaff.Campus
+          )
+      );
+      Set(
+          varTeacher,
+          If(
+              IsTeacherRole,
+              CurrentStaff,
+              First(
+                  Sort(
+                      Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher),
+                      Name,
+                      SortOrder.Ascending
+                  )
+              )
+          )
+      );
+      Set(varCanEditMonth, false);
+      Set(varLoading, false);
+      Set(varLoadError, "");
+      Set(varDetailsMode, false);
+      Set(varDetailOpen, false);
+      Set(varConfirmOpen, false);
+      Set(varBulkDay, 0);
+      Set(varSaveReq, {StudentId: ZeroGuid, DayNum: 0, Target: ""});
+      Set(varClearKey, {StudentId: ZeroGuid, DayNum: 0});
+      Set(varDetailKey, {StudentId: ZeroGuid, DayNum: 0});
+      Set(varLastAction, {Kind: "", Message: "", StudentId: ZeroGuid, DayNum: 0});
+      ClearCollect(colCellState, {StudentId: ZeroGuid, DayNum: 0, SaveState: "", Target: ""});
+      Clear(colCellState);
+      ClearCollect(colBulkLog, {StudentId: ZeroGuid, Outcome: ""});
+      Clear(colBulkLog);
+      Set(varStuSelId, ZeroGuid);
+      Set(varStuSelId, Blank());
+      Set(varStuMode, "");
+      Set(varStuSaving, false);
+      Set(varStuLoading, false);
+      Set(varStuLoadError, "");
+      Set(varStuAttAfter, 0);
+      Set(varStuFormCampusId, ZeroGuid);
+      Set(varStuScopeCampusId, StudentDefaultScope);
+      Set(varStuTeacherFilterId, ZeroGuid);
+      Set(varStuReceipt, {Kind: "", Title: "", StudentId: ZeroGuid});
+      ClearCollect(colStuReceiptLines, {Label: "", Value: ""});
+      Clear(colStuReceiptLines)
+    StartScreen: =Screen1
+    Theme: =PowerAppsTheme

@@ -1,0 +1,2009 @@
+Screens:
+  Screen1:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: =Select(btnAttLoadEngine)
+    Children:
+      - conAttRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            Width: =Parent.Width
+            Height: =Parent.Height
+            LayoutMinWidth: =0
+            LayoutMinHeight: =0
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutGap: =8
+            PaddingTop: =0
+            PaddingBottom: =16
+            PaddingLeft: =0
+            PaddingRight: =0
+            Fill: =ColorPaper
+            DropShadow: =DropShadow.None
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+          Children:
+            - conAttHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 92, 76)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorInk
+                  PaddingTop: =12
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =4
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                Children:
+                  - lblAttTitle:
+                      Control: ModernText
+                      Properties:
+                        Text: ="AACA Attendance"
+                        AccessibleLabel: ="AACA Attendance"
+                        Size: =20
+                        FontWeight: =FontWeight.Bold
+                        Color: =ColorWhite
+                        Wrap: =false
+                        Height: =28
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - lblAttIdentity:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          =Coalesce(CurrentUserRow.'Full Name', User().FullName) & " · " & RoleLabel & " · " & If(!StaffReady, "no campus", IsBlank(CurrentStaff.Campus), "All campuses", CurrentStaff.Campus.Name)
+                        AccessibleLabel: ="Signed in as " & Self.Text
+                        Size: =12
+                        Color: =ColorInkSoft
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 36, 20)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+            - conAttNotSetUp:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =!StaffReady
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 168, conAttRoot.Width < 1024, 128, 112)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorWhite
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =16
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =8
+                Children:
+                  - lblAttNotSetUpTitle:
+                      Control: ModernText
+                      Properties:
+                        Text: ="You're not set up yet"
+                        AccessibleLabel: ="You're not set up yet"
+                        Size: =16
+                        FontWeight: =FontWeight.Semibold
+                        Color: =ColorInk
+                        Wrap: =false
+                        Height: =24
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - lblAttNotSetUpBody:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          ="Your sign-in (" & User().Email & ") is not linked to an active Staff record. Ask a System Admin to add a Staff row linked to your Users record, then reopen the app."
+                        AccessibleLabel: =Self.Text
+                        Size: =14
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 104, conAttRoot.Width < 1024, 64, 48)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+            - conAttToolbar:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =StaffReady
+                  LayoutDirection: =If(conAttRoot.Width >= 1240, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width >= 1240, 74, 206)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorWhite
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =8
+                  PaddingBottom: =8
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =8
+                Children:
+                  - conAttMonthNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Width: =380
+                        Height: =58
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - btnAttPrevMonth:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="◀"
+                              AccessibleLabel: ="Previous month"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: =Set(varMonthStart, DateAdd(varMonthStart, -1, TimeUnit.Months)); Select(btnAttLoadEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =44
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - lblAttMonth:
+                            Control: ModernText
+                            Properties:
+                              Text: =Text(varMonthStart, "mmmm yyyy")
+                              AccessibleLabel: ="Month " & Self.Text
+                              Size: =16
+                              FontWeight: =FontWeight.Bold
+                              Color: =ColorInk
+                              Align: =Align.Center
+                              Wrap: =false
+                              Height: =28
+                              FillPortions: =1
+                              AlignInContainer: =AlignInContainer.Center
+                              LayoutMinWidth: =100
+                              LayoutMinHeight: =0
+                              PaddingTop: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                        - btnAttNextMonth:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="▶"
+                              AccessibleLabel: ="Next month"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: =Set(varMonthStart, DateAdd(varMonthStart, 1, TimeUnit.Months)); Select(btnAttLoadEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =44
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttThisMonth:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="This month"
+                              AccessibleLabel: ="Go to this month"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              PaddingLeft: =6
+                              PaddingRight: =6
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1)); Set(varViewDate, Today()); Select(btnAttLoadEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =88
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                  - conAttScope:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        FillPortions: =If(conAttRoot.Width >= 1240, 1, 0)
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =58
+                        LayoutMinWidth: =300
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - conAttCampusField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              FillPortions: =1
+                              AlignInContainer: =AlignInContainer.Stretch
+                              LayoutMinWidth: =146
+                              LayoutMinHeight: =0
+                              LayoutGap: =4
+                            Children:
+                              - lblAttCampus:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: ="Campus"
+                                    AccessibleLabel: ="Campus"
+                                    Size: =12
+                                    Color: =ColorMuted
+                                    Wrap: =false
+                                    Height: =18
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    PaddingTop: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                              - ddAttCampus:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    Items: =Sort(Campuses, Name, SortOrder.Ascending)
+                                    ItemDisplayText: =ThisItem.Name
+                                    Default: =varCampus
+                                    DisplayMode: =If(CanPickCampus && !varLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                    OnChange: |-
+                                      =Set(varCampus, Self.Selected); Set(varTeacher, First(Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending))); Select(btnAttLoadEngine)
+                                    AccessibleLabel: ="Campus"
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Height: =36
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                        - conAttTeacherField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              FillPortions: =1
+                              AlignInContainer: =AlignInContainer.Stretch
+                              LayoutMinWidth: =146
+                              LayoutMinHeight: =0
+                              LayoutGap: =4
+                            Children:
+                              - lblAttTeacher:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: ="Teacher"
+                                    AccessibleLabel: ="Teacher"
+                                    Size: =12
+                                    Color: =ColorMuted
+                                    Wrap: =false
+                                    Height: =18
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    PaddingTop: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                              - ddAttTeacher:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    Items: |-
+                                      =Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending)
+                                    ItemDisplayText: =ThisItem.Name
+                                    Default: =varTeacher
+                                    DisplayMode: =If(CanPickTeacher && !varLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                    OnChange: =Set(varTeacher, Self.Selected); Select(btnAttLoadEngine)
+                                    AccessibleLabel: ="Teacher"
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Height: =36
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                  - conAttViewGroup:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Width: =350
+                        Height: =58
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - tabAttView:
+                            Control: ModernTabList
+                            Properties:
+                              Items: =["Month", "Day"]
+                              ItemDisplayText: =ThisItem.Value
+                              Default: |-
+                                =If(conAttRoot.Width < 640, {Value: "Day"}, {Value: "Month"})
+                              Appearance: =TabListAppearance.Subtle
+                              TabSize: =TabSize.Small
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorInk
+                              AccessibleLabel: ="Month or Day view"
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =160
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttDetailsMode:
+                            Control: ModernButton
+                            Properties:
+                              Text: =If(varDetailsMode, "Details on", "Details mode")
+                              AccessibleLabel: ="Details mode – tap a marked cell to open its details"
+                              Appearance: =If(varDetailsMode, ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                              BasePaletteColor: =ColorTeal
+                              Color: =If(varDetailsMode, ColorWhite, ColorInk)
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              OnSelect: =Set(varDetailsMode, !varDetailsMode); Set(varDetailOpen, false)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =130
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttReload:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="↻"
+                              AccessibleLabel: ="Reload month"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: =Select(btnAttLoadEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =44
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+            - conAttNotice:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =StaffReady && lblAttNotice.Text <> ""
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 68, conAttRoot.Width < 1024, 56, 44)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =If(varLoadError <> "", ColorErrorBg, ColorWarnBg)
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  PaddingTop: =4
+                  PaddingBottom: =4
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  LayoutGap: =8
+                Children:
+                  - lblAttNotice:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          =If(varLoadError <> "", "Could not load attendance — " & varLoadError & ". Use ↻ to try again.", !IsBlank(varMonthLock), Text(varMonthStart, "mmmm yyyy") & " is locked for " & varCampus.Name & " — " & Coalesce(varMonthLock.Reason, "no reason given") & ". Cells are read-only.", IsReadOnlyRole, "View only — the Read-only role cannot change attendance.", "")
+                        AccessibleLabel: ="Notice " & Self.Text
+                        Size: =13
+                        Color: =ColorInk
+                        Wrap: =true
+                        VerticalAlign: =VerticalAlign.Middle
+                        FillPortions: =1
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+            - spnAttLoading:
+                Control: ModernSpinner
+                Properties:
+                  Visible: =varLoading
+                  Label: ="Loading " & Text(varMonthStart, "mmmm yyyy") & "…"
+                  LabelPosition: =SpinnerLabelPosition.After
+                  AccessibleLabel: ="Loading attendance"
+                  SpinnerColor: =ColorTeal
+                  Color: =ColorInk
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =48
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+            - conAttReceipt:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =varLastAction.Kind <> ""
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 124, conAttRoot.Width < 1024, 72, 56)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: |-
+                    =Switch(varLastAction.Kind, "Conflict", ColorWarnBg, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  PaddingTop: =6
+                  PaddingBottom: =6
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  LayoutGap: =8
+                Children:
+                  - lblAttReceipt:
+                      Control: ModernText
+                      Properties:
+                        Text: =varLastAction.Message
+                        AccessibleLabel: ="Last action " & varLastAction.Message
+                        Size: =13
+                        Color: =ColorInk
+                        Wrap: =true
+                        VerticalAlign: =VerticalAlign.Middle
+                        FillPortions: =1
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - btnAttReceiptDismiss:
+                      Control: ModernButton
+                      Properties:
+                        Text: ="Dismiss"
+                        AccessibleLabel: ="Dismiss last action message"
+                        Appearance: =ButtonAppearance.Secondary
+                        Color: =ColorInk
+                        Layout: =ButtonLayout.TextOnly
+                        Size: =14
+                        OnSelect: |-
+                          =Set(varLastAction, {Kind: "", Message: "", StudentId: ZeroGuid, DayNum: 0})
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Center
+                        Width: =88
+                        Height: =44
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+            - conAttConfirm:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =varConfirmOpen
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 164, 120)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorErrorBg
+                  BorderColor: =ColorUnexcused
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =12
+                  PaddingBottom: =12
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  LayoutGap: =8
+                Children:
+                  - lblAttConfirmText:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          =With({a: LookUp(colMonthAtt, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum && !IsDeleted), c: LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum)}, "Clear " & Switch(a.Letter, "P", "Present", "E", "Absent (excused)", "U", "Absent (unexcused)", "Absent") & " for " & c.StudentName & " on " & Text(c.CellDate, "dddd mmmm d") & "? The row is kept and marked deleted (audit logged); marking the day again restores it.")
+                        AccessibleLabel: =Self.Text
+                        Size: =14
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 88, 44)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - conAttConfirmActions:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =44
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - btnAttConfirmClear:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="Confirm clear"
+                              AccessibleLabel: ="Confirm clear"
+                              Appearance: =ButtonAppearance.Primary
+                              BasePaletteColor: =ColorUnexcused
+                              Color: =ColorWhite
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              OnSelect: |-
+                                =Set(varConfirmOpen, false); Set(varSaveReq, {StudentId: varClearKey.StudentId, DayNum: varClearKey.DayNum, Target: "clear"}); Select(btnAttSaveEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =132
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttConfirmCancel:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="Cancel"
+                              AccessibleLabel: ="Cancel clear"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              OnSelect: |-
+                                =Set(varConfirmOpen, false); Set(varLastAction, {Kind: "Cancelled", Message: "Clear cancelled · " & LookUp(colMonthCells, StudentId = varClearKey.StudentId && DayNum = varClearKey.DayNum).StudentName & " · " & Text(Date(Year(varMonthStart), Month(varMonthStart), varClearKey.DayNum), "ddd mmm d") & " · record unchanged", StudentId: varClearKey.StudentId, DayNum: varClearKey.DayNum})
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =96
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+            - conAttDetail:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =varDetailOpen
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =If(conAttRoot.Width < 640, 308, 264)
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorWhite
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =16
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =8
+                Children:
+                  - lblAttDetailTitle:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          =LookUp(colMonthStudents, StudentId = varDetailKey.StudentId).StudentName & " · " & Text(Date(Year(varMonthStart), Month(varMonthStart), varDetailKey.DayNum), "dddd mmmm d, yyyy")
+                        AccessibleLabel: ="Details for " & Self.Text
+                        Size: =16
+                        FontWeight: =FontWeight.Semibold
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 44, 24)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - lblAttDetailFacts:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          =With({a: LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted)}, If(IsBlank(a), "No attendance record for this cell.", "Status " & Switch(a.Letter, "P", "Present", "E", "Absent (excused)", "U", "Absent (unexcused)", "Absent (not classified)") & "  ·  IEP ratio " & Coalesce(a.IepText, "—") & "  ·  Classification " & a.ClassText & " (read-only)  ·  Reason " & Coalesce(With({qAttId: a.AttId}, LookUp(Attendance, ThisRecord.Attendance = qAttId)).'Absence Reason'.Name, "—") & "  ·  Key " & a.RecordKey))
+                        AccessibleLabel: =Self.Text
+                        Size: =13
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 68, 44)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - conAttDetailNotesField:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =96
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =4
+                      Children:
+                        - lblAttDetailNotesLabel:
+                            Control: ModernText
+                            Properties:
+                              Text: ="Notes"
+                              AccessibleLabel: ="Notes"
+                              Size: =12
+                              FontWeight: =FontWeight.Semibold
+                              Color: =ColorMuted
+                              Wrap: =false
+                              Height: =20
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Stretch
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                              PaddingTop: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                        - txtAttDetailNotes:
+                            Control: ModernTextInput
+                            Properties:
+                              Default: |-
+                                =LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted).Notes
+                              Type: =TextInputType.Multiline
+                              MaxLength: =2000
+                              Appearance: =Appearance.Outline
+                              Placeholder: ="Add a note for this day"
+                              AccessibleLabel: ="Notes"
+                              Color: =ColorInk
+                              DisplayMode: =If(varCanEditMonth, DisplayMode.Edit, DisplayMode.View)
+                              Height: =72
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Stretch
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                  - conAttDetailActions:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =44
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - btnAttDetailSave:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="Save notes"
+                              AccessibleLabel: ="Save notes"
+                              Appearance: =ButtonAppearance.Primary
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: |-
+                                =If(varCanEditMonth && !IsBlank(LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted)), DisplayMode.Edit, DisplayMode.Disabled)
+                              OnSelect: |-
+                                =With(
+                                    {
+                                        a: LookUp(colMonthAtt, StudentId = varDetailKey.StudentId && DayNum = varDetailKey.DayNum && !IsDeleted),
+                                        nm: LookUp(colMonthStudents, StudentId = varDetailKey.StudentId).StudentName,
+                                        dt: Text(Date(Year(varMonthStart), Month(varMonthStart), varDetailKey.DayNum), "ddd mmm d"),
+                                        newNotes: txtAttDetailNotes.Text
+                                    },
+                                    If(
+                                        IsBlank(a) || !varCanEditMonth,
+                                        Set(varLastAction, {Kind: "Blocked", Message: "Notes not saved · " & nm & " · " & dt & " · no record, month locked or view-only role", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
+                                        With(
+                                            {server: With({qAttId: a.AttId}, LookUp(Attendance, ThisRecord.Attendance = qAttId))},
+                                            If(
+                                                IsError(server),
+                                                Set(varLastAction, {Kind: "Failed", Message: "Failed · " & nm & " · " & dt & " · notes were not saved — press Save notes to retry", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
+                                                IsBlank(server) || server.'Modified On' <> a.ModifiedOn,
+                                                RemoveIf(colMonthAtt, AttId = a.AttId);
+                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                                Reset(txtAttDetailNotes);
+                                                Set(varLastAction, {Kind: "Conflict", Message: "Changed by someone else — reloaded · " & nm & " · " & dt & " · your notes were not saved", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
+                                                With(
+                                                    {written: IfError(Patch(Attendance, server, {Notes: newNotes}), Blank())},
+                                                    If(
+                                                        IsBlank(written),
+                                                        Set(varLastAction, {Kind: "Failed", Message: "Failed · " & nm & " · " & dt & " · notes were not saved — press Save notes to retry", StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum}),
+                                                        RemoveIf(colMonthAtt, AttId = a.AttId);
+                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                        Set(varLastAction, {Kind: "Notes", Message: "Notes saved · " & nm & " · " & dt & " · Notes """ & Left(written.Notes, 80) & If(Len(written.Notes) > 80, "…", "") & """ · Key " & written.'Record Key', StudentId: varDetailKey.StudentId, DayNum: varDetailKey.DayNum})
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =120
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttDetailClose:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="Close"
+                              AccessibleLabel: ="Close details"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              OnSelect: =Set(varDetailOpen, false)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =88
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+            - conAttMonthView:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =StaffReady && tabAttView.Selected.Value <> "Day"
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: |-
+                    =16 + If(conAttRoot.Width < 640, 84, conAttRoot.Width < 1340, 44, 24) + 8 + If(CountRows(colMonthStudents) = 0, 48, 64 + Min(528, Max(132, 44 * CountRows(colMonthStudents))) + 36 + 14) + 16
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorWhite
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =16
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =8
+                Children:
+                  - lblAttLegend:
+                      Control: ModernText
+                      Properties:
+                        Text: |-
+                          ="1 present · 0 absent (uncoloured = not classified, green = excused, red = unexcused) · grey = no school, weekend or holiday · – not enrolled · dashed = future · … saving · ✓ saved · ! save failed, tap to retry · Details mode: tap a marked cell for notes"
+                        AccessibleLabel: ="Legend " & Self.Text
+                        Size: =12
+                        Color: =ColorMuted
+                        Wrap: =true
+                        Height: =If(conAttRoot.Width < 640, 84, conAttRoot.Width < 1340, 44, 24)
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - lblAttEmpty:
+                      Control: ModernText
+                      Properties:
+                        Visible: =CountRows(colMonthStudents) = 0 && !varLoading
+                        Text: |-
+                          =If(IsBlank(varTeacher), "No teacher selected — choose a teacher above.", "No students for " & varTeacher.Name & " in " & Text(varMonthStart, "mmmm yyyy") & ".")
+                        AccessibleLabel: =Self.Text
+                        Size: =14
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =48
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - conAttGridScroll:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        Visible: =CountRows(colMonthStudents) > 0
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutOverflowX: =LayoutOverflow.Scroll
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =64 + Min(528, Max(132, 44 * CountRows(colMonthStudents))) + 36 + 14
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                      Children:
+                        - conAttGridInner:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Width: =Max(Parent.Width, 236 + 34 * Max(28, CountRows(colMonthDays)))
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                              LayoutGap: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                            Children:
+                              - conAttGridHeader:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Height: =64
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    LayoutGap: =0
+                                    Fill: =ColorPaper
+                                  Children:
+                                    - lblAttHeadName:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: ="Student"
+                                          AccessibleLabel: ="Student"
+                                          Size: =12
+                                          FontWeight: =FontWeight.Bold
+                                          Color: =ColorInk
+                                          Wrap: =false
+                                          VerticalAlign: =VerticalAlign.Bottom
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Width: =180
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                          PaddingTop: =0
+                                          PaddingBottom: =4
+                                          PaddingLeft: =8
+                                          PaddingRight: =0
+                                    - galAttDayHead:
+                                        Control: Gallery
+                                        Variant: Horizontal
+                                        Properties:
+                                          Items: =colMonthDays
+                                          TemplateSize: =RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                          TemplatePadding: =0
+                                          ShowScrollbar: =false
+                                          ShowNavigation: =false
+                                          Selectable: =false
+                                          TabIndex: =0
+                                          AccessibleLabel: ="Day columns"
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Width: =CountRows(colMonthDays) * RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                        Children:
+                                          - conAttDayHeadCell:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutAlignItems: =LayoutAlignItems.Stretch
+                                                Width: =Parent.TemplateWidth
+                                                Height: =Parent.TemplateHeight
+                                                LayoutMinWidth: =0
+                                                LayoutMinHeight: =0
+                                                Fill: =If(ThisItem.IsSchoolDay, ColorWhite, ColorNonSchool)
+                                                PaddingTop: =2
+                                                PaddingBottom: =2
+                                                PaddingLeft: =1
+                                                PaddingRight: =1
+                                                LayoutGap: =0
+                                              Children:
+                                                - lblAttDayHeadDow:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Text: =ThisItem.DowLabel
+                                                      AccessibleLabel: |-
+                                                        =Text(ThisItem.CellDate, "dddd mmmm d") & If(ThisItem.IsSchoolDay, "", " – " & ThisItem.NonSchoolReason)
+                                                      Size: =9
+                                                      Align: =Align.Center
+                                                      Color: =ColorMuted
+                                                      Wrap: =false
+                                                      Height: =16
+                                                      FillPortions: =0
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      LayoutMinWidth: =0
+                                                      LayoutMinHeight: =0
+                                                      PaddingTop: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                - lblAttDayHeadNum:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      Text: =Text(ThisItem.DayNum)
+                                                      AccessibleLabel: |-
+                                                        =Text(ThisItem.CellDate, "dddd mmmm d") & If(ThisItem.IsSchoolDay, "", " – " & ThisItem.NonSchoolReason)
+                                                      Size: =12
+                                                      FontWeight: =FontWeight.Bold
+                                                      Align: =Align.Center
+                                                      Color: =If(ThisItem.CellDate = Today(), ColorTeal, ColorInk)
+                                                      Wrap: =false
+                                                      Height: =18
+                                                      FillPortions: =0
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      LayoutMinWidth: =0
+                                                      LayoutMinHeight: =0
+                                                      PaddingTop: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                - btnAttDayAll:
+                                                    Control: Classic/Button
+                                                    Properties:
+                                                      Text: ="All"
+                                                      Size: =9
+                                                      Fill: =ColorTeal
+                                                      Color: =ColorWhite
+                                                      DisabledFill: =ColorNotEnrolled
+                                                      DisabledColor: =ColorMuted
+                                                      BorderThickness: =0
+                                                      RadiusTopLeft: =3
+                                                      RadiusTopRight: =3
+                                                      RadiusBottomLeft: =3
+                                                      RadiusBottomRight: =3
+                                                      PaddingTop: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      AutoDisableOnSelect: =false
+                                                      Tooltip: ="All present – " & Text(ThisItem.CellDate, "ddd mmm d")
+                                                      DisplayMode: |-
+                                                        =If(varCanEditMonth && !varLoading && CountRows(Filter(colMonthCells, DayNum = ThisItem.DayNum && State = "Open")) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      OnSelect: =Set(varBulkDay, ThisItem.DayNum); Select(btnAttBulkEngine)
+                                                      Height: =26
+                                                      FillPortions: =0
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      LayoutMinWidth: =0
+                                                      LayoutMinHeight: =0
+                                    - lblAttHeadTotal:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: ="Present"
+                                          AccessibleLabel: ="Days present per student"
+                                          Size: =11
+                                          FontWeight: =FontWeight.Bold
+                                          Color: =ColorInk
+                                          Align: =Align.Center
+                                          VerticalAlign: =VerticalAlign.Bottom
+                                          Wrap: =false
+                                          FillPortions: =1
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                          PaddingTop: =0
+                                          PaddingBottom: =4
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                              - galAttRows:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    Items: =colMonthStudents
+                                    TemplateSize: =44
+                                    TemplatePadding: =0
+                                    ShowScrollbar: =true
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    AccessibleLabel: ="Students in " & Text(varMonthStart, "mmmm yyyy")
+                                    Height: =Min(528, Max(132, 44 * CountRows(colMonthStudents)))
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                  Children:
+                                    - conAttRowShell:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          Width: =Parent.TemplateWidth
+                                          Height: =Parent.TemplateHeight
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                          LayoutGap: =0
+                                          Fill: =ColorWhite
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                        Children:
+                                          - lblAttRowName:
+                                              Control: ModernText
+                                              Properties:
+                                                Text: =ThisItem.StudentName
+                                                AccessibleLabel: =ThisItem.StudentName
+                                                Size: =12
+                                                Color: =ColorInk
+                                                Wrap: =true
+                                                VerticalAlign: =VerticalAlign.Middle
+                                                FillPortions: =0
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Width: =180
+                                                LayoutMinWidth: =0
+                                                LayoutMinHeight: =0
+                                                PaddingTop: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =8
+                                                PaddingRight: =4
+                                          - galAttCells:
+                                              Control: Gallery
+                                              Variant: Horizontal
+                                              Properties:
+                                                Items: |-
+                                                  =ForAll(
+                                                      Filter(colMonthCells, StudentId = ThisItem.StudentId) As c,
+                                                      With(
+                                                          {
+                                                              a: LookUp(colMonthAtt, StudentId = c.StudentId && DayNum = c.DayNum && !IsDeleted),
+                                                              s: LookUp(colCellState, StudentId = c.StudentId && DayNum = c.DayNum)
+                                                          },
+                                                          {
+                                                              StudentId: c.StudentId,
+                                                              StudentName: c.StudentName,
+                                                              DayNum: c.DayNum,
+                                                              CellDate: c.CellDate,
+                                                              State: c.State,
+                                                              Reason: c.Reason,
+                                                              HasRecord: !IsBlank(a),
+                                                              Letter: Coalesce(a.Letter, ""),
+                                                              SaveState: Coalesce(s.SaveState, ""),
+                                                              Target: Coalesce(s.Target, ""),
+                                                              Editable: varCanEditMonth && c.State = "Open",
+                                                              Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open"),
+                                                              StatusWord: If(
+                                                                  Coalesce(s.SaveState, "") = "failed", "Save failed – tap to retry",
+                                                                  Coalesce(s.SaveState, "") = "saving", "Saving",
+                                                                  !IsBlank(a), Switch(a.Letter, "P", "Present", "E", "Absent, excused", "U", "Absent, unexcused", "Absent, not classified"),
+                                                                  c.State = "NotEnrolled", "Not enrolled",
+                                                                  c.State = "NonSchool", "Not a school day",
+                                                                  c.State = "Future", "Future date",
+                                                                  "Not recorded"
+                                                              )
+                                                          }
+                                                      )
+                                                  )
+                                                TemplateSize: =RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                                TemplatePadding: =0
+                                                ShowScrollbar: =false
+                                                ShowNavigation: =false
+                                                Selectable: =false
+                                                TabIndex: =0
+                                                AccessibleLabel: ="Days for " & ThisItem.StudentName
+                                                FillPortions: =0
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Width: =CountRows(colMonthDays) * RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                                LayoutMinWidth: =0
+                                                LayoutMinHeight: =0
+                                              Children:
+                                                - btnAttCell:
+                                                    Control: Classic/Button
+                                                    Properties:
+                                                      Width: =Parent.TemplateWidth - 3
+                                                      Height: =Parent.TemplateHeight - 4
+                                                      Text: |-
+                                                        =Switch(ThisItem.SaveState, "failed", "!", "saving", If(ThisItem.Target = "clear", "…", If(ThisItem.Target = "P", "1", "0") & "…"), If(ThisItem.HasRecord, If(ThisItem.Letter = "P", "1", "0") & If(ThisItem.SaveState = "saved", "✓", ""), ThisItem.State = "NotEnrolled", "–", ""))
+                                                      Fill: |-
+                                                        =If(ThisItem.SaveState = "failed", ColorWhite, ThisItem.SaveState = "saving", ColorSaving, ThisItem.HasRecord, Switch(ThisItem.Letter, "E", ColorExcused, "U", ColorUnexcused, ColorWhite), ThisItem.State = "NonSchool", ColorNonSchool, ThisItem.State = "NotEnrolled", ColorNotEnrolled, ColorWhite)
+                                                      Color: |-
+                                                        =If(ThisItem.SaveState = "failed", ColorUnexcused, ThisItem.SaveState = "saving", ColorInk, ThisItem.HasRecord, If(ThisItem.Letter in ["E", "U"], ColorWhite, ColorInk), ColorMuted)
+                                                      BorderColor: |-
+                                                        =If(varLastAction.Kind <> "" && varLastAction.StudentId = ThisItem.StudentId && varLastAction.DayNum = ThisItem.DayNum, ColorTeal, ThisItem.SaveState = "failed", ColorUnexcused, ColorRule)
+                                                      BorderThickness: |-
+                                                        =If(varLastAction.Kind <> "" && varLastAction.StudentId = ThisItem.StudentId && varLastAction.DayNum = ThisItem.DayNum, 3, 1)
+                                                      BorderStyle: =If(ThisItem.State = "Future", BorderStyle.Dashed, BorderStyle.Solid)
+                                                      DisplayMode: =If(ThisItem.Actionable, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      DisabledFill: =Self.Fill
+                                                      DisabledColor: =Self.Color
+                                                      DisabledBorderColor: =Self.BorderColor
+                                                      HoverFill: =Self.Fill
+                                                      PressedFill: =Self.Fill
+                                                      HoverBorderColor: =ColorTeal
+                                                      HoverColor: =Self.Color
+                                                      Size: =14
+                                                      FontWeight: =FontWeight.Bold
+                                                      Align: =Align.Center
+                                                      VerticalAlign: =VerticalAlign.Middle
+                                                      PaddingLeft: =1
+                                                      PaddingRight: =1
+                                                      PaddingTop: =0
+                                                      PaddingBottom: =0
+                                                      RadiusTopLeft: =3
+                                                      RadiusTopRight: =3
+                                                      RadiusBottomLeft: =3
+                                                      RadiusBottomRight: =3
+                                                      FocusedBorderColor: =ColorTeal
+                                                      FocusedBorderThickness: =3
+                                                      AutoDisableOnSelect: =false
+                                                      TabIndex: =0
+                                                      Tooltip: |-
+                                                        =ThisItem.StudentName & " – " & Text(ThisItem.CellDate, "ddd mmm d") & " – " & ThisItem.StatusWord & If(ThisItem.State <> "Open" && ThisItem.Reason <> "", " (" & ThisItem.Reason & ")", "") & If(!varCanEditMonth && ThisItem.State = "Open", " (read-only)", "")
+                                                      OnSelect: |-
+                                                        =If(
+                                                            varDetailsMode,
+                                                            If(ThisItem.HasRecord, Set(varDetailKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varConfirmOpen, false); Reset(txtAttDetailNotes); Set(varDetailOpen, true)),
+                                                            !ThisItem.Editable || ThisItem.SaveState = "saving",
+                                                            false,
+                                                            ThisItem.SaveState = "failed",
+                                                            Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: ThisItem.Target}); Select(btnAttSaveEngine),
+                                                            !ThisItem.HasRecord,
+                                                            Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "P"}); Select(btnAttSaveEngine),
+                                                            ThisItem.Letter = "P",
+                                                            Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "A"}); Select(btnAttSaveEngine),
+                                                            Set(varClearKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varDetailOpen, false); Set(varConfirmOpen, true)
+                                                        )
+                                          - lblAttRowTotal:
+                                              Control: ModernText
+                                              Properties:
+                                                Text: =Text(CountRows(Filter(colMonthAtt, StudentId = ThisItem.StudentId && Present && !IsDeleted)))
+                                                AccessibleLabel: ="Days present " & Self.Text
+                                                Size: =12
+                                                FontWeight: =FontWeight.Semibold
+                                                Color: =ColorInk
+                                                Align: =Align.Center
+                                                VerticalAlign: =VerticalAlign.Middle
+                                                Wrap: =false
+                                                FillPortions: =1
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                LayoutMinWidth: =0
+                                                LayoutMinHeight: =0
+                                                PaddingTop: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                              - conAttGridFooter:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Height: =36
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    LayoutGap: =0
+                                    Fill: =ColorPaper
+                                  Children:
+                                    - lblAttFootName:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: ="Present per day"
+                                          AccessibleLabel: ="Present per day"
+                                          Size: =12
+                                          FontWeight: =FontWeight.Semibold
+                                          Color: =ColorInk
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Wrap: =false
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Width: =180
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                          PaddingTop: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =8
+                                          PaddingRight: =0
+                                    - galAttDayTotals:
+                                        Control: Gallery
+                                        Variant: Horizontal
+                                        Properties:
+                                          Items: =colMonthDays
+                                          TemplateSize: =RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                          TemplatePadding: =0
+                                          ShowScrollbar: =false
+                                          ShowNavigation: =false
+                                          Selectable: =false
+                                          AccessibleLabel: ="Students present per day"
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Width: =CountRows(colMonthDays) * RoundDown((conAttGridInner.Width - 236) / Max(1, CountRows(colMonthDays)), 0)
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                        Children:
+                                          - lblAttDayTotal:
+                                              Control: ModernText
+                                              Properties:
+                                                Text: |-
+                                                  =With({n: CountRows(Filter(colMonthAtt, DayNum = ThisItem.DayNum && Present && !IsDeleted))}, If(n = 0 && !ThisItem.IsSchoolDay, "", Text(n)))
+                                                AccessibleLabel: ="Present on " & Text(ThisItem.CellDate, "dddd mmmm d") & " " & Self.Text
+                                                Width: =Parent.TemplateWidth
+                                                Height: =Parent.TemplateHeight
+                                                Size: =12
+                                                FontWeight: =FontWeight.Semibold
+                                                Color: =ColorInk
+                                                Align: =Align.Center
+                                                VerticalAlign: =VerticalAlign.Middle
+                                                Wrap: =false
+                                                PaddingTop: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                    - lblAttFootTotal:
+                                        Control: ModernText
+                                        Properties:
+                                          Text: =Text(CountRows(Filter(colMonthAtt, Present && !IsDeleted)))
+                                          AccessibleLabel: ="Total present this month " & Self.Text
+                                          Size: =12
+                                          FontWeight: =FontWeight.Bold
+                                          Color: =ColorInk
+                                          Align: =Align.Center
+                                          VerticalAlign: =VerticalAlign.Middle
+                                          Wrap: =false
+                                          FillPortions: =1
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                          PaddingTop: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+            - conAttDayView:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  Visible: =StaffReady && tabAttView.Selected.Value = "Day"
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: |-
+                    =16 + 44 + 8 + If(lblAttDayNotice.Text <> "", 56, 0) + If(CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) = 0, 0, Min(620, Max(124, 124 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))) + 16
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  Fill: =ColorWhite
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  PaddingTop: =16
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  LayoutGap: =8
+                Children:
+                  - conAttDayNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Height: =44
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        LayoutGap: =8
+                      Children:
+                        - btnAttPrevDay:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="◀"
+                              AccessibleLabel: ="Previous day"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: |-
+                                =With({nd: DateAdd(varViewDate, -1, TimeUnit.Days)}, Set(varViewDate, nd); If(nd < varMonthStart, Set(varMonthStart, Date(Year(nd), Month(nd), 1)); Select(btnAttLoadEngine)))
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =44
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - lblAttDayDate:
+                            Control: ModernText
+                            Properties:
+                              Text: =Text(varViewDate, "ddd mmm d")
+                              AccessibleLabel: ="Day " & Text(varViewDate, "dddd mmmm d")
+                              Size: =14
+                              FontWeight: =FontWeight.Bold
+                              Color: =ColorInk
+                              Align: =Align.Center
+                              Wrap: =false
+                              Height: =28
+                              FillPortions: =1
+                              AlignInContainer: =AlignInContainer.Center
+                              LayoutMinWidth: =100
+                              LayoutMinHeight: =0
+                              PaddingTop: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                        - btnAttNextDay:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="▶"
+                              AccessibleLabel: ="Next day"
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: =If(varLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              OnSelect: |-
+                                =With({nd: DateAdd(varViewDate, 1, TimeUnit.Days)}, Set(varViewDate, nd); If(nd > varMonthEnd, Set(varMonthStart, Date(Year(nd), Month(nd), 1)); Select(btnAttLoadEngine)))
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =44
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                        - btnAttDayAllPresent:
+                            Control: ModernButton
+                            Properties:
+                              Text: ="All present"
+                              AccessibleLabel: ="Mark all present for " & Text(varViewDate, "dddd mmmm d")
+                              Appearance: =ButtonAppearance.Primary
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Layout: =ButtonLayout.TextOnly
+                              Size: =14
+                              DisplayMode: |-
+                                =If(varCanEditMonth && !varLoading && CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && State = "Open")) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                              OnSelect: =Set(varBulkDay, Day(varViewDate)); Select(btnAttBulkEngine)
+                              FillPortions: =0
+                              AlignInContainer: =AlignInContainer.Center
+                              Width: =120
+                              Height: =44
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                  - lblAttDayNotice:
+                      Control: ModernText
+                      Properties:
+                        Visible: =Self.Text <> ""
+                        Text: |-
+                          =With({dd: LookUp(colMonthDays, DayNum = Day(varViewDate))}, If(varLoading, "", CountRows(colMonthStudents) = 0, "No students for this teacher in " & Text(varMonthStart, "mmmm yyyy") & ".", !dd.IsSchoolDay, "Not a school day — " & dd.NonSchoolReason & ".", CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) = 0, "No students are enrolled with this teacher on this day.", ""))
+                        AccessibleLabel: =Self.Text
+                        Size: =13
+                        Color: =ColorInk
+                        Wrap: =true
+                        Height: =48
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                        PaddingTop: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                  - galAttDayList:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        Visible: =CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future"))) > 0
+                        Items: |-
+                          =ForAll(
+                              Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")) As c,
+                              With(
+                                  {
+                                      a: LookUp(colMonthAtt, StudentId = c.StudentId && DayNum = c.DayNum && !IsDeleted),
+                                      s: LookUp(colCellState, StudentId = c.StudentId && DayNum = c.DayNum)
+                                  },
+                                  {
+                                      StudentId: c.StudentId,
+                                      StudentName: c.StudentName,
+                                      DayNum: c.DayNum,
+                                      CellDate: c.CellDate,
+                                      State: c.State,
+                                      Reason: c.Reason,
+                                      HasRecord: !IsBlank(a),
+                                      Letter: Coalesce(a.Letter, ""),
+                                      SaveState: Coalesce(s.SaveState, ""),
+                                      Target: Coalesce(s.Target, ""),
+                                      Editable: varCanEditMonth && c.State = "Open",
+                                      Actionable: If(varDetailsMode, !IsBlank(a), varCanEditMonth && c.State = "Open"),
+                                      StatusWord: If(
+                                          Coalesce(s.SaveState, "") = "failed", "Save failed – tap to retry",
+                                          Coalesce(s.SaveState, "") = "saving", "Saving",
+                                          !IsBlank(a), Switch(a.Letter, "P", "Present", "E", "Absent, excused", "U", "Absent, unexcused", "Absent, not classified"),
+                                          c.State = "NotEnrolled", "Not enrolled",
+                                          c.State = "NonSchool", "Not a school day",
+                                          c.State = "Future", "Future date",
+                                          "Not recorded"
+                                      )
+                                  }
+                              )
+                          )
+                        TemplateSize: =116
+                        TemplatePadding: =4
+                        ShowScrollbar: =true
+                        Selectable: =false
+                        TabIndex: =0
+                        AccessibleLabel: ="Students for " & Text(varViewDate, "dddd mmmm d")
+                        Height: |-
+                          =Min(620, Max(124, 124 * CountRows(Filter(colMonthCells, DayNum = Day(varViewDate) && (State = "Open" || State = "Future")))))
+                        FillPortions: =0
+                        AlignInContainer: =AlignInContainer.Stretch
+                        LayoutMinWidth: =0
+                        LayoutMinHeight: =0
+                      Children:
+                        - conAttDayRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              Width: =Parent.TemplateWidth
+                              Height: =Parent.TemplateHeight
+                              LayoutMinWidth: =0
+                              LayoutMinHeight: =0
+                              Fill: =ColorWhite
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              PaddingTop: =8
+                              PaddingBottom: =8
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              LayoutGap: =4
+                            Children:
+                              - lblAttDayName:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: =ThisItem.StudentName
+                                    AccessibleLabel: =ThisItem.StudentName
+                                    Size: =14
+                                    FontWeight: =FontWeight.Semibold
+                                    Color: =ColorInk
+                                    Wrap: =false
+                                    Height: =24
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    PaddingTop: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                              - lblAttDayStatus:
+                                  Control: ModernText
+                                  Properties:
+                                    Text: |-
+                                      =Switch(ThisItem.SaveState, "failed", "Save failed – press Present or Absent to retry", "saving", "Saving…", If(ThisItem.HasRecord, ThisItem.StatusWord & If(ThisItem.SaveState = "saved", " ✓ saved", ""), ThisItem.State = "Future", "Future date – locked", "Not recorded"))
+                                    AccessibleLabel: ="Status for " & ThisItem.StudentName & " " & Self.Text
+                                    Size: =12
+                                    Color: =If(ThisItem.SaveState = "failed", ColorUnexcused, ColorMuted)
+                                    Wrap: =false
+                                    Height: =20
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    PaddingTop: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                              - conAttDayActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    FillPortions: =0
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Height: =44
+                                    LayoutMinWidth: =0
+                                    LayoutMinHeight: =0
+                                    LayoutGap: =8
+                                  Children:
+                                    - btnAttDayPresent:
+                                        Control: ModernButton
+                                        Properties:
+                                          Text: ="Present"
+                                          AccessibleLabel: ="Mark " & ThisItem.StudentName & " present"
+                                          Appearance: =ButtonAppearance.Primary
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          Layout: =ButtonLayout.TextOnly
+                                          Size: =14
+                                          DisplayMode: |-
+                                            =If(ThisItem.Editable && ThisItem.SaveState <> "saving" && (ThisItem.Letter <> "P" || ThisItem.SaveState = "failed"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "P"}); Select(btnAttSaveEngine)
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Width: =100
+                                          Height: =44
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                    - btnAttDayAbsent:
+                                        Control: ModernButton
+                                        Properties:
+                                          Text: ="Absent"
+                                          AccessibleLabel: ="Mark " & ThisItem.StudentName & " absent"
+                                          Appearance: =ButtonAppearance.Primary
+                                          BasePaletteColor: =ColorInk
+                                          Color: =ColorWhite
+                                          Layout: =ButtonLayout.TextOnly
+                                          Size: =14
+                                          DisplayMode: |-
+                                            =If(ThisItem.Editable && ThisItem.SaveState <> "saving" && (!(ThisItem.Letter in ["A", "E", "U"]) || ThisItem.SaveState = "failed"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =Set(varSaveReq, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum, Target: "A"}); Select(btnAttSaveEngine)
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Width: =100
+                                          Height: =44
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+                                    - btnAttDayClear:
+                                        Control: ModernButton
+                                        Properties:
+                                          Visible: =ThisItem.HasRecord
+                                          Text: ="Clear"
+                                          AccessibleLabel: ="Clear the record for " & ThisItem.StudentName
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Layout: =ButtonLayout.TextOnly
+                                          Size: =14
+                                          DisplayMode: =If(ThisItem.Editable && ThisItem.SaveState <> "saving", DisplayMode.Edit, DisplayMode.Disabled)
+                                          OnSelect: |-
+                                            =Set(varClearKey, {StudentId: ThisItem.StudentId, DayNum: ThisItem.DayNum}); Set(varDetailOpen, false); Set(varConfirmOpen, true)
+                                          FillPortions: =0
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Width: =88
+                                          Height: =44
+                                          LayoutMinWidth: =0
+                                          LayoutMinHeight: =0
+            - btnAttSaveEngine:
+                Control: Classic/Button
+                Properties:
+                  Visible: =false
+                  Text: ="save"
+                  AutoDisableOnSelect: =false
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =40
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  OnSelect: |-
+                    =With(
+                        {
+                            req: varSaveReq,
+                            cell: LookUp(colMonthCells, StudentId = varSaveReq.StudentId && DayNum = varSaveReq.DayNum)
+                        },
+                        With(
+                            {
+                                seg: LookUp(colMonthEnr, EnrId = cell.EnrId),
+                                local: LookUp(colMonthAtt, StudentId = req.StudentId && DayNum = req.DayNum),
+                                term: LookUp(colMonthTerms, ThisRecord.'Term (aaca_termid)' = LookUp(colMonthDays, DayNum = req.DayNum).TermId),
+                                dateText: Text(cell.CellDate, "ddd mmm d")
+                            },
+                            If(
+                                IsBlank(cell) || cell.State <> "Open" || !varCanEditMonth || IsBlank(req.Target) || (req.Target = "clear" && (IsBlank(local) || local.IsDeleted)),
+                                Set(varLastAction, {Kind: "Blocked", Message: "Not saved · " & cell.StudentName & " · " & dateText & " · " & If(!varCanEditMonth, "month locked or view-only role", Coalesce(cell.Reason, "cell not editable")), StudentId: req.StudentId, DayNum: req.DayNum}),
+                                RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
+                                Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "saving", Target: req.Target});
+                                With(
+                                    {server: With({qSid: req.StudentId, qSvc: seg.ServiceId, qDate: cell.CellDate}, LookUp(Attendance, Student.Student = qSid && Service.Service = qSvc && Date = qDate))},
+                                    If(
+                                        IsError(server),
+                                        RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
+                                        Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "failed", Target: req.Target});
+                                        Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "A", "Absent", "Clear") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
+                                        (!IsBlank(local) && local.ModifiedOn <> server.'Modified On') || (IsBlank(local) && !IsBlank(server) && server.'Is Deleted' <> true),
+                                        RemoveIf(colMonthAtt, StudentId = req.StudentId && DayNum = req.DayNum);
+                                        If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                        RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
+                                        Set(varLastAction, {Kind: "Conflict", Message: "Changed by someone else — reloaded · " & cell.StudentName & " · " & dateText & " · now " & If(IsBlank(server) || server.'Is Deleted' = true, "Not recorded", If(server.Present = true, "Present", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Absent (excused)", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Absent (unexcused)", "Absent (not classified)")) & " · your change was not saved", StudentId: req.StudentId, DayNum: req.DayNum}),
+                                        With(
+                                            {
+                                                wasDeleted: !IsBlank(server) && server.'Is Deleted' = true,
+                                                written: IfError(
+                                                    If(
+                                                        req.Target = "clear",
+                                                        Patch(Attendance, server, {'Is Deleted': true}),
+                                                        Patch(
+                                                            Attendance,
+                                                            Coalesce(server, Defaults(Attendance)),
+                                                            {
+                                                                'Record Key': Text(cell.CellDate, "yyyymmdd") & "|" & seg.StudentNumber & "|" & seg.ServiceCode,
+                                                                Date: cell.CellDate,
+                                                                Student: seg.EnrRec.Student,
+                                                                Service: seg.EnrRec.Service,
+                                                                Enrollment: seg.EnrRec,
+                                                                Teacher: varTeacher,
+                                                                Campus: seg.EnrRec.Campus,
+                                                                'School Year': seg.EnrRec.'School Year',
+                                                                Term: term,
+                                                                'IEP Ratio': Switch(
+                                                                    seg.EnrRec.'IEP Ratio',
+                                                                    'IEP Ratio (Enrollments)'.'No Aide', 'IEP Ratio (Attendance)'.'No Aide',
+                                                                    'IEP Ratio (Enrollments)'.'1:1', 'IEP Ratio (Attendance)'.'1:1',
+                                                                    'IEP Ratio (Enrollments)'.'2:1', 'IEP Ratio (Attendance)'.'2:1',
+                                                                    'IEP Ratio (Enrollments)'.'3:1', 'IEP Ratio (Attendance)'.'3:1',
+                                                                    'IEP Ratio (Enrollments)'.'4:1', 'IEP Ratio (Attendance)'.'4:1'
+                                                                ),
+                                                                Present: req.Target = "P",
+                                                                'Is Deleted': false
+                                                            }
+                                                        )
+                                                    ),
+                                                    Blank()
+                                                )
+                                            },
+                                            If(
+                                                IsBlank(written),
+                                                RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
+                                                Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "failed", Target: req.Target});
+                                                Set(varLastAction, {Kind: "Failed", Message: "Failed · " & cell.StudentName & " · " & dateText & " · " & Switch(req.Target, "P", "Present", "A", "Absent", "Clear") & " was not saved — tap the cell (or the Day view button) to retry", StudentId: req.StudentId, DayNum: req.DayNum}),
+                                                With(
+                                                    {
+                                                        audit: If(
+                                                            req.Target = "clear",
+                                                            IfError(
+                                                                Patch(
+                                                                    'Audit Events',
+                                                                    Defaults('Audit Events'),
+                                                                    {
+                                                                        Summary: "Attendance soft-deleted " & written.'Record Key',
+                                                                        Action: 'Action (Audit Events)'.'Soft Delete',
+                                                                        Entity: "aaca_attendance",
+                                                                        'Entity ID': Text(written.Attendance),
+                                                                        Before: "Is Deleted=No; Present=" & If(local.Present, "Yes", "No"),
+                                                                        After: "Is Deleted=Yes",
+                                                                        Reason: "Cleared in Attendance Matrix"
+                                                                    }
+                                                                ),
+                                                                Blank()
+                                                            ),
+                                                            Blank()
+                                                        )
+                                                    },
+                                                    RemoveIf(colMonthAtt, StudentId = req.StudentId && DayNum = req.DayNum);
+                                                    Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                    RemoveIf(colCellState, StudentId = req.StudentId && DayNum = req.DayNum);
+                                                    Collect(colCellState, {StudentId: req.StudentId, DayNum: req.DayNum, SaveState: "saved", Target: req.Target});
+                                                    Set(
+                                                        varLastAction,
+                                                        {
+                                                            Kind: If(req.Target = "clear", "Cleared", wasDeleted, "Restored", "Saved"),
+                                                            Message: If(
+                                                                req.Target = "clear",
+                                                                "Cleared · " & cell.StudentName & " · " & dateText & " · Is Deleted = Yes · Key " & written.'Record Key' & If(IsBlank(audit), " · audit event NOT written", " · audit event written"),
+                                                                If(wasDeleted, "Restored · ", "Saved · ") & cell.StudentName & " · " & dateText & " · Status " & If(written.Present = true, "Present", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "Absent (excused)", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "Absent (unexcused)", "Absent (not classified)") & " · IEP " & Text(written.'IEP Ratio') & " · Teacher " & varTeacher.Name & " · Term " & term.Name & " · Key " & written.'Record Key'
+                                                            ),
+                                                            StudentId: req.StudentId,
+                                                            DayNum: req.DayNum
+                                                        }
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+            - btnAttBulkEngine:
+                Control: Classic/Button
+                Properties:
+                  Visible: =false
+                  Text: ="bulk"
+                  AutoDisableOnSelect: =false
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =40
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  OnSelect: |-
+                    =With(
+                        {
+                            dn: varBulkDay,
+                            cd: Date(Year(varMonthStart), Month(varMonthStart), varBulkDay),
+                            term: LookUp(colMonthTerms, ThisRecord.'Term (aaca_termid)' = LookUp(colMonthDays, DayNum = varBulkDay).TermId)
+                        },
+                        If(
+                            !varCanEditMonth || CountRows(Filter(colMonthCells, DayNum = dn && State = "Open")) = 0,
+                            Set(varLastAction, {Kind: "Blocked", Message: "All present not available · " & Text(cd, "ddd mmm d") & " · no editable cells (non-school, future, locked or view-only)", StudentId: ZeroGuid, DayNum: dn}),
+                            Clear(colBulkLog);
+                            ForAll(
+                                Filter(colMonthCells, DayNum = dn && State = "Open") As c,
+                                With(
+                                    {
+                                        seg: LookUp(colMonthEnr, EnrId = c.EnrId),
+                                        local: LookUp(colMonthAtt, StudentId = c.StudentId && DayNum = dn)
+                                    },
+                                    If(
+                                        !IsBlank(local) && !local.IsDeleted,
+                                        Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "skipped"}),
+                                        With(
+                                            {server: With({qSid: c.StudentId, qSvc: seg.ServiceId, qDate: cd}, LookUp(Attendance, Student.Student = qSid && Service.Service = qSvc && Date = qDate))},
+                                            If(
+                                                IsError(server),
+                                                RemoveIf(colCellState, StudentId = c.StudentId && DayNum = dn);
+                                                Collect(colCellState, {StudentId: c.StudentId, DayNum: dn, SaveState: "failed", Target: "P"});
+                                                Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "failed"}),
+                                                (!IsBlank(local) && local.ModifiedOn <> server.'Modified On') || (IsBlank(local) && !IsBlank(server) && server.'Is Deleted' <> true),
+                                                RemoveIf(colMonthAtt, StudentId = c.StudentId && DayNum = dn);
+                                                If(!IsBlank(server), Collect(colMonthAtt, {AttId: server.Attendance, StudentId: server.Student.Student, DayNum: Day(server.Date), AttDate: server.Date, Present: server.Present = true, IsDeleted: server.'Is Deleted' = true, Letter: If(server.Present = true, "P", server.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", server.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(server.Present = true, "—", IsBlank(server.'Absence Classification'), "Not classified", Text(server.'Absence Classification')), IepText: Text(server.'IEP Ratio'), Notes: server.Notes, RecordKey: server.'Record Key', ModifiedOn: server.'Modified On'}));
+                                                Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "skipped"}),
+                                                With(
+                                                    {
+                                                        written: IfError(
+                                                            Patch(
+                                                                Attendance,
+                                                                Coalesce(server, Defaults(Attendance)),
+                                                                {
+                                                                    'Record Key': Text(c.CellDate, "yyyymmdd") & "|" & seg.StudentNumber & "|" & seg.ServiceCode,
+                                                                    Date: c.CellDate,
+                                                                    Student: seg.EnrRec.Student,
+                                                                    Service: seg.EnrRec.Service,
+                                                                    Enrollment: seg.EnrRec,
+                                                                    Teacher: varTeacher,
+                                                                    Campus: seg.EnrRec.Campus,
+                                                                    'School Year': seg.EnrRec.'School Year',
+                                                                    Term: term,
+                                                                    'IEP Ratio': Switch(
+                                                                        seg.EnrRec.'IEP Ratio',
+                                                                        'IEP Ratio (Enrollments)'.'No Aide', 'IEP Ratio (Attendance)'.'No Aide',
+                                                                        'IEP Ratio (Enrollments)'.'1:1', 'IEP Ratio (Attendance)'.'1:1',
+                                                                        'IEP Ratio (Enrollments)'.'2:1', 'IEP Ratio (Attendance)'.'2:1',
+                                                                        'IEP Ratio (Enrollments)'.'3:1', 'IEP Ratio (Attendance)'.'3:1',
+                                                                        'IEP Ratio (Enrollments)'.'4:1', 'IEP Ratio (Attendance)'.'4:1'
+                                                                    ),
+                                                                    Present: true,
+                                                                    'Is Deleted': false
+                                                                }
+                                                            ),
+                                                            Blank()
+                                                        )
+                                                    },
+                                                    If(
+                                                        IsBlank(written),
+                                                        RemoveIf(colCellState, StudentId = c.StudentId && DayNum = dn);
+                                                        Collect(colCellState, {StudentId: c.StudentId, DayNum: dn, SaveState: "failed", Target: "P"});
+                                                        Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "failed"}),
+                                                        RemoveIf(colMonthAtt, StudentId = c.StudentId && DayNum = dn);
+                                                        Collect(colMonthAtt, {AttId: written.Attendance, StudentId: written.Student.Student, DayNum: Day(written.Date), AttDate: written.Date, Present: written.Present = true, IsDeleted: written.'Is Deleted' = true, Letter: If(written.Present = true, "P", written.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", written.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(written.Present = true, "—", IsBlank(written.'Absence Classification'), "Not classified", Text(written.'Absence Classification')), IepText: Text(written.'IEP Ratio'), Notes: written.Notes, RecordKey: written.'Record Key', ModifiedOn: written.'Modified On'});
+                                                        RemoveIf(colCellState, StudentId = c.StudentId && DayNum = dn);
+                                                        Collect(colCellState, {StudentId: c.StudentId, DayNum: dn, SaveState: "saved", Target: "P"});
+                                                        Collect(colBulkLog, {StudentId: c.StudentId, Outcome: "marked"})
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            );
+                            Set(varLastAction, {Kind: "Bulk", Message: "All present · " & Text(cd, "ddd mmm d") & " · " & CountRows(Filter(colBulkLog, Outcome = "marked")) & " marked, " & CountRows(Filter(colBulkLog, Outcome = "skipped")) & " skipped (already recorded or changed by someone else), " & CountRows(Filter(colBulkLog, Outcome = "failed")) & " failed", StudentId: ZeroGuid, DayNum: dn})
+                        )
+                    )
+            - btnAttLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  Visible: =false
+                  Text: ="load"
+                  AutoDisableOnSelect: =false
+                  FillPortions: =0
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Height: =40
+                  LayoutMinWidth: =0
+                  LayoutMinHeight: =0
+                  OnSelect: |-
+                    =Set(varLoading, true);
+                    Set(varLoadError, "");
+                    Set(varMonthEnd, DateAdd(DateAdd(varMonthStart, 1, TimeUnit.Months), -1, TimeUnit.Days));
+                    Set(varDetailOpen, false);
+                    Set(varConfirmOpen, false);
+                    Clear(colCellState);
+                    If(
+                        !StaffReady || IsBlank(varTeacher),
+                        Clear(colMonthEnr); Clear(colMonthAtt); Clear(colMonthExceptions); Clear(colMonthTerms);
+                        Clear(colMonthDays); Clear(colMonthStudents); Clear(colMonthCells),
+                        IfError(
+                            Concurrent(
+                                ClearCollect(
+                                    colMonthEnr,
+                                    ForAll(
+                                        Filter(Enrollments, Teacher.Staff = varTeacher.Staff && 'Start Date' <= varMonthEnd && (IsBlank('End Date') || 'End Date' >= varMonthStart)) As e,
+                                        {
+                                            EnrId: e.Enrollment,
+                                            StudentId: e.Student.Student,
+                                            StudentName: e.Student.'Display Name',
+                                            StudentNumber: e.Student.'Student Number',
+                                            ServiceId: e.Service.Service,
+                                            ServiceCode: e.Service.'Service Code',
+                                            StartDate: e.'Start Date',
+                                            EndDate: e.'End Date',
+                                            IsSummer: e.Program = 'Program (Enrollments)'.Summer,
+                                            IepText: Text(e.'IEP Ratio'),
+                                            EnrRec: e
+                                        }
+                                    )
+                                ),
+                                ClearCollect(
+                                    colMonthAtt,
+                                    ForAll(
+                                        Filter(Attendance, Teacher.Staff = varTeacher.Staff && Date >= varMonthStart && Date <= varMonthEnd) As r,
+                                        {AttId: r.Attendance, StudentId: r.Student.Student, DayNum: Day(r.Date), AttDate: r.Date, Present: r.Present = true, IsDeleted: r.'Is Deleted' = true, Letter: If(r.Present = true, "P", r.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", r.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A"), ClassText: If(r.Present = true, "—", IsBlank(r.'Absence Classification'), "Not classified", Text(r.'Absence Classification')), IepText: Text(r.'IEP Ratio'), Notes: r.Notes, RecordKey: r.'Record Key', ModifiedOn: r.'Modified On'}
+                                    )
+                                ),
+                                ClearCollect(colMonthExceptions, Filter('Calendar Exceptions', Date >= varMonthStart && Date <= varMonthEnd)),
+                                ClearCollect(colMonthTerms, Filter(Terms, 'Start Date' <= varMonthEnd && 'End Date' >= varMonthStart)),
+                                Set(varMonthLock, LookUp('Month Locks', Campus.Campus = varCampus.Campus && Month = varMonthStart && 'Status (aaca_status)' = 'Status (Month Locks)'.Locked))
+                            ),
+                            Set(varLoadError, FirstError.Message)
+                        );
+                        Clear(colMonthDays);
+                        ForAll(
+                            Sequence(Day(varMonthEnd)) As n,
+                            With(
+                                {d: Date(Year(varMonthStart), Month(varMonthStart), n.Value)},
+                                With(
+                                    {
+                                        t: First(Filter(colMonthTerms, ThisRecord.'Start Date' <= d && ThisRecord.'End Date' >= d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = varCampus.Campus))),
+                                        x: LookUp(colMonthExceptions, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = varCampus.Campus) && ThisRecord.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day'),
+                                        mk: !IsBlank(LookUp(colMonthExceptions, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = varCampus.Campus) && ThisRecord.Type = 'Type (Calendar Exceptions)'.'Make-up School Day')),
+                                        wkend: Weekday(d, StartOfWeek.Monday) >= 6
+                                    },
+                                    Collect(
+                                        colMonthDays,
+                                        {
+                                            DayNum: n.Value,
+                                            CellDate: d,
+                                            DowLabel: Text(d, "ddd"),
+                                            TermId: t.'Term (aaca_termid)',
+                                            TermKind: If(IsBlank(t), "", t.'Term (aaca_term)' = 'Term (Terms)'.Summer, "Summer", "Regular"),
+                                            IsSchoolDay: !IsBlank(t) && (mk || (!wkend && IsBlank(x))),
+                                            NonSchoolReason: If(IsBlank(t), "Outside any term", mk, "", !IsBlank(x), Text(x.Type) & " – " & x.Description, wkend, "Weekend", "")
+                                        }
+                                    )
+                                )
+                            )
+                        );
+                        ClearCollect(
+                            colMonthStudents,
+                            Sort(
+                                ForAll(
+                                    Distinct(colMonthEnr, StudentId) As g,
+                                    With({en: LookUp(colMonthEnr, StudentId = g.Value)}, {StudentId: g.Value, StudentName: en.StudentName, StudentNumber: en.StudentNumber})
+                                ),
+                                StudentName,
+                                SortOrder.Ascending
+                            )
+                        );
+                        Clear(colMonthCells);
+                        ForAll(
+                            colMonthStudents As s,
+                            Collect(
+                                colMonthCells,
+                                ForAll(
+                                    colMonthDays As dd,
+                                    With(
+                                        {seg: LookUp(colMonthEnr, StudentId = s.StudentId && StartDate <= dd.CellDate && (IsBlank(EndDate) || EndDate >= dd.CellDate) && IsSummer = (dd.TermKind = "Summer"))},
+                                        {
+                                            StudentId: s.StudentId,
+                                            StudentName: s.StudentName,
+                                            DayNum: dd.DayNum,
+                                            CellDate: dd.CellDate,
+                                            EnrId: seg.EnrId,
+                                            State: If(!dd.IsSchoolDay, "NonSchool", IsBlank(seg), "NotEnrolled", dd.CellDate > Today() && !AllowFutureDates, "Future", "Open"),
+                                            Reason: If(!dd.IsSchoolDay, dd.NonSchoolReason, IsBlank(seg), "Not enrolled with this teacher on this day", dd.CellDate > Today() && !AllowFutureDates, "Future date", "")
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    );
+                    Set(varCanEditMonth, CanEditRole && IsBlank(varMonthLock) && varLoadError = "");
+                    If(
+                        varViewDate < varMonthStart || varViewDate > varMonthEnd,
+                        Set(varViewDate, If(Today() >= varMonthStart && Today() <= varMonthEnd, Today(), varMonthStart))
+                    );
+                    Set(varLoading, false)

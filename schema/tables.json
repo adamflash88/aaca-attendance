@@ -1,0 +1,236 @@
+{
+  "$comment": "Single source of truth for the AACA Attendance Dataverse schema. Applied by provisioning/Deploy-Schema.ps1. Choice values use the publisher option prefix 58210 (582100000+). Never renumber an existing choice value; append new ones.",
+  "publisher": {
+    "uniqueName": "aaca",
+    "friendlyName": "AACA",
+    "prefix": "aaca",
+    "optionValuePrefix": 58210
+  },
+  "solution": {
+    "uniqueName": "AACAAttendance",
+    "friendlyName": "AACA Attendance",
+    "version": "1.0.0.0"
+  },
+  "tables": [
+    {
+      "logicalName": "aaca_campus",
+      "displayName": "Campus",
+      "pluralName": "Campuses",
+      "description": "A school campus. Maps to a business unit of the same name.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_code", "type": "text", "displayName": "Code", "maxLength": 10, "required": true },
+        { "logicalName": "aaca_active", "type": "bool", "displayName": "Active", "default": true }
+      ],
+      "keys": [ { "logicalName": "aaca_campus_code", "displayName": "Campus Code", "columns": [ "aaca_code" ] } ]
+    },
+    {
+      "logicalName": "aaca_staff",
+      "displayName": "Staff",
+      "pluralName": "Staff",
+      "description": "App user profile. App Role drives the UI only; data access comes from security roles.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_approle", "type": "choice", "displayName": "App Role", "required": true,
+          "options": [ [582100000, "Teacher"], [582100001, "Attendance Office"], [582100002, "Read-only"], [582100003, "System Admin"] ] },
+        { "logicalName": "aaca_active", "type": "bool", "displayName": "Active", "default": true }
+      ]
+    },
+    {
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "pluralName": "Students",
+      "description": "A student. Owned by the student's current teacher. Never deleted; archived instead.",
+      "primaryName": { "logicalName": "aaca_displayname", "displayName": "Display Name", "maxLength": 200, "description": "Last, First. Set by the app on save." },
+      "columns": [
+        { "logicalName": "aaca_studentnumber", "type": "autonumber", "displayName": "Student Number", "format": "STU-{SEQNUM:6}", "maxLength": 20 },
+        { "logicalName": "aaca_firstname", "type": "text", "displayName": "First Name", "maxLength": 100, "required": true },
+        { "logicalName": "aaca_lastname", "type": "text", "displayName": "Last Name", "maxLength": 100, "required": true },
+        { "logicalName": "aaca_dateofbirth", "type": "date", "displayName": "Date of Birth" },
+        { "logicalName": "aaca_grade", "type": "choice", "displayName": "Grade",
+          "options": [ [582100000, "K"], [582100001, "1"], [582100002, "2"], [582100003, "3"], [582100004, "4"], [582100005, "5"], [582100006, "6"], [582100007, "7"], [582100008, "8"], [582100009, "9"], [582100010, "10"], [582100011, "11"], [582100012, "12"], [582100013, "12+"] ] },
+        { "logicalName": "aaca_externalclientid", "type": "text", "displayName": "External Client ID", "maxLength": 50 },
+        { "logicalName": "aaca_status", "type": "choice", "displayName": "Status", "required": true, "default": 582100000,
+          "options": [ [582100000, "Active"], [582100001, "Inactive"], [582100002, "Archived"] ] },
+        { "logicalName": "aaca_archivedon", "type": "date", "displayName": "Archived On" }
+      ],
+      "keys": [ { "logicalName": "aaca_student_number", "displayName": "Student Number", "columns": [ "aaca_studentnumber" ] } ]
+    },
+    {
+      "logicalName": "aaca_service",
+      "displayName": "Service",
+      "pluralName": "Services",
+      "description": "A tracked service. Currently one row: Special Education Attendance.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_servicecode", "type": "text", "displayName": "Service Code", "maxLength": 20, "required": true },
+        { "logicalName": "aaca_billingcode", "type": "text", "displayName": "Billing Code", "maxLength": 50 },
+        { "logicalName": "aaca_active", "type": "bool", "displayName": "Active", "default": true }
+      ],
+      "keys": [ { "logicalName": "aaca_service_code", "displayName": "Service Code", "columns": [ "aaca_servicecode" ] } ]
+    },
+    {
+      "logicalName": "aaca_schoolyear",
+      "displayName": "School Year",
+      "pluralName": "School Years",
+      "description": "A school year including its summer program (e.g. Aug 2026 - Jul 2027).",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 20 },
+      "columns": [
+        { "logicalName": "aaca_startdate", "type": "date", "displayName": "Start Date", "required": true },
+        { "logicalName": "aaca_enddate", "type": "date", "displayName": "End Date", "required": true },
+        { "logicalName": "aaca_status", "type": "choice", "displayName": "Status", "required": true, "default": 582100000,
+          "options": [ [582100000, "Planned"], [582100001, "Current"], [582100002, "Closed"] ] }
+      ],
+      "keys": [ { "logicalName": "aaca_schoolyear_name", "displayName": "School Year Name", "columns": [ "aaca_name" ] } ]
+    },
+    {
+      "logicalName": "aaca_term",
+      "displayName": "Term",
+      "pluralName": "Terms",
+      "description": "Quarter or summer program date range. Blank campus = applies to all campuses.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_term", "type": "choice", "displayName": "Term", "required": true,
+          "options": [ [582100000, "Q1"], [582100001, "Q2"], [582100002, "Q3"], [582100003, "Q4"], [582100004, "ESY"] ] },
+        { "logicalName": "aaca_startdate", "type": "date", "displayName": "Start Date", "required": true },
+        { "logicalName": "aaca_enddate", "type": "date", "displayName": "End Date", "required": true }
+      ]
+    },
+    {
+      "logicalName": "aaca_calendarexception",
+      "displayName": "Calendar Exception",
+      "pluralName": "Calendar Exceptions",
+      "description": "A non-school weekday or a make-up school day. Blank campus = all campuses.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Description", "maxLength": 200 },
+      "columns": [
+        { "logicalName": "aaca_date", "type": "date", "displayName": "Date", "required": true },
+        { "logicalName": "aaca_type", "type": "choice", "displayName": "Type", "required": true,
+          "options": [ [582100000, "Holiday"], [582100001, "Break"], [582100002, "Work Only"], [582100003, "Closed"], [582100004, "Make-up School Day"] ] }
+      ]
+    },
+    {
+      "logicalName": "aaca_enrollment",
+      "displayName": "Enrollment",
+      "pluralName": "Enrollments",
+      "description": "One continuous assignment of a student to a teacher/campus/ratio. Closed and replaced on change; never deleted. Owned by the teacher.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 200 },
+      "columns": [
+        { "logicalName": "aaca_program", "type": "choice", "displayName": "Program", "required": true, "default": 582100000,
+          "options": [ [582100000, "Regular Year"], [582100001, "ESY"] ] },
+        { "logicalName": "aaca_iepratio", "type": "choice", "displayName": "IEP Ratio", "required": true,
+          "options": [ [582100000, "No Aide"], [582100001, "1:1"], [582100002, "2:1"], [582100003, "3:1"], [582100004, "4:1"] ] },
+        { "logicalName": "aaca_startdate", "type": "date", "displayName": "Start Date", "required": true },
+        { "logicalName": "aaca_enddate", "type": "date", "displayName": "End Date", "description": "Blank = open-ended within the school year." },
+        { "logicalName": "aaca_status", "type": "choice", "displayName": "Status", "required": true, "default": 582100001,
+          "options": [ [582100000, "Planned"], [582100001, "Active"], [582100002, "Ended"] ] },
+        { "logicalName": "aaca_endreason", "type": "choice", "displayName": "End Reason",
+          "options": [ [582100000, "Transfer"], [582100001, "Ratio Change"], [582100002, "Archived"], [582100003, "Year End"], [582100004, "Correction"] ] }
+      ]
+    },
+    {
+      "logicalName": "aaca_absencereason",
+      "displayName": "Absence Reason",
+      "pluralName": "Absence Reasons",
+      "description": "Maintainable list of absence reasons. Required when an absence is Excused.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_active", "type": "bool", "displayName": "Active", "default": true },
+        { "logicalName": "aaca_sortorder", "type": "int", "displayName": "Sort Order", "min": 0, "max": 1000 }
+      ]
+    },
+    {
+      "logicalName": "aaca_attendance",
+      "displayName": "Attendance",
+      "pluralName": "Attendance",
+      "description": "One row per student, service and date. Snapshot columns preserve history. Owned by the recording teacher. Soft-deleted only.",
+      "primaryName": { "logicalName": "aaca_recordkey", "displayName": "Record Key", "maxLength": 100, "description": "yyyymmdd|StudentNumber|ServiceCode" },
+      "columns": [
+        { "logicalName": "aaca_date", "type": "date", "displayName": "Date", "required": true },
+        { "logicalName": "aaca_present", "type": "bool", "displayName": "Present", "required": true, "default": false },
+        { "logicalName": "aaca_iepratio", "type": "choice", "displayName": "IEP Ratio",
+          "options": [ [582100000, "No Aide"], [582100001, "1:1"], [582100002, "2:1"], [582100003, "3:1"], [582100004, "4:1"] ] },
+        { "logicalName": "aaca_classification", "type": "choice", "displayName": "Absence Classification", "secured": true,
+          "description": "Blank = Not classified. Only meaningful when Present = No.",
+          "options": [ [582100000, "Excused"], [582100001, "Unexcused"] ] },
+        { "logicalName": "aaca_classifiedon", "type": "datetime", "displayName": "Classified On", "secured": true },
+        { "logicalName": "aaca_notes", "type": "memo", "displayName": "Notes", "maxLength": 2000 },
+        { "logicalName": "aaca_isdeleted", "type": "bool", "displayName": "Is Deleted", "default": false }
+      ],
+      "keys": [ { "logicalName": "aaca_attendance_studentservicedate", "displayName": "Student Service Date", "columns": [ "aaca_student", "aaca_service", "aaca_date" ] } ]
+    },
+    {
+      "logicalName": "aaca_monthlock",
+      "displayName": "Month Lock",
+      "pluralName": "Month Locks",
+      "description": "Month-end lock per campus. Month = first day of the month.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Name", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_month", "type": "date", "displayName": "Month", "required": true },
+        { "logicalName": "aaca_status", "type": "choice", "displayName": "Status", "required": true, "default": 582100000,
+          "options": [ [582100000, "Locked"], [582100001, "Unlocked"] ] },
+        { "logicalName": "aaca_lockedon", "type": "datetime", "displayName": "Locked On" },
+        { "logicalName": "aaca_reason", "type": "text", "displayName": "Reason", "maxLength": 500 }
+      ],
+      "keys": [ { "logicalName": "aaca_monthlock_campusmonth", "displayName": "Campus Month", "columns": [ "aaca_campus", "aaca_month" ] } ]
+    },
+    {
+      "logicalName": "aaca_setting",
+      "displayName": "Setting",
+      "pluralName": "Settings",
+      "description": "Key/value configuration.",
+      "primaryName": { "logicalName": "aaca_key", "displayName": "Key", "maxLength": 100 },
+      "columns": [
+        { "logicalName": "aaca_value", "type": "text", "displayName": "Value", "maxLength": 500 },
+        { "logicalName": "aaca_description", "type": "text", "displayName": "Description", "maxLength": 500 }
+      ],
+      "keys": [ { "logicalName": "aaca_setting_key", "displayName": "Setting Key", "columns": [ "aaca_key" ] } ]
+    },
+    {
+      "logicalName": "aaca_auditevent",
+      "displayName": "Audit Event",
+      "pluralName": "Audit Events",
+      "description": "Business action with reason, for the in-app audit viewer. Built-in Dataverse auditing is the tamper-proof record. Who/when = Created By/On.",
+      "primaryName": { "logicalName": "aaca_name", "displayName": "Summary", "maxLength": 200 },
+      "columns": [
+        { "logicalName": "aaca_action", "type": "choice", "displayName": "Action", "required": true,
+          "options": [ [582100000, "Create"], [582100001, "Update"], [582100002, "Soft Delete"], [582100003, "Restore"], [582100004, "Transfer"], [582100005, "Discharge"], [582100006, "Archive"], [582100007, "Unarchive"], [582100008, "Reclassify"], [582100009, "Lock"], [582100010, "Unlock"], [582100011, "Override"], [582100012, "Rollover"] ] },
+        { "logicalName": "aaca_entity", "type": "text", "displayName": "Entity", "maxLength": 100, "required": true },
+        { "logicalName": "aaca_entityid", "type": "text", "displayName": "Entity ID", "maxLength": 100, "required": true },
+        { "logicalName": "aaca_before", "type": "memo", "displayName": "Before", "maxLength": 10000 },
+        { "logicalName": "aaca_after", "type": "memo", "displayName": "After", "maxLength": 10000 },
+        { "logicalName": "aaca_reason", "type": "text", "displayName": "Reason", "maxLength": 1000 }
+      ]
+    }
+  ],
+  "lookups": [
+    { "table": "aaca_staff", "logicalName": "aaca_user", "displayName": "User", "target": "systemuser", "description": "Blank until the person has an account. One Staff row per user (checked by Grant-AacaAccess and the integrity check)." },
+    { "table": "aaca_staff", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "description": "Blank = all campuses." },
+
+    { "table": "aaca_student", "logicalName": "aaca_archivedby", "displayName": "Archived By", "target": "systemuser" },
+
+    { "table": "aaca_term", "logicalName": "aaca_schoolyear", "displayName": "School Year", "target": "aaca_schoolyear", "required": true },
+    { "table": "aaca_term", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "description": "Blank = all campuses." },
+
+    { "table": "aaca_calendarexception", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "description": "Blank = all campuses." },
+
+    { "table": "aaca_enrollment", "logicalName": "aaca_student", "displayName": "Student", "target": "aaca_student", "required": true },
+    { "table": "aaca_enrollment", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "required": true },
+    { "table": "aaca_enrollment", "logicalName": "aaca_teacher", "displayName": "Teacher", "target": "aaca_staff", "required": true },
+    { "table": "aaca_enrollment", "logicalName": "aaca_service", "displayName": "Service", "target": "aaca_service", "required": true },
+    { "table": "aaca_enrollment", "logicalName": "aaca_schoolyear", "displayName": "School Year", "target": "aaca_schoolyear", "required": true },
+    { "table": "aaca_enrollment", "logicalName": "aaca_previousenrollment", "displayName": "Previous Enrollment", "target": "aaca_enrollment", "onDelete": "RemoveLink" },
+
+    { "table": "aaca_attendance", "logicalName": "aaca_student", "displayName": "Student", "target": "aaca_student", "required": true },
+    { "table": "aaca_attendance", "logicalName": "aaca_service", "displayName": "Service", "target": "aaca_service", "required": true },
+    { "table": "aaca_attendance", "logicalName": "aaca_enrollment", "displayName": "Enrollment", "target": "aaca_enrollment" },
+    { "table": "aaca_attendance", "logicalName": "aaca_teacher", "displayName": "Teacher", "target": "aaca_staff", "description": "Snapshot at time of recording." },
+    { "table": "aaca_attendance", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "description": "Snapshot at time of recording." },
+    { "table": "aaca_attendance", "logicalName": "aaca_schoolyear", "displayName": "School Year", "target": "aaca_schoolyear", "description": "Snapshot at time of recording." },
+    { "table": "aaca_attendance", "logicalName": "aaca_term", "displayName": "Term", "target": "aaca_term", "description": "Snapshot at time of recording." },
+    { "table": "aaca_attendance", "logicalName": "aaca_absencereason", "displayName": "Absence Reason", "target": "aaca_absencereason", "secured": true },
+    { "table": "aaca_attendance", "logicalName": "aaca_classifiedby", "displayName": "Classified By", "target": "systemuser", "secured": true },
+
+    { "table": "aaca_monthlock", "logicalName": "aaca_campus", "displayName": "Campus", "target": "aaca_campus", "required": true },
+    { "table": "aaca_monthlock", "logicalName": "aaca_lockedby", "displayName": "Locked By", "target": "systemuser" }
+  ]
+}
