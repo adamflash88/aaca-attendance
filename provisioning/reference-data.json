@@ -1,0 +1,69 @@
+{
+  "$comment": "Reference data every environment needs that is not part of the solution. Applied (upserted) by import/Import-AacaData.ps1. Captured from Dev 2026-10-01.",
+  "settings": [
+    {
+      "key": "AbsenceAlertPerTerm",
+      "value": "5",
+      "description": "Alert office staff when a student reaches this many absences in a term."
+    },
+    {
+      "key": "AllowFutureDates",
+      "value": "false",
+      "description": "Allow attendance on future dates (true/false)."
+    },
+    {
+      "key": "ConsecutiveAbsenceAlert",
+      "value": "3",
+      "description": "Alert office staff after this many consecutive absences."
+    },
+    {
+      "key": "ParentReportCutoverDate",
+      "value": "2026-01-01",
+      "description": "Parent absence reports with an absence date on or after this date (yyyy-mm-dd) appear in Ready to approve."
+    },
+    {
+      "key": "UnclassifiedAgingDays",
+      "value": "5",
+      "description": "Flag absences still unclassified after this many days."
+    }
+  ],
+  "absenceReasons": [
+    {
+      "name": "Illness",
+      "active": true,
+      "sortOrder": 10
+    },
+    {
+      "name": "Medical/Therapy Appointment",
+      "active": true,
+      "sortOrder": 20
+    },
+    {
+      "name": "Family Emergency",
+      "active": true,
+      "sortOrder": 30
+    },
+    {
+      "name": "Religious Observance",
+      "active": true,
+      "sortOrder": 40
+    },
+    {
+      "name": "Bereavement",
+      "active": true,
+      "sortOrder": 50
+    },
+    {
+      "name": "Other",
+      "active": true,
+      "sortOrder": 60
+    }
+  ],
+  "services": [
+    {
+      "code": "SPED",
+      "name": "Special Education",
+      "billingCode": null
+    }
+  ]
+}

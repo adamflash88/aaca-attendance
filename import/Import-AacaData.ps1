@@ -79,6 +79,21 @@ foreach ($c in $plan.campuses) {
 $service = Invoke-Dv -Method Patch -Path "$(Set-Of 'aaca_service')(aaca_servicecode='$($plan.serviceCode)')" -Body @{ aaca_name = 'Special Education'; aaca_active = $true } -ExtraHeaders @{ Prefer = 'return=representation' }
 $serviceId = $service.aaca_serviceid
 
+Step 'Reference data (settings, absence reasons)'
+# Rows every environment needs that are data, not solution components (see provisioning/reference-data.json).
+$ref = Get-Content (Join-Path $PSScriptRoot '..\provisioning\reference-data.json') -Raw | ConvertFrom-Json
+foreach ($st in $ref.settings) {
+    Invoke-Dv -Method Patch -Path "$(Set-Of 'aaca_setting')(aaca_key='$($st.key)')" -Body @{ aaca_value = $st.value; aaca_description = $st.description } | Out-Null
+}
+$reasonSet = Set-Of 'aaca_absencereason'
+$existingReasons = @(foreach ($r in (Get-DvAll "${reasonSet}?`$select=aaca_name")) { $r.aaca_name })
+foreach ($ar in $ref.absenceReasons) {
+    if ($existingReasons -notcontains $ar.name) {
+        New-DvRow $reasonSet @{ aaca_name = $ar.name; aaca_active = [bool]$ar.active; aaca_sortorder = [int]$ar.sortOrder } | Out-Null
+    }
+}
+Write-Host "  $(@($ref.settings).Count) settings, $(@($ref.absenceReasons).Count) absence reasons ensured"
+
 Step 'School years'
 $yearId = @{}
 $today = [datetime]$plan.today

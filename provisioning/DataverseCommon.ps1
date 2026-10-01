@@ -8,6 +8,7 @@ $ErrorActionPreference = 'Stop'
 $script:DvClientId = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 $script:DvTenantId = 'organizations'
 $script:DvTokenExpires = $null
+$script:DvSolutionManaged = $null
 
 function New-Label([string] $text) {
     # Collections are List[object] so an empty or single-item list still serializes as a JSON array.
@@ -246,6 +247,12 @@ function New-DvRow([string] $EntitySet, [hashtable] $Body) {
 }
 
 function Add-DvSolutionComponent([guid] $ComponentId, [int] $ComponentType) {
+    # Test/Production hold the solution as managed, which can't take new components: leave them unmanaged there.
+    if ($null -eq $script:DvSolutionManaged) {
+        $s = (Invoke-Dv -Path "solutions?`$select=ismanaged&`$filter=uniquename eq '$script:DvSolution'").value | Select-Object -First 1
+        $script:DvSolutionManaged = [bool]($s -and $s.ismanaged)
+    }
+    if ($script:DvSolutionManaged) { return }
     Invoke-Dv -Method Post -Path 'AddSolutionComponent' -Body @{
         ComponentId = $ComponentId; ComponentType = $ComponentType; SolutionUniqueName = $script:DvSolution
         AddRequiredComponents = $false; DoNotIncludeSubcomponents = $false

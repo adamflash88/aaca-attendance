@@ -123,6 +123,12 @@ foreach ($t in $schema.tables) {
     foreach ($c in $t.columns) { if ($c.PSObject.Properties['secured'] -and $c.secured) { $secured += [pscustomobject]@{ table = $t.logicalName; column = $c.logicalName } } }
 }
 foreach ($l in $schema.lookups) { if ($l.PSObject.Properties['secured'] -and $l.secured) { $secured += [pscustomobject]@{ table = $l.table; column = $l.logicalName } } }
+# Only columns the environment actually secures can take permissions (the schema marks two lookups secured that
+# Deploy-Schema never secured). Skip those with a warning rather than failing.
+$secured = @(foreach ($s in $secured) {
+    $isSec = (Invoke-Dv -Path "EntityDefinitions(LogicalName='$($s.table)')/Attributes(LogicalName='$($s.column)')?`$select=IsSecured").IsSecured
+    if ($isSec) { $s } else { Write-Warning "$($s.table).$($s.column) is not column-secured in this environment; skipped." }
+})
 
 # 4 = Allowed, 0 = Not allowed
 $profiles = [ordered]@{

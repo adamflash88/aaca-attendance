@@ -37,7 +37,7 @@ if ($Role -in 'Teacher', 'AttendanceOffice' -and -not $Campus) { throw "-Campus 
 
 # User
 $email = $UserEmail.Replace("'", "''")
-$user = (Invoke-Dv -Path "systemusers?`$select=systemuserid,fullname,_businessunitid_value&`$filter=internalemailaddress eq '$email' or domainname eq '$email'").value | Select-Object -First 1
+$user = (Invoke-Dv -Path "systemusers?`$select=systemuserid,fullname,firstname,lastname,_businessunitid_value&`$filter=internalemailaddress eq '$email' or domainname eq '$email'").value | Select-Object -First 1
 if (-not $user) { throw "$UserEmail is not a user in this environment. Add them in the Power Platform admin center first." }
 $userId = $user.systemuserid
 
@@ -55,10 +55,11 @@ $targetBu = if ($Role -in 'Teacher', 'AttendanceOffice') {
     $bu.businessunitid
 } else { $rootBu }
 
-function Get-UserRoles { (Invoke-Dv -Path "systemusers($userId)/systemuserroles_association?`$select=roleid,name").value }
+function Get-UserRoles { @((Invoke-Dv -Path "systemusers($userId)/systemuserroles_association?`$select=roleid,name").value) }
+function Names($rows) { @(foreach ($r in $rows) { $r.name }) }
 
 if ($user._businessunitid_value -ne $targetBu) {
-    if ((Get-UserRoles).name -contains 'System Administrator' -and -not $Force) {
+    if ((Names (Get-UserRoles)) -contains 'System Administrator' -and -not $Force) {
         throw "$UserEmail is a System Administrator; moving business units would remove that role. Use -Force if intended."
     }
     Invoke-Dv -Method Patch -Path "systemusers($userId)" -Body @{ 'businessunitid@odata.bind' = "/businessunits($targetBu)" } | Out-Null
@@ -72,7 +73,7 @@ foreach ($r in $current | Where-Object { $_.name -like 'AACA *' -and $_.name -ne
     Write-Host "Removed role $($r.name)"
 }
 foreach ($rn in $roleNames[$Role], 'Basic User') {
-    if ($current.name -contains $rn) { continue }
+    if ((Names $current) -contains $rn) { continue }
     $r = (Invoke-Dv -Path "roles?`$select=roleid&`$filter=name eq '$rn' and _businessunitid_value eq $targetBu").value | Select-Object -First 1
     if (-not $r) { throw "Role '$rn' not found in the target business unit. Run Deploy-Security.ps1." }
     Invoke-Dv -Method Post -Path "systemusers($userId)/systemuserroles_association/`$ref" -Body @{ '@odata.id' = "$script:DvApi/roles($($r.roleid))" } | Out-Null
@@ -81,9 +82,9 @@ foreach ($rn in $roleNames[$Role], 'Basic User') {
 
 # Column-security profile: exactly one of the two AACA profiles
 $profiles = (Invoke-Dv -Path "fieldsecurityprofiles?`$select=fieldsecurityprofileid,name&`$filter=startswith(name,'AACA ')").value
-$userProfiles = (Invoke-Dv -Path "systemusers($userId)/systemuserprofiles_association?`$select=fieldsecurityprofileid,name").value
+$userProfiles = @((Invoke-Dv -Path "systemusers($userId)/systemuserprofiles_association?`$select=fieldsecurityprofileid,name").value)
 foreach ($p in $profiles) {
-    $has = $userProfiles.fieldsecurityprofileid -contains $p.fieldsecurityprofileid
+    $has = @(foreach ($up in $userProfiles) { $up.fieldsecurityprofileid }) -contains $p.fieldsecurityprofileid
     if ($p.name -eq $fsProfile -and -not $has) {
         Invoke-Dv -Method Post -Path "systemusers($userId)/systemuserprofiles_association/`$ref" -Body @{ '@odata.id' = "$script:DvApi/fieldsecurityprofiles($($p.fieldsecurityprofileid))" } | Out-Null
         Write-Host "Added column-security profile $($p.name)" -ForegroundColor Green
@@ -96,7 +97,18 @@ foreach ($p in $profiles) {
 # Staff row (drives the app UI)
 $staffSet = Get-DvEntitySet 'aaca_staff'
 $staff = (Invoke-Dv -Path "${staffSet}?`$select=aaca_staffid&`$filter=_aaca_user_value eq $userId").value | Select-Object -First 1
-$body = @{ aaca_name = $user.fullname; aaca_approle = $appRole[$Role]; aaca_active = $true; 'aaca_user@odata.bind' = "/systemusers($userId)" }
+if (-not $staff) {
+    # Imported Staff rows (which own the teacher's enrollments) are named "Last, First" and their sheet email may
+    # differ from the account's; link the unlinked row with this person's name instead of creating a duplicate.
+    $names = @($user.fullname, "$($user.lastname), $($user.firstname)") | Where-Object { $_ -and $_ -ne ', ' } |
+        ForEach-Object { "aaca_name eq '$($_.Replace("'", "''"))'" }
+    $found = @((Invoke-Dv -Path "${staffSet}?`$select=aaca_staffid,aaca_name&`$filter=_aaca_user_value eq null and ($($names -join ' or '))").value)
+    if ($found.Count -gt 1) { throw "More than one unlinked Staff row named $($user.fullname); link the right one manually." }
+    $staff = $found | Select-Object -First 1
+    if ($staff) { Write-Host "Linking existing Staff row '$($staff.aaca_name)'" }
+}
+$body = @{ aaca_approle = $appRole[$Role]; aaca_active = $true; 'aaca_user@odata.bind' = "/systemusers($userId)" }
+if (-not $staff) { $body.aaca_name = $user.fullname }
 if ($campusRow) { $body['aaca_campus@odata.bind'] = "/$(Get-DvEntitySet 'aaca_campus')($($campusRow.aaca_campusid))" }
 if ($staff) {
     Invoke-Dv -Method Patch -Path "$staffSet($($staff.aaca_staffid))" -Body $body | Out-Null
