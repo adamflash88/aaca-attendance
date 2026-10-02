@@ -67,6 +67,10 @@ Grant $m 'aaca_attendance' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 Grant $m 'aaca_calendarexception', 'aaca_monthlock' 'Create', 'Write', 'Append' 'Local'
 Grant $m 'aaca_absencereason' 'Create', 'Write' 'Global'
 Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Append' 'Local'
+# Family portal: process their campus's absence notices (parents create them through the portal) and see who the
+# guardians are. Guardian onboarding (creating links) is a later phase.
+Grant $m 'aaca_absencenotice' 'Read', 'Write', 'Append' 'Local'
+Grant $m 'aaca_guardianlink' 'Read' 'Local'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Local'
 $roles['AACA Attendance Office'] = @{ Description = 'Campus office: students, assignments, ratios, parent-report approval and absence classification, month locks.'; Matrix = $m }
 
@@ -87,16 +91,17 @@ Grant $m $billingTables $allAccess 'Global'
 Grant $m ($allTables | Where-Object { $_ -ne 'aaca_auditevent' }) 'Read', 'AppendTo' 'Global'
 Grant $m 'aaca_service' 'Write' 'Global'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Global'
+$roles['AACA Finance'] = @{ Description = 'Billing: CodeMetro uploads, mappings, RDS grids, month close, QuickBooks export and RDS PDFs.'; Matrix = $m }
+
 # Campus record owner: given only to each campus business unit's default team, which owns that campus's students,
 # enrollments and attendance (Set-CampusOwnership.ps1). Dataverse requires an owning team to be able to read what it
 # owns; Basic depth = only the team's own records, which campus staff can already read at Local depth.
 $m = @{}
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Read', 'AppendTo' 'Basic'
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Append' 'Basic'
+Grant $m 'aaca_guardianlink', 'aaca_absencenotice' 'Read', 'Append' 'Basic'
 Grant $m $reference 'Read', 'AppendTo' 'Global'
-$roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments and attendance.'; Matrix = $m }
-
-$roles['AACA Finance'] =@{ Description = 'Billing: CodeMetro uploads, mappings, RDS grids, month close, QuickBooks export and RDS PDFs.'; Matrix = $m }
+$roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments, attendance and family-portal records.'; Matrix = $m }
 #endregion
 
 #region Business units ------------------------------------------------------------------

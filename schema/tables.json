@@ -1071,6 +1071,135 @@
       ]
     },
     {
+      "logicalName": "aaca_guardianlink",
+      "displayName": "Guardian Link",
+      "pluralName": "Guardian Links",
+      "description": "Family portal: links a parent or guardian (Contact) to one student. Only linked, active guardians see the student in the portal. Owned by the student's campus team.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Name",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_relationship",
+          "type": "choice",
+          "displayName": "Relationship",
+          "options": [
+            [
+              582100000,
+              "Parent"
+            ],
+            [
+              582100001,
+              "Guardian"
+            ],
+            [
+              582100002,
+              "Grandparent"
+            ],
+            [
+              582100003,
+              "Foster Parent"
+            ],
+            [
+              582100004,
+              "Caregiver"
+            ],
+            [
+              582100005,
+              "Other"
+            ]
+          ],
+          "default": 582100000
+        },
+        {
+          "logicalName": "aaca_canreportabsences",
+          "type": "bool",
+          "displayName": "Can Report Absences",
+          "default": true
+        },
+        {
+          "logicalName": "aaca_active",
+          "type": "bool",
+          "displayName": "Active",
+          "default": true
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_guardianlink_contactstudent",
+          "displayName": "Contact Student",
+          "columns": [
+            "aaca_contact",
+            "aaca_student"
+          ]
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_absencenotice",
+      "displayName": "Absence Notice",
+      "pluralName": "Absence Notices",
+      "description": "Family portal: an absence reported by a linked guardian. Submitted on = Created On (server time, used for the 24-hour notice rule). A flow sets the campus and makes the campus team the owner.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_absencestart",
+          "type": "date",
+          "displayName": "First Day Absent",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_absenceend",
+          "type": "date",
+          "displayName": "Last Day Absent",
+          "required": true,
+          "description": "Same as First Day Absent for a single day."
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "memo",
+          "displayName": "Note",
+          "maxLength": 2000
+        },
+        {
+          "logicalName": "aaca_status",
+          "type": "choice",
+          "displayName": "Status",
+          "options": [
+            [
+              582100000,
+              "New"
+            ],
+            [
+              582100001,
+              "Accepted"
+            ],
+            [
+              582100002,
+              "Dismissed"
+            ],
+            [
+              582100003,
+              "Cancelled"
+            ]
+          ],
+          "required": true,
+          "default": 582100000
+        },
+        {
+          "logicalName": "aaca_processedon",
+          "type": "datetime",
+          "displayName": "Processed On"
+        }
+      ]
+    },
+    {
       "logicalName": "aaca_funder",
       "displayName": "Funder",
       "pluralName": "Funders",
@@ -1788,6 +1917,57 @@
       "logicalName": "aaca_campus",
       "displayName": "Campus",
       "target": "aaca_campus"
+    },
+    {
+      "table": "aaca_guardianlink",
+      "logicalName": "aaca_contact",
+      "displayName": "Guardian",
+      "target": "contact",
+      "required": true,
+      "onDelete": "Cascade",
+      "description": "Deleting the contact removes its links."
+    },
+    {
+      "table": "aaca_guardianlink",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student",
+      "required": true
+    },
+    {
+      "table": "aaca_absencenotice",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student",
+      "required": true
+    },
+    {
+      "table": "aaca_absencenotice",
+      "logicalName": "aaca_submittedby",
+      "displayName": "Submitted By",
+      "target": "contact",
+      "required": true,
+      "description": "The guardian who reported the absence (kept as billing evidence)."
+    },
+    {
+      "table": "aaca_absencenotice",
+      "logicalName": "aaca_absencereason",
+      "displayName": "Absence Reason",
+      "target": "aaca_absencereason",
+      "required": true
+    },
+    {
+      "table": "aaca_absencenotice",
+      "logicalName": "aaca_campus",
+      "displayName": "Campus",
+      "target": "aaca_campus",
+      "description": "Set by the campus-assignment flow from the student's active enrollment."
+    },
+    {
+      "table": "aaca_absencenotice",
+      "logicalName": "aaca_processedby",
+      "displayName": "Processed By",
+      "target": "systemuser"
     },
     {
       "table": "aaca_funderalias",

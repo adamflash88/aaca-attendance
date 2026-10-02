@@ -1,6 +1,7 @@
 # AACA Family Portal (Power Pages) - plan, 2026-10-02
 
-Status: proposed, awaiting Adam's answers (see "Open questions"). Build in **Dev** first
+Status: approved 2026-10-02 (see "Decisions"). Phase 1 schema + roles deployed to Dev 2026-10-02; campus flow
+(`flows/Absence-Notice-Campus.md`) to be built by Adam; web role + table permissions move to Phase 2 (need the site). Build in **Dev** first
 (env https://org42baa05f.crm.dynamics.com, same Dataverse as the attendance and billing apps).
 Tooling: Microsoft `power-pages` Claude Code plugin (installed 2026-10-02): create-site (code site / SPA),
 setup-datamodel, setup-auth, create-webroles, integrate-webapi, audit-permissions, security-review,
@@ -22,14 +23,17 @@ billable-notice rule (notice < 24h before 9:00am PT school start, or none = bill
 - **Data (new):**
   - Guardian = built-in `contact`.
   - `aaca_guardianlink`: contact <-> aaca_student, relationship, can report absences, active.
-  - `aaca_absencenotice`: student, submitting contact, absence start/end, return date, reason (aaca_absencereason),
-    note, status (New / Accepted / Dismissed / Cancelled), campus; submitted-on = createdon (server).
-    A flow on create sets campus + owner = campus default team (same model as Set-CampusOwnership.ps1).
+  - `aaca_absencenotice`: student, submitted by (contact), first/last day absent (full days only in v1), reason
+    (aaca_absencereason), note, status (New / Accepted / Dismissed / Cancelled), campus, processed on/by;
+    submitted-on = createdon (server). A flow on create checks the guardian link, sets campus + owner = campus
+    default team (same model as Set-CampusOwnership.ps1) and the summary name.
+  - Portal shows students by first name only (no last-initial column needed).
 - **Web role "Guardian"; table permissions:** contact (self); guardian link (contact scope, read);
   student (parental via guardian link, read, minimal columns: first name + last initial / key not shown);
   absence notice (contact scope: create, read, cancel own future-dated). Web API field allow-lists.
-- **Parent pages (v1):** sign in; my children; report an absence; my reports (status, cancel future);
-  help (office phone numbers per campus).
+- **Parent pages (v1, confirmed 2026-10-02):** sign in; parent dashboard (card/tile layout built to take
+  more features later, e.g. my reports, attendance, documents); report an absence. Deferred: my reports
+  list/cancel, help page, attendance view.
 - **Office side:** notices appear in the attendance app's Absences tab for that campus, already matched
   (part of the planned Absences/Transportation rebuild).
 
@@ -41,13 +45,18 @@ billable-notice rule (notice < 24h before 9:00am PT school start, or none = bill
 4. Guardian onboarding: import guardian contacts, send invitations.
 5. Cutover from the website form; Spanish; custom domain; production authenticated-user capacity licence.
 
+## Decisions (Adam, 2026-10-02)
+
+1. Sign-in: **Entra External ID** external tenant (email one-time passcode).
+2. Guardian data: no formal repository; Adam's **student enrollment web app** holds most/all parent emails
+   and is the likely source for the Phase 4 import.
+3. **English first**; Spanish in Phase 5.
+4. v1 scope: **login, parent dashboard (extensible), absence reporting** only.
+
 ## Open questions (Adam)
 
-1. Entra External ID external tenant (free up to 50k MAU) OK, or plain local email/password accounts?
-2. Where guardian names/emails live today (CodeMetro / SIS / spreadsheet)? Sample export for the import.
-3. English + Spanish from day one?
-4. Branding (logo, colours from autismacademy.org) and site name.
-5. v1 scope confirmed (no attendance view for parents in v1)?
+1. Branding (logo, colours from autismacademy.org) and site name.
+2. Enrollment web app: where it stores parent emails (Dataverse table? SharePoint? other) for the import.
 
 ## Related decisions already made (attendance app, same discussion)
 

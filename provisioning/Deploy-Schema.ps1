@@ -43,6 +43,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $schema = Get-Content $SchemaPath -Raw | ConvertFrom-Json
+# Built-in tables a lookup may target besides our own (contact = family portal guardians).
+$systemTargets = 'systemuser', 'contact'
+function Get-Prop($obj, [string] $name, $default = $null) {
+    if ($obj.PSObject.Properties[$name]) { $obj.$name } else { $default }
+}
 
 #region Validation ----------------------------------------------------------------------
 function Test-Schema {
@@ -76,7 +81,8 @@ function Test-Schema {
     }
     foreach ($l in $schema.lookups) {
         if ($l.table -notin $tableNames) { $errors.Add("Lookup $($l.logicalName): unknown table $($l.table)") }
-        if ($l.target -ne 'systemuser' -and $l.target -notin $tableNames) { $errors.Add("Lookup $($l.table).$($l.logicalName): unknown target $($l.target)") }
+        if ($l.target -notin $systemTargets -and $l.target -notin $tableNames) { $errors.Add("Lookup $($l.table).$($l.logicalName): unknown target $($l.target)") }
+        if ((Get-Prop $l 'onDelete' 'Restrict') -notin 'Restrict', 'RemoveLink', 'Cascade') { $errors.Add("Lookup $($l.table).$($l.logicalName): unknown onDelete $($l.onDelete)") }
     }
     return $errors
 }
@@ -99,9 +105,6 @@ function New-Label([string] $text) {
 }
 function New-Required([bool] $required) {
     @{ Value = $(if ($required) { 'ApplicationRequired' } else { 'None' }); CanBeChanged = $true; ManagedPropertyLogicalName = 'canmodifyrequirementlevelsettings' }
-}
-function Get-Prop($obj, [string] $name, $default = $null) {
-    if ($obj.PSObject.Properties[$name]) { $obj.$name } else { $default }
 }
 function New-AuditSetting { @{ Value = $true; CanBeChanged = $true; ManagedPropertyLogicalName = 'canmodifyauditsettings' } }
 
@@ -186,6 +189,8 @@ function New-TableBody($t) {
 
 function New-LookupBody($l) {
     $onDelete = Get-Prop $l 'onDelete' $(if ($l.target -eq 'systemuser') { 'RemoveLink' } else { 'Restrict' })
+    # Dataverse requires Merge = Cascade on relationships to contact (contacts can be merged).
+    $merge = if ($l.target -eq 'contact') { 'Cascade' } else { 'NoCascade' }
     @{
         '@odata.type'        = 'Microsoft.Dynamics.CRM.OneToManyRelationshipMetadata'
         SchemaName           = "$($l.table)_$($l.logicalName)"
@@ -193,7 +198,7 @@ function New-LookupBody($l) {
         ReferencedAttribute  = "$($l.target)id"
         ReferencingEntity    = $l.table
         CascadeConfiguration = @{ Assign = 'NoCascade'; Share = 'NoCascade'; Unshare = 'NoCascade'; Reparent = 'NoCascade'
-                                  Merge = 'NoCascade'; RollupView = 'NoCascade'; Delete = $onDelete }
+                                  Merge = $merge; RollupView = 'NoCascade'; Delete = $onDelete }
         Lookup               = @{
             '@odata.type'  = 'Microsoft.Dynamics.CRM.LookupAttributeMetadata'
             SchemaName     = $l.logicalName
