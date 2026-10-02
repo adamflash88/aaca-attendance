@@ -87,7 +87,16 @@ Grant $m $billingTables $allAccess 'Global'
 Grant $m ($allTables | Where-Object { $_ -ne 'aaca_auditevent' }) 'Read', 'AppendTo' 'Global'
 Grant $m 'aaca_service' 'Write' 'Global'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Global'
-$roles['AACA Finance'] = @{ Description = 'Billing: CodeMetro uploads, mappings, RDS grids, month close, QuickBooks export and RDS PDFs.'; Matrix = $m }
+# Campus record owner: given only to each campus business unit's default team, which owns that campus's students,
+# enrollments and attendance (Set-CampusOwnership.ps1). Dataverse requires an owning team to be able to read what it
+# owns; Basic depth = only the team's own records, which campus staff can already read at Local depth.
+$m = @{}
+Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Read', 'AppendTo' 'Basic'
+Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Append' 'Basic'
+Grant $m $reference 'Read', 'AppendTo' 'Global'
+$roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments and attendance.'; Matrix = $m }
+
+$roles['AACA Finance'] =@{ Description = 'Billing: CodeMetro uploads, mappings, RDS grids, month close, QuickBooks export and RDS PDFs.'; Matrix = $m }
 #endregion
 
 #region Business units ------------------------------------------------------------------
@@ -132,6 +141,20 @@ foreach ($roleName in $roles.Keys) {
     }
     Invoke-Dv -Method Post -Path "roles($($role.roleid))/Microsoft.Dynamics.CRM.ReplacePrivilegesRole" -Body @{ Privileges = $list } | Out-Null
     Write-Host "  $roleName : $($list.Count) privileges set"
+}
+#endregion
+
+#region Campus teams --------------------------------------------------------------------
+foreach ($c in $campuses) {
+    $bu = (Invoke-Dv -Path "businessunits?`$select=businessunitid&`$filter=name eq '$($c.aaca_name.Replace("'", "''"))'").value | Select-Object -First 1
+    if (-not $bu) { continue }
+    $team = (Invoke-Dv -Path "teams?`$select=teamid&`$filter=isdefault eq true and _businessunitid_value eq $($bu.businessunitid)").value | Select-Object -First 1
+    $r = (Invoke-Dv -Path "roles?`$select=roleid&`$filter=name eq 'AACA Campus Records' and _businessunitid_value eq $($bu.businessunitid)").value | Select-Object -First 1
+    $has = @((Invoke-Dv -Path "teams($($team.teamid))/teamroles_association?`$select=roleid&`$filter=roleid eq $($r.roleid)").value).Count -gt 0
+    if (-not $has) {
+        Invoke-Dv -Method Post -Path "teams($($team.teamid))/teamroles_association/`$ref" -Body @{ '@odata.id' = "$script:DvApi/roles($($r.roleid))" } | Out-Null
+        Write-Host "Campus team $($c.aaca_name): AACA Campus Records assigned" -ForegroundColor Green
+    }
 }
 #endregion
 

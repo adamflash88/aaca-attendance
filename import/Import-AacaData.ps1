@@ -218,6 +218,12 @@ if ($maxKey) {
 }
 #endregion
 
+# Campus roles (Teacher, Attendance Office) read only their own campus's records: hand each record to its campus
+# (needs Deploy-Security.ps1 to have created the campus business units; otherwise run Set-CampusOwnership later).
+Step 'Campus ownership'
+try { & (Join-Path $PSScriptRoot '..\provisioning\Set-CampusOwnership.ps1') -EnvironmentUrl $EnvironmentUrl | Out-Null; Write-Host '  records assigned to their campus teams' }
+catch { Write-Warning "Campus ownership not set ($($_.Exception.Message)). Run Deploy-Security.ps1, then provisioning/Set-CampusOwnership.ps1." }
+
 Step 'Done'
 $check = foreach ($t in 'aaca_campus', 'aaca_staff', 'aaca_student', 'aaca_enrollment', 'aaca_schoolyear', 'aaca_term', 'aaca_calendarexception', 'aaca_attendance') {
     [pscustomobject]@{ Table = $t; Rows = (Get-DvAll "$(Set-Of $t)?`$select=createdon").Count }
