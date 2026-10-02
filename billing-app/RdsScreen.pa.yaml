@@ -1,0 +1,1485 @@
+Screens:
+  RdsScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: =Select(btnRdsLoadEngine)
+    Children:
+      - conRdsRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conRdsHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conRdsRoot.Width < 640, 92, 76) + If(IsFinance, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblRdsTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Billing"
+                        Wrap: =false
+                  - lblRdsIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conRdsRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conRdsNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =IsFinance
+                      Children:
+                        - btnRdsNavHome:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Home"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(HomeScreen)
+                              Size: =14
+                              Text: ="Home"
+                              Width: =110
+                        - btnRdsNavFunders:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Funders"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(FundersScreen)
+                              Size: =14
+                              Text: ="Funders"
+                              Width: =110
+                        - btnRdsNavServices:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Services"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(ServicesScreen)
+                              Size: =14
+                              Text: ="Services"
+                              Width: =110
+                        - btnRdsNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnRdsNavRds:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="RDS Grid (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(RdsScreen)
+                              Size: =14
+                              Text: ="RDS Grid"
+                              Width: =110
+            - conRdsGate:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!IsFinance
+                Children:
+                  - lblRdsGateTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="You don't have access to AACA Billing"
+                        Wrap: =false
+                  - lblRdsGateBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        VerticalAlign: =VerticalAlign.Top
+            - conRdsPickers:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =10 + If(conRdsRoot.Width - 66 >= 1160, 66, conRdsRoot.Width - 66 >= 828, 144, 222) + 6 + 18 + 10
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =6
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =10
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =10
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =IsFinance
+                Children:
+                  - conRdsPickerRow:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conRdsRoot.Width - 66 >= 1160, 66, conRdsRoot.Width - 66 >= 828, 144, 222)
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                      Children:
+                        - conRdsMonthField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =66
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Width: =356
+                            Children:
+                              - lblRdsMonthCap:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Month"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Month"
+                                    Wrap: =false
+                              - conRdsMonthRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnRdsPrevMonth:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Previous month"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varRdsLoading || IsBlank(varRdsMonth), DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varRdsMonth, Date(Year(varRdsMonth), Month(varRdsMonth) - 1, 1)); Select(btnRdsMonthEngine)
+                                          Size: =14
+                                          Text: ="Previous"
+                                    - lblRdsMonth:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Selected month " & Self.Text
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =44
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Text: =If(IsBlank(varRdsMonth), "", Text(varRdsMonth, "mmmm yyyy"))
+                                          Width: =140
+                                          Wrap: =false
+                                    - btnRdsNextMonth:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Next month"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varRdsLoading || IsBlank(varRdsMonth), DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varRdsMonth, Date(Year(varRdsMonth), Month(varRdsMonth) + 1, 1)); Select(btnRdsMonthEngine)
+                                          Size: =14
+                                          Text: ="Next"
+                        - conRdsFunderField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =66
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Width: =460
+                            Children:
+                              - lblRdsFunderCap:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Funder"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Funder"
+                                    Wrap: =false
+                              - ddRdsFunder:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="Funder"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colRdsFunderOpts, FunderId = varRdsFunderId)
+                                    DisplayMode: =If(varRdsLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    ItemDisplayText: =ThisItem.Abbr & " – " & ThisItem.FullName & " (" & ThisItem.TypeText & ")"
+                                    Items: =colRdsFunderOpts
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnChange: =If(Coalesce(Self.Selected.FunderId, ZeroGuid) <> Coalesce(varRdsFunderId, ZeroGuid), Set(varRdsFunderId, Self.Selected.FunderId); Select(btnRdsGridEngine))
+                                    Width: =Parent.Width
+                        - conRdsStudentField:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =66
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Width: =320
+                            Children:
+                              - lblRdsStudentCap:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Student"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Student"
+                                    Wrap: =false
+                              - ddRdsStudent:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="Student"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colRdsStudentOpts, StudentId = varRdsStudentId)
+                                    DisplayMode: =If(varRdsLoading || IsBlank(varRdsFunderId), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    ItemDisplayText: =ThisItem.DisplayName & " (" & ThisItem.StudentKey & ")"
+                                    Items: =colRdsStudentOpts
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnChange: =If(Coalesce(Self.Selected.StudentId, ZeroGuid) <> Coalesce(varRdsStudentId, ZeroGuid), Set(varRdsStudentId, Self.Selected.StudentId); Select(btnRdsGridEngine))
+                                    Width: =Parent.Width
+                  - lblRdsStatus:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =If(varRdsLoadError <> "", ColorUnexcused, varRdsPageCapped, ColorWarnInk, ColorMuted)
+                        Height: =18
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =If(
+                              varRdsLoading, "Loading...",
+                              varRdsLoadError <> "", "Could not load - " & varRdsLoadError,
+                              varRdsPageCapped, "Warning: a day returned 500 or more deliveries, so the funder and student lists may be incomplete. Tell Adam.",
+                              Text(CountRows(colRdsFunderOpts)) & " funders · " & Text(CountRows(colRdsMonthPairs), "#,##0") & " deliveries in " & Text(varRdsMonth, "mmmm yyyy")
+                          )
+                        VerticalAlign: =VerticalAlign.Top
+            - conRdsEmpty:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =72
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =IsFinance && (IsBlank(varRdsFunderId) || IsBlank(varRdsStudentId))
+                Children:
+                  - lblRdsEmptyText:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: |-
+                          =With({mn: Text(varRdsMonth, "mmmm yyyy")},
+                              If(
+                                  varRdsLoading, "Loading...",
+                                  CountRows(colRdsFunderOpts) = 0, "No funders have deliveries, districts of record or student services in " & mn & ". Try another month.",
+                                  IsBlank(varRdsFunderId), "Choose a funder to see its students for " & mn & ".",
+                                  CountRows(colRdsStudentOpts) = 0, "No students have anything for this funder in " & mn & ".",
+                                  "Choose a student to show the Register of Daily Services."
+                              )
+                          )
+                        VerticalAlign: =VerticalAlign.Top
+            - conRdsDoc:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: |-
+                    =16 + 76 + 12 + If(CountRows(colRdsRows) = 0, 40, 58 + Min(880, 36 * CountRows(colRdsRows))) + 12 +
+                     If(conRdsRoot.Width - 66 >= 1004, 28, conRdsRoot.Width - 66 >= 560, 64, 100) + 206 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =IsFinance && !IsBlank(varRdsFunderId) && !IsBlank(varRdsStudentId)
+                Children:
+                  - conRdsDocHead:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =76
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lblRdsDocTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Bold
+                              Height: =28
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =20
+                              Text: |-
+                                =With({s: LookUp(colStudents, StudentId = varRdsStudentId)}, "Register of Daily Services  ·  " & s.DisplayName & " (" & s.StudentKey & ")")
+                              Wrap: =false
+                        - lblRdsDocStudent:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: |-
+                                =With({s: LookUp(colStudents, StudentId = varRdsStudentId)}, s.DisplayName & " (" & s.StudentKey & ")")
+                              Visible: =false
+                              Wrap: =false
+                        - lblRdsDocMeta1:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =With({f: LookUp(colFunders, FunderId = varRdsFunderId)}, "Funder: " & f.Abbr & " – " & f.FullName & " (" & f.TypeText & ")   ·   Month: " & Text(varRdsMonth, "mmmm yyyy"))
+                              VerticalAlign: =VerticalAlign.Top
+                        - lblRdsDocMeta2:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                =With(
+                                    {
+                                        s: LookUp(colStudents, StudentId = varRdsStudentId),
+                                        dors: SortByColumns(Filter(colDor, StudentId = varRdsStudentId && StartDate <= varRdsMonthEnd && Coalesce(EndDate, FarFuture) >= varRdsMonth), "StartDate", SortOrder.Ascending)
+                                    },
+                                    "Campus: " & varRdsCampusText & "   ·   District of record: " &
+                                    If(
+                                        s.TypeText = "Regional Center Only", "None (Regional Center Only)",
+                                        CountRows(dors) = 0, "None on file for this month",
+                                        Concat(dors As d, LookUp(colFunders, FunderId = d.FunderId).Abbr & " " & Text(d.StartDate, "m/d/yyyy") & " to " & If(IsBlank(d.EndDate), "ongoing", Text(d.EndDate, "m/d/yyyy")), "; ")
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                  - lblRdsNoRows:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: |-
+                          =If(varRdsLoading, "Loading grid...", "No rows for this student, funder and month: no attendance or day-service rows apply and no services were delivered.")
+                        VerticalAlign: =VerticalAlign.Top
+                        Visible: =CountRows(colRdsRows) = 0
+                  - conRdsGridScroll:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =58 + Min(880, 36 * Max(1, CountRows(colRdsRows)))
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutOverflowX: =LayoutOverflow.Scroll
+                        Visible: =CountRows(colRdsRows) > 0
+                      Children:
+                        - conRdsGridInner:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =ColorGrid
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =42 + Min(880, 36 * Max(1, CountRows(colRdsRows)))
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Width: =Max(Parent.Width, 330 + 30 * CountRows(colRdsDays))
+                            Children:
+                              - conRdsGridHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorGrid
+                                    FillPortions: =0
+                                    Height: =40
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =1
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =1
+                                  Children:
+                                    - lblRdsHeadLabel:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Service column"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Fill: =ColorPaper
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =39
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =4
+                                          PaddingLeft: =6
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: ="Service"
+                                          VerticalAlign: =VerticalAlign.Bottom
+                                          Width: =220
+                                          Wrap: =false
+                                    - galRdsDayHead:
+                                        Control: Gallery
+                                        Variant: Horizontal
+                                        Properties:
+                                          AccessibleLabel: ="Days of the month"
+                                          Fill: =ColorGrid
+                                          FillPortions: =0
+                                          Height: =39
+                                          Items: =colRdsDays
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Selectable: =false
+                                          ShowScrollbar: =false
+                                          TemplatePadding: =0
+                                          TemplateSize: =RoundDown((conRdsGridInner.Width - 330) / Max(1, CountRows(colRdsDays)), 0)
+                                          Width: =CountRows(colRdsDays) * RoundDown((conRdsGridInner.Width - 330) / Max(1, CountRows(colRdsDays)), 0)
+                                        Children:
+                                          - conRdsDayHeadCell:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Fill: =If(ThisItem.IsSchoolDay, ColorPaper, ColorNonSchool)
+                                                Height: =Parent.TemplateHeight
+                                                LayoutAlignItems: =LayoutAlignItems.Stretch
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                PaddingBottom: =2
+                                                PaddingTop: =2
+                                                RadiusBottomLeft: =0
+                                                RadiusBottomRight: =0
+                                                RadiusTopLeft: =0
+                                                RadiusTopRight: =0
+                                                Width: =Parent.TemplateWidth - 1
+                                              Children:
+                                                - lblRdsDayNum:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Text(ThisItem.CellDate, "dddd mmmm d") & If(ThisItem.IsSchoolDay, "", ", " & ThisItem.NonSchoolReason)
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorInk
+                                                      FontWeight: =FontWeight.Bold
+                                                      Height: =18
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: =Text(ThisItem.DayNum)
+                                                      Wrap: =false
+                                                - lblRdsDayDow:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Text(ThisItem.CellDate, "dddd mmmm d") & If(ThisItem.IsSchoolDay, "", ", " & ThisItem.NonSchoolReason)
+                                                      Align: =Align.Center
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorMuted
+                                                      Height: =14
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =9
+                                                      Text: =ThisItem.DowLetter
+                                                      Wrap: =false
+                                    - lblRdsHeadTotal:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Total column"
+                                          Align: =Align.Center
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Fill: =ColorPaper
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =4
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =11
+                                          Text: ="Total"
+                                          VerticalAlign: =VerticalAlign.Bottom
+                                          Wrap: =false
+                              - galRdsRows:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Register rows for " & Text(varRdsMonth, "mmmm yyyy")
+                                    FillPortions: =0
+                                    Height: =Min(880, 36 * Max(1, CountRows(colRdsRows)))
+                                    Items: =SortByColumns(colRdsRows, "SortKey", SortOrder.Ascending, "Label", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =36
+                                  Children:
+                                    - conRdsRowShell:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          Fill: =ColorGrid
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =1
+                                          PaddingBottom: =1
+                                          Width: =Parent.TemplateWidth
+                                        Children:
+                                          - lblRdsRowLabel:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =If(ThisItem.IsBillable, ColorInk, ColorMuted)
+                                                Fill: =ColorWhite
+                                                FontWeight: =If(ThisItem.Kind = "SAI", FontWeight.Semibold, FontWeight.Normal)
+                                                Height: =35
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =6
+                                                PaddingRight: =4
+                                                PaddingTop: =0
+                                                Size: =11
+                                                Text: =ThisItem.Label & If(ThisItem.IsBillable, "", " · not billable")
+                                                Width: =220
+                                          - galRdsCells:
+                                              Control: Gallery
+                                              Variant: Horizontal
+                                              Properties:
+                                                AccessibleLabel: ="Days for " & ThisItem.Label
+                                                Fill: =ColorGrid
+                                                FillPortions: =0
+                                                Height: =35
+                                                Items: =SortByColumns(Filter(colRdsCells, RowKey = ThisItem.RowKey), "DayNum", SortOrder.Ascending)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                Selectable: =false
+                                                ShowScrollbar: =false
+                                                TemplatePadding: =0
+                                                TemplateSize: =RoundDown((conRdsGridInner.Width - 330) / Max(1, CountRows(colRdsDays)), 0)
+                                                Width: =CountRows(colRdsDays) * RoundDown((conRdsGridInner.Width - 330) / Max(1, CountRows(colRdsDays)), 0)
+                                              Children:
+                                                - lblRdsCell:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Text(ThisItem.DayNum) & " " & Switch(ThisItem.State, "excused", "absent excused", "unexcused", "absent unexcused", "nonschool", "non-school day", "flag", "review, minutes on a non-school day", "outside", "outside the row dates", "") & " " & ThisItem.CellText
+                                                      Align: =Align.Center
+                                                      Color: =If(ThisItem.State = "excused" || ThisItem.State = "unexcused", ColorWhite, ColorInk)
+                                                      Fill: =Switch(ThisItem.State, "excused", ColorExcused, "unexcused", ColorUnexcused, "nonschool", ColorNonSchool, "flag", ColorFlag, "outside", ColorNotEnrolled, ColorWhite)
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =Parent.TemplateHeight
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: =ThisItem.CellText
+                                                      Width: =Parent.TemplateWidth - 1
+                                                      Wrap: =false
+                                          - conRdsRowTotal:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                Fill: =ColorWhite
+                                                LayoutAlignItems: =LayoutAlignItems.Stretch
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =2
+                                                PaddingLeft: =4
+                                                PaddingRight: =4
+                                                PaddingTop: =2
+                                              Children:
+                                                - lblRdsRowTotalMain:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: ="Total " & Self.Text
+                                                      Align: =Align.Right
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorInk
+                                                      FontWeight: =FontWeight.Bold
+                                                      Height: =18
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =11
+                                                      Text: |-
+                                                        =With({tot: Sum(Filter(colRdsCells, RowKey = ThisItem.RowKey), CellNum)}, If(ThisItem.Kind = "CLIN", Text(tot, "#,##0") & " min", Text(tot) & " days"))
+                                                      Wrap: =false
+                                                - lblRdsRowTotalSub:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: ="Total " & Self.Text
+                                                      Align: =Align.Right
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorMuted
+                                                      Height: =14
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =10
+                                                      Text: =Switch(ThisItem.Kind, "SAI", "absent " & CountIf(colRdsCells, RowKey = ThisItem.RowKey && IsAbsent), "DAY", "", Text(Sum(Filter(colRdsCells, RowKey = ThisItem.RowKey), CellNum) / 60, "0.00") & " h · " & ThisItem.UnitText)
+                                                      Wrap: =false
+                  - conRdsFooter:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conRdsRoot.Width - 66 >= 1004, 28, conRdsRoot.Width - 66 >= 560, 64, 100) + 206
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =6
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - conRdsLegend:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conRdsRoot.Width - 66 >= 1004, 28, conRdsRoot.Width - 66 >= 560, 64, 100)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutWrap: =true
+                            Children:
+                              - lblRdsLegPresent:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorInk
+                                    Fill: =ColorWhite
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="1 present"
+                                    Width: =90
+                                    Wrap: =false
+                              - lblRdsLegExcused:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorWhite
+                                    Fill: =ColorExcused
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="0 excused"
+                                    Width: =96
+                                    Wrap: =false
+                              - lblRdsLegUnexcused:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorWhite
+                                    Fill: =ColorUnexcused
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="0 unexcused"
+                                    Width: =110
+                                    Wrap: =false
+                              - lblRdsLegUnclass:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorInk
+                                    Fill: =ColorWhite
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="0 not classified"
+                                    Width: =130
+                                    Wrap: =false
+                              - lblRdsLegNonSchool:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorInk
+                                    Fill: =ColorNonSchool
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="Non-school day"
+                                    Width: =130
+                                    Wrap: =false
+                              - lblRdsLegFlag:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorInk
+                                    Fill: =ColorFlag
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: |-
+                                      ="Review: minutes on a non-school day"
+                                    Width: =260
+                                    Wrap: =false
+                              - lblRdsLegOutside:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Legend " & Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    Color: =ColorInk
+                                    Fill: =ColorNotEnrolled
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =0
+                                    Size: =11
+                                    Text: ="Outside row dates"
+                                    Width: =140
+                                    Wrap: =false
+                        - lblRdsNonSchool:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With(
+                                    {hol: Filter(colRdsDays, !IsSchoolDay && NonSchoolReason <> "Weekend" && NonSchoolReason <> "Outside any term"), outN: CountIf(colRdsDays, NonSchoolReason = "Outside any term")},
+                                    If(CountRows(hol) = 0, "No holidays or breaks this month.", "Holidays and breaks: " & Concat(hol, Text(CellDate, "mmm d") & " " & NonSchoolReason, "; ") & ".") &
+                                    If(outN > 0, " " & outN & " day(s) fall outside any school term.", "")
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - lblRdsTotals:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                ="Totals: " &
+                                If(CountIf(colRdsRows, Kind = "SAI") > 0, "SAI " & Sum(Filter(colRdsCells, RowKey = "SAI"), CellNum) & " days · ", "") &
+                                Concat(Filter(colRdsRows, Kind = "DAY") As r, r.ShortLabel & " " & Sum(Filter(colRdsCells, RowKey = r.RowKey), CellNum) & " days · ") &
+                                With({m: Sum(Filter(colRdsCells, Left(RowKey, 2) = "CL"), CellNum)}, "clinical " & Text(m, "#,##0") & " min (" & Text(m / 60, "0.00") & " h)")
+                              VerticalAlign: =VerticalAlign.Top
+                        - lblRdsAbsenceNote:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Absences show as excused (green), unexcused (red) or not classified (plain). Billable-absence flags (24-hour notice rule) are coming in Phase 2."
+                              VerticalAlign: =VerticalAlign.Top
+                        - lblRdsDataNote:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: |-
+                                =With({u: First(SortByColumns(colRdsUploads, "UploadedOn", SortOrder.Descending))}, If(!IsBlank(u) && u.RowsIn <> u.RowsMatched + u.RowsExc, ColorWarnInk, ColorMuted))
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With(
+                                    {u: First(SortByColumns(colRdsUploads, "UploadedOn", SortOrder.Descending))},
+                                    If(
+                                        IsBlank(u), "No completed CodeMetro upload covers " & Text(varRdsMonth, "mmmm yyyy") & ".",
+                                        "Data: CodeMetro upload " & u.FileName & " (" & Text(u.DateFrom, "m/d/yyyy") & " to " & Text(u.DateTo, "m/d/yyyy") &
+                                        ", uploaded " & Text(u.UploadedOn, "m/d/yyyy h:mm AM/PM") & ") · Rows in " & u.RowsIn & " = matched " & u.RowsMatched &
+                                        " + exceptions " & u.RowsExc & If(u.RowsIn = u.RowsMatched + u.RowsExc, " (ties out)", " (DOES NOT TIE OUT)")
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - lblRdsExcNote:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =If(CountRows(colRdsExc) > 0, ColorWarnInk, ColorMuted)
+                              FontWeight: =If(CountRows(colRdsExc) > 0, FontWeight.Semibold, FontWeight.Normal)
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({n: CountRows(colRdsExc)}, If(n = 0, "No open upload exceptions dated in " & Text(varRdsMonth, "mmmm yyyy") & ".", n & " open upload exception(s) dated in " & Text(varRdsMonth, "mmmm yyyy") & "."))
+                              Wrap: =false
+            - btnRdsLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  Height: =0
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varRdsLoading, true);
+                    Set(varRdsLoadError, "");
+                    If(
+                        !IsFinance,
+                        Clear(colFunders); Clear(colServices); Clear(colStudents); Clear(colDor); Clear(colStuSvc);
+                        Clear(colRdsMonthPairs); Clear(colRdsFunderOpts); Clear(colRdsStudentOpts); Clear(colRdsDays); Clear(colRdsRows); Clear(colRdsCells),
+                        IfError(
+                            Refresh(Funders); Refresh(Services); Refresh(Students); Refresh('Districts of Record'); Refresh('Student Services');
+                            Concurrent(
+                                ClearCollect(colFunders, ForAll(Funders As f, {FunderId: f.Funder, Abbr: Coalesce(f.Abbreviation, ""), FullName: Coalesce(f.'Full Name', ""), TypeText: Coalesce(Text(f.'Funder Type'), ""), QboCustomer: Coalesce(f.'QuickBooks Customer', ""), IsActive: Coalesce(f.Active, false)})),
+                                ClearCollect(colServices, ForAll(Services As s, {ServiceId: s.Service, Code: Coalesce(s.'Service Code', ""), Name: Coalesce(s.Name, ""), KindText: Coalesce(Text(s.Kind), ""), KindRank: If(Text(s.Kind) = "School Day", 1, 2), UnitText: Coalesce(Text(s.'Billing Unit'), ""), QboItem: Coalesce(s.'QuickBooks Item', ""), SortNum: s.'Sort Order', IsBillable: Coalesce(s.Billable, false), NonSchool: Coalesce(s.'Billable on Non-School Days', false), IsActive: Coalesce(s.Active, false)})),
+                                ClearCollect(colStudents, ForAll(Students As s, {StudentId: s.Student, StudentKey: Coalesce(s.'External Client ID', ""), DisplayName: Coalesce(s.'Display Name', ""), StatusText: Coalesce(Text(s.'Status (aaca_status)'), ""), TypeText: If(Text(s.'Student Type') = "Regional Center Only", "Regional Center Only", "School")})),
+                                ClearCollect(colDor, ForAll('Districts of Record' As d, {DorId: d.'District of Record', StudentId: d.Student.Student, FunderId: d.Funder.Funder, StartDate: d.'Start Date', EndDate: d.'End Date', SourceText: Coalesce(Text(d.Source), ""), Note: Coalesce(d.Note, "")})),
+                                ClearCollect(colStuSvc, ForAll('Student Services' As x, {SsId: x.'Student Service', StudentId: x.Student.Student, ServiceId: x.Service.Service, FunderId: x.Funder.Funder, SvcSort: Coalesce(x.Service.'Sort Order', 9999), StartDate: x.'Start Date', EndDate: x.'End Date', Frequency: Coalesce(x.Frequency, ""), Minutes: x.'Minutes per Frequency', IsEsy: Coalesce(x.ESY, false), SourceText: Coalesce(Text(x.Source), ""), IsExcluded: Coalesce(x.Excluded, false), Note: Coalesce(x.Note, ""), Summary: Coalesce(x.Summary, "")}))
+                            );
+                            If(
+                                IsBlank(varRdsMonth),
+                                With(
+                                    {lastD: First(Sort('Service Deliveries', Date, SortOrder.Descending)).Date},
+                                    Set(varRdsMonth, If(IsBlank(lastD), Date(Year(Today()), Month(Today()), 1), Date(Year(lastD), Month(lastD), 1)))
+                                )
+                            );
+                            true,
+                            Set(varRdsLoadError, FirstError.Message);
+                            false
+                        )
+                    );
+                    Set(varRdsLoading, false);
+                    If(IsFinance && varRdsLoadError = "", Select(btnRdsMonthEngine))
+                  Text: ="load"
+                  Visible: =false
+            - btnRdsMonthEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  Height: =0
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varRdsLoading, true);
+                    Set(varRdsLoadError, "");
+                    Set(varRdsMonthEnd, Date(Year(varRdsMonth), Month(varRdsMonth), Day(DateAdd(DateAdd(varRdsMonth, 1, TimeUnit.Months), -1, TimeUnit.Days))));
+                    With(
+                        {ms: varRdsMonth, me: varRdsMonthEnd},
+                        Clear(colRdsMonthPairs);
+                        Clear(colRdsPageLog);
+                        IfError(
+                            ForAll(
+                                Sequence(Day(me)) As n,
+                                With(
+                                    {d: Date(Year(ms), Month(ms), n.Value)},
+                                    With(
+                                        {pg: ForAll(Filter('Service Deliveries', Date = d) As r, {StudentId: r.Student.Student, FunderId: r.Funder.Funder})},
+                                        Collect(colRdsMonthPairs, pg);
+                                        Collect(colRdsPageLog, {DayNum: n.Value, RowCount: CountRows(pg)})
+                                    )
+                                )
+                            );
+                            Concurrent(
+                                ClearCollect(colRdsTerms, ForAll(Filter(Terms, 'Start Date' <= me && 'End Date' >= ms) As t, {CampusId: t.Campus.Campus, StartDate: t.'Start Date', EndDate: t.'End Date'})),
+                                ClearCollect(colRdsCalEx, ForAll(Filter('Calendar Exceptions', Date >= ms && Date <= me) As x, {ExDate: x.Date, CampusId: x.Campus.Campus, TypeText: Coalesce(Text(x.Type), ""), Descr: Coalesce(x.Description, "")})),
+                                ClearCollect(colRdsUploads, ForAll(Filter('CodeMetro Uploads', 'Date From' <= me && 'Date To' >= ms && 'Status (aaca_status)' = 'Status (CodeMetro Uploads)'.Complete) As u, {FileName: Coalesce(u.'File Name', ""), UploadedOn: u.'Uploaded On', DateFrom: u.'Date From', DateTo: u.'Date To', RowsIn: Coalesce(u.'Rows In', 0), RowsMatched: Coalesce(u.'Rows Matched', 0), RowsExc: Coalesce(u.'Rows in Exceptions', 0)})),
+                                ClearCollect(colRdsExc, ForAll(Filter('Upload Exceptions', 'Appt Date' >= ms && 'Appt Date' <= me && 'Status (aaca_status)' = 'Status (Upload Exceptions)'.Open) As e, {ExcId: e.'Upload Exception'}))
+                            );
+                            true,
+                            Set(varRdsLoadError, FirstError.Message);
+                            false
+                        );
+                        Set(varRdsPageCapped, CountIf(colRdsPageLog, RowCount >= 500) > 0);
+                        With(
+                            {pairFunders: colRdsMonthPairs.FunderId},
+                            ClearCollect(
+                                colRdsFunderOpts,
+                                SortByColumns(
+                                    Filter(
+                                        colFunders As f,
+                                        f.IsActive && (
+                                            f.FunderId in pairFunders ||
+                                            CountIf(colDor, FunderId = f.FunderId && StartDate <= me && Coalesce(EndDate, FarFuture) >= ms) > 0 ||
+                                            CountIf(colStuSvc, FunderId = f.FunderId && StartDate <= me && Coalesce(EndDate, FarFuture) >= ms) > 0
+                                        )
+                                    ),
+                                    "Abbr", SortOrder.Ascending
+                                )
+                            )
+                        );
+                        If(IsBlank(LookUp(colRdsFunderOpts, FunderId = varRdsFunderId)), Set(varRdsFunderId, Blank()))
+                    );
+                    Set(varRdsLoading, false);
+                    Select(btnRdsGridEngine)
+                  Text: ="load"
+                  Visible: =false
+            - btnRdsGridEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  Height: =0
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varRdsLoading, true);
+                    With(
+                        {ms: varRdsMonth, me: varRdsMonthEnd, fid: varRdsFunderId},
+                        With(
+                            {pairs: Filter(colRdsMonthPairs, FunderId = fid)},
+                            ClearCollect(
+                                colRdsStudentOpts,
+                                SortByColumns(
+                                    Filter(
+                                        colStudents As s,
+                                        !IsBlank(fid) && (
+                                            s.StudentId in pairs.StudentId ||
+                                            CountIf(colDor, StudentId = s.StudentId && FunderId = fid && StartDate <= me && Coalesce(EndDate, FarFuture) >= ms) > 0 ||
+                                            CountIf(colStuSvc, StudentId = s.StudentId && FunderId = fid && StartDate <= me && Coalesce(EndDate, FarFuture) >= ms) > 0
+                                        )
+                                    ),
+                                    "DisplayName", SortOrder.Ascending
+                                )
+                            )
+                        );
+                        If(IsBlank(LookUp(colRdsStudentOpts, StudentId = varRdsStudentId)), Set(varRdsStudentId, Blank()));
+                        Clear(colRdsDel); Clear(colRdsAtt); Clear(colRdsEnr); Clear(colRdsDays); Clear(colRdsRows); Clear(colRdsCells);
+                        Set(varRdsCampusText, "");
+                        If(
+                            IsFinance && !IsBlank(fid) && !IsBlank(varRdsStudentId),
+                            With(
+                                {sid: varRdsStudentId},
+                                IfError(
+                                    Concurrent(
+                                        ClearCollect(colRdsDel, ForAll(Filter('Service Deliveries', Student.Student = sid && Funder.Funder = fid && Date >= ms && Date <= me) As r, {ServiceId: r.Service.Service, DayNum: Day(r.Date), Minutes: Coalesce(r.Minutes, 0)})),
+                                        ClearCollect(colRdsAtt, ForAll(Filter(Attendance, Student.Student = sid && Date >= ms && Date <= me) As a, {DayNum: Day(a.Date), Present: a.Present = true, IsDeleted: a.'Is Deleted' = true, Letter: If(a.Present = true, "P", a.'Absence Classification' = 'Absence Classification (Attendance)'.Excused, "E", a.'Absence Classification' = 'Absence Classification (Attendance)'.Unexcused, "U", "A")})),
+                                        ClearCollect(colRdsEnr, ForAll(Filter(Enrollments, Student.Student = sid && 'Start Date' <= me && (IsBlank('End Date') || 'End Date' >= ms)) As e, {CampusId: e.Campus.Campus, CampusName: Coalesce(e.Campus.Name, ""), StartDate: e.'Start Date', EndDate: e.'End Date'}))
+                                    );
+                                    true,
+                                    Set(varRdsLoadError, FirstError.Message);
+                                    false
+                                );
+                                RemoveIf(colRdsAtt, IsDeleted);
+                                With(
+                                    {
+                                        stu: LookUp(colStudents, StudentId = sid),
+                                        isRc: LookUp(colFunders, FunderId = fid).TypeText = "Regional Center",
+                                        fbCid: First(SortByColumns(colRdsEnr, "StartDate", SortOrder.Descending)).CampusId
+                                    },
+                                    With(
+                                        {noCampus: stu.TypeText = "Regional Center Only" || CountRows(colRdsEnr) = 0},
+                                        Set(varRdsCampusText, If(stu.TypeText = "Regional Center Only", "Regional Center Only", CountRows(colRdsEnr) = 0, "No enrollment in this month (weekends shaded only)", Concat(Distinct(SortByColumns(colRdsEnr, "StartDate", SortOrder.Ascending), CampusName), Value, ", ")));
+                                        // ---------- 1. Days with the per-campus school-day rule ----------
+                                        ForAll(
+                                            Sequence(Day(me)) As n,
+                                            With(
+                                                {d: Date(Year(ms), Month(ms), n.Value)},
+                                                With(
+                                                    {
+                                                        cid: Coalesce(LookUp(colRdsEnr, StartDate <= d && (IsBlank(EndDate) || EndDate >= d)).CampusId, fbCid),
+                                                        wkend: Weekday(d, StartOfWeek.Monday) >= 6,
+                                                        inDor: CountIf(colDor, StudentId = sid && FunderId = fid && StartDate <= d && Coalesce(EndDate, FarFuture) >= d) > 0
+                                                    },
+                                                    With(
+                                                        {
+                              t: LookUp(colRdsTerms, StartDate <= d && EndDate >= d && (IsBlank(CampusId) || CampusId = cid)),
+                              x: LookUp(colRdsCalEx, ExDate = d && (IsBlank(CampusId) || CampusId = cid) && TypeText <> "Make-up School Day"),
+                              mk: CountIf(colRdsCalEx, ExDate = d && (IsBlank(CampusId) || CampusId = cid) && TypeText = "Make-up School Day") > 0
+                                                        },
+                                                        Collect(
+                              colRdsDays,
+                              {
+                                DayNum: n.Value,
+                                CellDate: d,
+                                DowLetter: Mid("SMTWTFS", Weekday(d), 1),
+                                InDor: inDor,
+                                IsSchoolDay: If(noCampus, !wkend, !IsBlank(t) && (mk || (!wkend && IsBlank(x)))),
+                                NonSchoolReason: If(noCampus, If(wkend, "Weekend", ""), IsBlank(t), "Outside any term", mk, "", !IsBlank(x), x.TypeText & " - " & x.Descr, wkend, "Weekend", "")
+                              }
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        );
+                                        // ---------- 2a. SAI row (not RC, student's DoR for part of the month) ----------
+                                        If(
+                                            !isRc && CountIf(colRdsDays, InDor) > 0,
+                                            Collect(colRdsRows, {RowKey: "SAI", Kind: "SAI", SortKey: 0, Label: "SAI – Special Education", ShortLabel: "SAI", ServiceId: LookUp(colServices, Code = "SPED").ServiceId, NonSchool: false, IsBillable: true, UnitText: "Days", StartDate: ms, EndDate: me})
+                                        );
+                                        // ---------- 2b. Day-service rows (one per Student Services row) ----------
+                                        If(
+                                            !isRc,
+                                            With(
+                                                {
+                                                    ss: SortByColumns(
+                                                        Filter(colStuSvc As q, q.StudentId = sid && q.FunderId = fid && !q.IsExcluded && q.StartDate <= me && Coalesce(q.EndDate, FarFuture) >= ms && LookUp(colServices, ServiceId = q.ServiceId).KindText = "School Day" && LookUp(colServices, ServiceId = q.ServiceId).Code <> "SPED"),
+                                                        "SvcSort", SortOrder.Ascending, "StartDate", SortOrder.Ascending
+                                                    )
+                                                },
+                                                ForAll(
+                                                    Sequence(CountRows(ss)) As i,
+                                                    With(
+                                                        {row: Index(ss, i.Value)},
+                                                        With(
+                              {sv: LookUp(colServices, ServiceId = row.ServiceId), nTot: CountIf(ss, ServiceId = row.ServiceId), nIdx: CountIf(FirstN(ss, i.Value), ServiceId = row.ServiceId)},
+                              Collect(colRdsRows, {RowKey: "SS" & Text(row.SsId), Kind: "DAY", SortKey: 1000 + i.Value, Label: sv.Code & " – " & sv.Name & If(nTot > 1, " #" & nIdx, ""), ShortLabel: sv.Code & If(nTot > 1, " #" & nIdx, ""), ServiceId: row.ServiceId, NonSchool: If(sv.NonSchool, true, false), IsBillable: If(sv.IsBillable, true, false), UnitText: sv.UnitText, StartDate: row.StartDate, EndDate: Coalesce(row.EndDate, FarFuture)})
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        );
+                                        // ---------- 2c. Delivered-service (clinical) rows ----------
+                                        ForAll(
+                                            Distinct(colRdsDel, ServiceId) As g,
+                                            With(
+                                                {sv: LookUp(colServices, ServiceId = g.Value)},
+                                                Collect(colRdsRows, {RowKey: "CL" & Text(g.Value), Kind: "CLIN", SortKey: 100000 + Coalesce(sv.SortNum, 9999), Label: sv.Code & " – " & sv.Name, ShortLabel: sv.Code, ServiceId: g.Value, NonSchool: If(sv.NonSchool, true, false), IsBillable: If(sv.IsBillable, true, false), UnitText: sv.UnitText, StartDate: ms, EndDate: me})
+                                            )
+                                        );
+                                        // ---------- 3. Cells (single source for fills, totals and footer) ----------
+                                        ForAll(
+                                            colRdsRows As rw,
+                                            Collect(
+                                                colRdsCells,
+                                                ForAll(
+                                                    colRdsDays As dd,
+                                                    With(
+                                                        {
+                              a: LookUp(colRdsAtt, DayNum = dd.DayNum),
+                              inRow: rw.StartDate <= dd.CellDate && rw.EndDate >= dd.CellDate,
+                              mins: Sum(Filter(colRdsDel, ServiceId = rw.ServiceId && DayNum = dd.DayNum), Minutes),
+                              shade: !dd.IsSchoolDay && !rw.NonSchool
+                                                        },
+                                                        Switch(
+                              rw.Kind,
+                              "SAI",
+                              {RowKey: rw.RowKey, DayNum: dd.DayNum, CellText: If(!dd.InDor || IsBlank(a), "", a.Present, "1", "0"), CellNum: If(dd.InDor && !IsBlank(a) && a.Present, 1, 0), IsAbsent: dd.InDor && !IsBlank(a) && !a.Present, State: If(!dd.InDor, "outside", !IsBlank(a) && !a.Present && a.Letter = "E", "excused", !IsBlank(a) && !a.Present && a.Letter = "U", "unexcused", shade, "nonschool", "plain")},
+                              "DAY",
+                              {RowKey: rw.RowKey, DayNum: dd.DayNum, CellText: If(inRow && !IsBlank(a) && a.Present, "1", ""), CellNum: If(inRow && !IsBlank(a) && a.Present, 1, 0), IsAbsent: false, State: If(!inRow, "outside", shade, "nonschool", "plain")},
+                              {RowKey: rw.RowKey, DayNum: dd.DayNum, CellText: If(mins > 0, Text(mins), ""), CellNum: mins, IsAbsent: false, State: If(shade && mins > 0, "flag", shade, "nonschool", "plain")}
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    );
+                    Set(varRdsLoading, false)
+                  Text: ="load"
+                  Visible: =false

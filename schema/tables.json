@@ -87,6 +87,13 @@
           "type": "bool",
           "displayName": "Active",
           "default": true
+        },
+        {
+          "logicalName": "aaca_financeaccess",
+          "type": "bool",
+          "displayName": "Finance Access",
+          "default": false,
+          "description": "Shows the Billing app to this person. Data access comes from the AACA Finance security role."
         }
       ]
     },
@@ -231,6 +238,23 @@
           "logicalName": "aaca_archivedon",
           "type": "date",
           "displayName": "Archived On"
+        },
+        {
+          "logicalName": "aaca_studenttype",
+          "type": "choice",
+          "displayName": "Student Type",
+          "options": [
+            [
+              582100000,
+              "School"
+            ],
+            [
+              582100001,
+              "Regional Center Only"
+            ]
+          ],
+          "default": 582100000,
+          "description": "Regional Center Only students receive services outside school (RC- keys); they have no enrollment or attendance. Blank = School."
         }
       ],
       "keys": [
@@ -254,7 +278,7 @@
       "logicalName": "aaca_service",
       "displayName": "Service",
       "pluralName": "Services",
-      "description": "A tracked service. Currently one row: Special Education Attendance.",
+      "description": "A billable or tracked service: Special Education (SAI) attendance, day services (aide, BII, transportation, HNS) and CodeMetro clinical services. QuickBooks item and billing unit are maintained by finance.",
       "primaryName": {
         "logicalName": "aaca_name",
         "displayName": "Name",
@@ -279,6 +303,64 @@
           "type": "bool",
           "displayName": "Active",
           "default": true
+        },
+        {
+          "logicalName": "aaca_servicekind",
+          "type": "choice",
+          "displayName": "Kind",
+          "options": [
+            [
+              582100000,
+              "School Day"
+            ],
+            [
+              582100001,
+              "Clinical"
+            ]
+          ],
+          "description": "School Day = billed in days from attendance; Clinical = billed from CodeMetro minutes."
+        },
+        {
+          "logicalName": "aaca_billingunit",
+          "type": "choice",
+          "displayName": "Billing Unit",
+          "options": [
+            [
+              582100000,
+              "Days"
+            ],
+            [
+              582100001,
+              "Hours"
+            ]
+          ],
+          "description": "Unit the QuickBooks item bills in. Clinical minutes are converted to decimal hours for Hours items."
+        },
+        {
+          "logicalName": "aaca_qboitem",
+          "type": "text",
+          "displayName": "QuickBooks Item",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_billablenonschool",
+          "type": "bool",
+          "displayName": "Billable on Non-School Days",
+          "default": false
+        },
+        {
+          "logicalName": "aaca_billable",
+          "type": "bool",
+          "displayName": "Billable",
+          "default": true,
+          "description": "No = shown on the RDS but never invoiced (e.g. no-show codes)."
+        },
+        {
+          "logicalName": "aaca_sortorder",
+          "type": "int",
+          "displayName": "Sort Order",
+          "min": 0,
+          "max": 10000
         }
       ],
       "keys": [
@@ -987,6 +1069,547 @@
           ]
         }
       ]
+    },
+    {
+      "logicalName": "aaca_funder",
+      "displayName": "Funder",
+      "pluralName": "Funders",
+      "billing": true,
+      "description": "Who pays: a school district, regional center or private payer, with its QuickBooks customer.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Abbreviation",
+        "maxLength": 100
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_fullname",
+          "type": "text",
+          "displayName": "Full Name",
+          "maxLength": 250
+        },
+        {
+          "logicalName": "aaca_fundertype",
+          "type": "choice",
+          "displayName": "Funder Type",
+          "options": [
+            [
+              582100000,
+              "District"
+            ],
+            [
+              582100001,
+              "Regional Center"
+            ],
+            [
+              582100002,
+              "Private Pay"
+            ]
+          ],
+          "required": true
+        },
+        {
+          "logicalName": "aaca_qbocustomer",
+          "type": "text",
+          "displayName": "QuickBooks Customer",
+          "maxLength": 250
+        },
+        {
+          "logicalName": "aaca_active",
+          "type": "bool",
+          "displayName": "Active",
+          "default": true
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_funder_name",
+          "displayName": "Abbreviation",
+          "columns": [
+            "aaca_name"
+          ]
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_funderalias",
+      "displayName": "Funder Alias",
+      "pluralName": "Funder Aliases",
+      "billing": true,
+      "description": "A Funding Source name as CodeMetro writes it (normalised: trimmed, single spaces, upper case), mapped to a Funder.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "CodeMetro Name",
+        "maxLength": 250
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_note",
+          "type": "text",
+          "displayName": "Note",
+          "maxLength": 500
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_funderalias_name",
+          "displayName": "CodeMetro Name",
+          "columns": [
+            "aaca_name"
+          ]
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_servicealias",
+      "displayName": "Service Alias",
+      "pluralName": "Service Aliases",
+      "billing": true,
+      "description": "A CPT Code or Service Name as CodeMetro writes it (normalised, upper case), mapped to a Service.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Alias",
+        "maxLength": 250
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_aliastype",
+          "type": "choice",
+          "displayName": "Alias Type",
+          "options": [
+            [
+              582100000,
+              "CPT Code"
+            ],
+            [
+              582100001,
+              "Service Name"
+            ]
+          ],
+          "required": true
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_servicealias_name",
+          "displayName": "Alias",
+          "columns": [
+            "aaca_name",
+            "aaca_aliastype"
+          ]
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_studentfunder",
+      "displayName": "District of Record",
+      "pluralName": "Districts of Record",
+      "billing": true,
+      "description": "The funder that pays a student's school days (SAI) for a date range.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_startdate",
+          "type": "date",
+          "displayName": "Start Date",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_enddate",
+          "type": "date",
+          "displayName": "End Date"
+        },
+        {
+          "logicalName": "aaca_source",
+          "type": "choice",
+          "displayName": "Source",
+          "options": [
+            [
+              582100000,
+              "CodeMetro"
+            ],
+            [
+              582100001,
+              "Manual"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "text",
+          "displayName": "Note",
+          "maxLength": 500
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_studentservice",
+      "displayName": "Student Service",
+      "pluralName": "Student Services",
+      "billing": true,
+      "description": "One RDS grid row a student is entitled to, from the CodeMetro student services export (a 2:1 aide = two rows).",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_startdate",
+          "type": "date",
+          "displayName": "Start Date",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_enddate",
+          "type": "date",
+          "displayName": "End Date"
+        },
+        {
+          "logicalName": "aaca_frequency",
+          "type": "text",
+          "displayName": "Frequency",
+          "maxLength": 20
+        },
+        {
+          "logicalName": "aaca_minutesperfrequency",
+          "type": "int",
+          "displayName": "Minutes per Frequency",
+          "min": 0,
+          "max": 100000
+        },
+        {
+          "logicalName": "aaca_esy",
+          "type": "bool",
+          "displayName": "ESY",
+          "default": false
+        },
+        {
+          "logicalName": "aaca_source",
+          "type": "choice",
+          "displayName": "Source",
+          "options": [
+            [
+              582100000,
+              "CodeMetro"
+            ],
+            [
+              582100001,
+              "Manual"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_excluded",
+          "type": "bool",
+          "displayName": "Excluded",
+          "default": false,
+          "description": "Finance override: ignore this row for the RDS and billing."
+        },
+        {
+          "logicalName": "aaca_sourcekey",
+          "type": "text",
+          "displayName": "Source Key",
+          "maxLength": 300,
+          "description": "Identity of the CodeMetro row (student|code|funder|start|end|occurrence) used to update on re-import."
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "text",
+          "displayName": "Note",
+          "maxLength": 500
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_codemetroupload",
+      "displayName": "CodeMetro Upload",
+      "pluralName": "CodeMetro Uploads",
+      "billing": true,
+      "description": "One CodeMetro services-rendered file. It replaces all delivered services dated within its date range (open months only). Rows In = rows on grids (sessions) + exceptions.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "File Name",
+        "maxLength": 250
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_uploadedon",
+          "type": "datetime",
+          "displayName": "Uploaded On"
+        },
+        {
+          "logicalName": "aaca_datefrom",
+          "type": "date",
+          "displayName": "Date From"
+        },
+        {
+          "logicalName": "aaca_dateto",
+          "type": "date",
+          "displayName": "Date To"
+        },
+        {
+          "logicalName": "aaca_rowsin",
+          "type": "int",
+          "displayName": "Rows In",
+          "min": 0
+        },
+        {
+          "logicalName": "aaca_rowsmatched",
+          "type": "int",
+          "displayName": "Rows Matched",
+          "min": 0
+        },
+        {
+          "logicalName": "aaca_rowsexception",
+          "type": "int",
+          "displayName": "Rows in Exceptions",
+          "min": 0
+        },
+        {
+          "logicalName": "aaca_minutesin",
+          "type": "int",
+          "displayName": "Minutes In"
+        },
+        {
+          "logicalName": "aaca_minutesmatched",
+          "type": "int",
+          "displayName": "Minutes Matched"
+        },
+        {
+          "logicalName": "aaca_status",
+          "type": "choice",
+          "displayName": "Status",
+          "options": [
+            [
+              582100000,
+              "Processing"
+            ],
+            [
+              582100001,
+              "Complete"
+            ],
+            [
+              582100002,
+              "Failed"
+            ],
+            [
+              582100003,
+              "Superseded"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "memo",
+          "displayName": "Note",
+          "maxLength": 4000
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_servicedelivery",
+      "displayName": "Service Delivery",
+      "pluralName": "Service Deliveries",
+      "billing": true,
+      "description": "Delivered minutes for one student + funder + service + day, summed from CodeMetro session rows.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_date",
+          "type": "date",
+          "displayName": "Date",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_minutes",
+          "type": "int",
+          "displayName": "Minutes"
+        },
+        {
+          "logicalName": "aaca_sessions",
+          "type": "int",
+          "displayName": "Sessions",
+          "min": 0
+        },
+        {
+          "logicalName": "aaca_fundingsourcetype",
+          "type": "choice",
+          "displayName": "Funding Source Type",
+          "options": [
+            [
+              582100000,
+              "District"
+            ],
+            [
+              582100001,
+              "Regional Center"
+            ],
+            [
+              582100002,
+              "Private Pay"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_deliverykey",
+          "type": "text",
+          "displayName": "Delivery Key",
+          "maxLength": 200,
+          "description": "StudentKey|yyyy-mm-dd|ServiceCode|FunderAbbreviation"
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_servicedelivery_key",
+          "displayName": "Delivery Key",
+          "columns": [
+            "aaca_deliverykey"
+          ]
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_uploadexception",
+      "displayName": "Upload Exception",
+      "pluralName": "Upload Exceptions",
+      "billing": true,
+      "description": "A CodeMetro row that could not be placed on a grid, with the reason. Nothing is dropped silently.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 250
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_line",
+          "type": "int",
+          "displayName": "Line",
+          "min": 0
+        },
+        {
+          "logicalName": "aaca_reason",
+          "type": "choice",
+          "displayName": "Reason",
+          "options": [
+            [
+              582100000,
+              "Unknown student"
+            ],
+            [
+              582100001,
+              "Unknown service"
+            ],
+            [
+              582100002,
+              "Unknown funder"
+            ],
+            [
+              582100003,
+              "Missing date"
+            ],
+            [
+              582100004,
+              "Zero or negative minutes"
+            ],
+            [
+              582100005,
+              "Code and name disagree"
+            ],
+            [
+              582100006,
+              "Closed month"
+            ],
+            [
+              582100007,
+              "Other"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_studentkey",
+          "type": "text",
+          "displayName": "Student ID",
+          "maxLength": 50
+        },
+        {
+          "logicalName": "aaca_clientname",
+          "type": "text",
+          "displayName": "Client Name",
+          "maxLength": 200
+        },
+        {
+          "logicalName": "aaca_cptcode",
+          "type": "text",
+          "displayName": "CPT Code",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_servicename",
+          "type": "text",
+          "displayName": "Service Name",
+          "maxLength": 200
+        },
+        {
+          "logicalName": "aaca_fundingsource",
+          "type": "text",
+          "displayName": "Funding Source",
+          "maxLength": 250
+        },
+        {
+          "logicalName": "aaca_fundingsourcetype",
+          "type": "text",
+          "displayName": "Funding Source Type",
+          "maxLength": 50
+        },
+        {
+          "logicalName": "aaca_apptdate",
+          "type": "date",
+          "displayName": "Appt Date"
+        },
+        {
+          "logicalName": "aaca_minutes",
+          "type": "int",
+          "displayName": "Minutes"
+        },
+        {
+          "logicalName": "aaca_status",
+          "type": "choice",
+          "displayName": "Status",
+          "options": [
+            [
+              582100000,
+              "Open"
+            ],
+            [
+              582100001,
+              "Resolved"
+            ],
+            [
+              582100002,
+              "Ignored"
+            ],
+            [
+              582100003,
+              "Superseded"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_raw",
+          "type": "memo",
+          "displayName": "Raw Row",
+          "maxLength": 4000
+        }
+      ]
     }
   ],
   "lookups": [
@@ -1165,6 +1788,84 @@
       "logicalName": "aaca_campus",
       "displayName": "Campus",
       "target": "aaca_campus"
+    },
+    {
+      "table": "aaca_funderalias",
+      "logicalName": "aaca_funder",
+      "displayName": "Funder",
+      "target": "aaca_funder"
+    },
+    {
+      "table": "aaca_servicealias",
+      "logicalName": "aaca_service",
+      "displayName": "Service",
+      "target": "aaca_service"
+    },
+    {
+      "table": "aaca_studentfunder",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
+    },
+    {
+      "table": "aaca_studentfunder",
+      "logicalName": "aaca_funder",
+      "displayName": "Funder",
+      "target": "aaca_funder"
+    },
+    {
+      "table": "aaca_studentservice",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
+    },
+    {
+      "table": "aaca_studentservice",
+      "logicalName": "aaca_service",
+      "displayName": "Service",
+      "target": "aaca_service"
+    },
+    {
+      "table": "aaca_studentservice",
+      "logicalName": "aaca_funder",
+      "displayName": "Funder",
+      "target": "aaca_funder"
+    },
+    {
+      "table": "aaca_servicedelivery",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
+    },
+    {
+      "table": "aaca_servicedelivery",
+      "logicalName": "aaca_funder",
+      "displayName": "Funder",
+      "target": "aaca_funder"
+    },
+    {
+      "table": "aaca_servicedelivery",
+      "logicalName": "aaca_service",
+      "displayName": "Service",
+      "target": "aaca_service"
+    },
+    {
+      "table": "aaca_servicedelivery",
+      "logicalName": "aaca_upload",
+      "displayName": "Upload",
+      "target": "aaca_codemetroupload"
+    },
+    {
+      "table": "aaca_uploadexception",
+      "logicalName": "aaca_upload",
+      "displayName": "Upload",
+      "target": "aaca_codemetroupload"
+    },
+    {
+      "table": "aaca_uploadexception",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
     }
   ]
 }

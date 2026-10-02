@@ -1,0 +1,742 @@
+{
+  "$comment": "Billing reference data (Phase 1). Applied by provisioning/Seed-BillingReference.ps1 (upsert; finance edits in the Billing app win for QuickBooks fields). Aliases are matched after normalising: trim, collapse spaces, upper case. Private-pay funders (parents) are NOT listed here: they come from the CodeMetro files.",
+  "services": [
+    {
+      "code": "SPED",
+      "name": "Special Education (SAI)",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 10,
+      "cptAliases": [
+        "SAI",
+        "SPED",
+        "Spec Ed",
+        "Spec. Ed"
+      ],
+      "nameAliases": [
+        "Academic Instruction",
+        "Special Education",
+        "Special Education (SAI)",
+        "Specialized Academic Instruction"
+      ]
+    },
+    {
+      "code": "1:1 Aide",
+      "name": "One to One Aide",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 20,
+      "cptAliases": [
+        "1:1 Aide",
+        "1:1 Aides",
+        "Aide"
+      ],
+      "nameAliases": [
+        "One to One Aide",
+        "One to One Aides"
+      ]
+    },
+    {
+      "code": "BII",
+      "name": "Behavior Intervention Implementation",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 30,
+      "cptAliases": [
+        "BII"
+      ],
+      "nameAliases": [
+        "Behavior Intervention Implementation"
+      ]
+    },
+    {
+      "code": "TA",
+      "name": "Transportation Aide",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 40,
+      "cptAliases": [
+        "TA"
+      ],
+      "nameAliases": [
+        "Transportation Aide"
+      ]
+    },
+    {
+      "code": "BII TA",
+      "name": "BII Transportation Aide",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 50,
+      "cptAliases": [
+        "BII TA"
+      ],
+      "nameAliases": [
+        "BII Transportation Aide"
+      ]
+    },
+    {
+      "code": "HNS",
+      "name": "Health and Nursing Services",
+      "kind": "School Day",
+      "unit": "Days",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 60,
+      "cptAliases": [
+        "HNS"
+      ],
+      "nameAliases": [
+        "Health and Nursing Services"
+      ]
+    },
+    {
+      "code": "BID",
+      "name": "Behavior Intervention Development",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 70,
+      "cptAliases": [
+        "BID"
+      ],
+      "nameAliases": [
+        "Behavior Intervention Development"
+      ]
+    },
+    {
+      "code": "BID Cons",
+      "name": "Behavior Intervention Development Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 80,
+      "cptAliases": [
+        "BID Cons"
+      ],
+      "nameAliases": [
+        "Behavior Intervention Development Consult"
+      ]
+    },
+    {
+      "code": "OT Ind",
+      "name": "Occupational Therapy Individual",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 90,
+      "cptAliases": [
+        "OT Ind"
+      ],
+      "nameAliases": [
+        "Occupational Therapy Individual"
+      ]
+    },
+    {
+      "code": "OT Group",
+      "name": "Occupational Therapy Group",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 100,
+      "cptAliases": [
+        "OT Group",
+        "OT Grp"
+      ],
+      "nameAliases": [
+        "Occupational Therapy Group"
+      ]
+    },
+    {
+      "code": "OT Cons",
+      "name": "Occupational Therapy Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 110,
+      "cptAliases": [
+        "OT Cons"
+      ],
+      "nameAliases": [
+        "Occupational Therapy Consult"
+      ]
+    },
+    {
+      "code": "SLP Ind",
+      "name": "Speech Language Pathology Individual",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 120,
+      "cptAliases": [
+        "SLP Ind"
+      ],
+      "nameAliases": [
+        "Speech Language Pathology Individual"
+      ]
+    },
+    {
+      "code": "SLP Group",
+      "name": "Speech Language Pathology Group",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 130,
+      "cptAliases": [
+        "SLP Group",
+        "SLP Grp"
+      ],
+      "nameAliases": [
+        "Speech Language Pathology Group"
+      ]
+    },
+    {
+      "code": "SLP Cons",
+      "name": "Speech Language Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 140,
+      "cptAliases": [
+        "SLP Cons"
+      ],
+      "nameAliases": [
+        "Speech Language Consult"
+      ]
+    },
+    {
+      "code": "PT",
+      "name": "Physical Therapy",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 150,
+      "cptAliases": [
+        "PT"
+      ],
+      "nameAliases": [
+        "Physical Therapy"
+      ]
+    },
+    {
+      "code": "PT Cons",
+      "name": "Physical Therapy Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 160,
+      "cptAliases": [
+        "PT Cons"
+      ],
+      "nameAliases": [
+        "Physical Therapy Consult"
+      ]
+    },
+    {
+      "code": "APE",
+      "name": "Adaptive Physical Education",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 170,
+      "cptAliases": [
+        "APE"
+      ],
+      "nameAliases": [
+        "Adaptive Physical Education"
+      ]
+    },
+    {
+      "code": "APE Cons",
+      "name": "Adaptive Physical Education Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 180,
+      "cptAliases": [
+        "APE Cons"
+      ],
+      "nameAliases": [
+        "Adaptive Physical Education Consult"
+      ]
+    },
+    {
+      "code": "ATS",
+      "name": "Assistive Technology",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 190,
+      "cptAliases": [
+        "ATS"
+      ],
+      "nameAliases": [
+        "Assistive Technology"
+      ]
+    },
+    {
+      "code": "AT Cons",
+      "name": "Assistive Technology Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 200,
+      "cptAliases": [
+        "AT Cons",
+        "ATS Cons"
+      ],
+      "nameAliases": [
+        "Assistive Technology Consult"
+      ]
+    },
+    {
+      "code": "AT PCON",
+      "name": "Assistive Technology Parent Training",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 210,
+      "cptAliases": [
+        "AT PCON"
+      ],
+      "nameAliases": [
+        "Assistive Technology Parent Training"
+      ]
+    },
+    {
+      "code": "DIS",
+      "name": "DIS Counseling",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 220,
+      "cptAliases": [
+        "Counseling",
+        "DIS"
+      ],
+      "nameAliases": [
+        "DIS Counseling"
+      ]
+    },
+    {
+      "code": "DISG",
+      "name": "DIS Counseling Group",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 230,
+      "cptAliases": [
+        "DIS Group",
+        "DIS Grp",
+        "DISG"
+      ],
+      "nameAliases": [
+        "DIS Counseling Group"
+      ]
+    },
+    {
+      "code": "DISC",
+      "name": "DIS Counseling Consult",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 240,
+      "cptAliases": [
+        "DIS Cons",
+        "DISC"
+      ],
+      "nameAliases": [
+        "DIS Counseling Consult"
+      ]
+    },
+    {
+      "code": "DISP",
+      "name": "DIS Parent Counseling",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": true,
+      "sortOrder": 250,
+      "cptAliases": [
+        "DISP"
+      ],
+      "nameAliases": [
+        "DIS Parent Counseling"
+      ]
+    },
+    {
+      "code": "605 BA",
+      "name": "605 BA - Adaptive Skills",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": true,
+      "billable": true,
+      "sortOrder": 260,
+      "cptAliases": [
+        "605 BA",
+        "FT BA"
+      ],
+      "nameAliases": [
+        "605 BA - Adaptive Skills"
+      ]
+    },
+    {
+      "code": "605 MA",
+      "name": "605 MA - Adaptive Skills",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": true,
+      "billable": true,
+      "sortOrder": 270,
+      "cptAliases": [
+        "605 MA",
+        "FT MA"
+      ],
+      "nameAliases": [
+        "605 MA - Adaptive Skills"
+      ]
+    },
+    {
+      "code": "605 AMA",
+      "name": "605 AMA - Adaptive Skills",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": true,
+      "billable": true,
+      "sortOrder": 280,
+      "cptAliases": [
+        "605 AMA",
+        "FT AMA"
+      ],
+      "nameAliases": [
+        "605 AMA - Adaptive Skills"
+      ]
+    },
+    {
+      "code": "FT",
+      "name": "Floortime Therapy",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": true,
+      "billable": true,
+      "sortOrder": 290,
+      "cptAliases": [
+        "FT"
+      ],
+      "nameAliases": [
+        "Floortime Therapy"
+      ]
+    },
+    {
+      "code": "FTA",
+      "name": "Floortime Assessment",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": true,
+      "billable": true,
+      "sortOrder": 300,
+      "cptAliases": [
+        "FTA"
+      ],
+      "nameAliases": [
+        "Floortime Assessment"
+      ]
+    },
+    {
+      "code": "OT No Show",
+      "name": "Occupational Therapy - No Show",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": false,
+      "sortOrder": 310,
+      "cptAliases": [
+        "OT No Show"
+      ],
+      "nameAliases": [
+        "Occupational Therapy - No Show"
+      ]
+    },
+    {
+      "code": "ATS NS",
+      "name": "Assistive Technology - No Show",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": false,
+      "sortOrder": 320,
+      "cptAliases": [
+        "ATS NS"
+      ],
+      "nameAliases": [
+        "Assistive Technology - No Show"
+      ]
+    },
+    {
+      "code": "BID NS",
+      "name": "Behavior Intervention Development - No Show",
+      "kind": "Clinical",
+      "unit": "Hours",
+      "billableNonSchool": false,
+      "billable": false,
+      "sortOrder": 330,
+      "cptAliases": [
+        "BID NS"
+      ],
+      "nameAliases": [
+        "Behavior Intervention Development - No Show"
+      ]
+    }
+  ],
+  "funders": [
+    {
+      "abbreviation": "AADUSD",
+      "fullName": "Acton Agua Dulce School District",
+      "type": "District",
+      "aliases": [
+        "Acton Agua Dulce School District"
+      ]
+    },
+    {
+      "abbreviation": "AVHSD",
+      "fullName": "Antelope Valley Union High School District",
+      "type": "District",
+      "aliases": [
+        "Antelope Valley Union High School District",
+        "Antelope Valley Union Highschool District"
+      ]
+    },
+    {
+      "abbreviation": "BUSD",
+      "fullName": "Burbank Unified School District",
+      "type": "District",
+      "aliases": [
+        "Burbank Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "CAVA",
+      "fullName": "California Virtual Academies",
+      "type": "District",
+      "aliases": [
+        "CAVA",
+        "California Virtual Academies"
+      ]
+    },
+    {
+      "abbreviation": "IQ Academy",
+      "fullName": "Ca Virtual Academies @ IQ Academy",
+      "type": "District",
+      "aliases": [
+        "Ca Virtual Academies @ IQ Academy"
+      ]
+    },
+    {
+      "abbreviation": "Compass CS",
+      "fullName": "Compass Charter School",
+      "type": "District",
+      "aliases": [
+        "Compass Charter School"
+      ]
+    },
+    {
+      "abbreviation": "CVUSD",
+      "fullName": "Conejo Valley Unified School District",
+      "type": "District",
+      "aliases": [
+        "Conejo Valley Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "ECRCHS",
+      "fullName": "El Camino Real Charter High School",
+      "type": "District",
+      "aliases": [
+        "El Camino Real Charter High School"
+      ]
+    },
+    {
+      "abbreviation": "EUSD",
+      "fullName": "Eastside Union School District",
+      "type": "District",
+      "aliases": [
+        "Eastside Union School District"
+      ]
+    },
+    {
+      "abbreviation": "GUSD",
+      "fullName": "Glendale Unified School District",
+      "type": "District",
+      "aliases": [
+        "Glendale Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "HUHSD",
+      "fullName": "Hart Union High School District",
+      "type": "District",
+      "aliases": [
+        "Hart Union High School District"
+      ]
+    },
+    {
+      "abbreviation": "LSD",
+      "fullName": "Lancaster School District",
+      "type": "District",
+      "aliases": [
+        "Lancaster School District"
+      ]
+    },
+    {
+      "abbreviation": "LVUSD",
+      "fullName": "Las Virgenes Unified School District",
+      "type": "District",
+      "aliases": [
+        "Las Virgenes Unified School District",
+        "Las Virgines Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "LAUSD",
+      "fullName": "Los Angeles Unified School District",
+      "type": "District",
+      "aliases": [
+        "Los Angeles Unified School District",
+        "Los Angeles Unified School District 1",
+        "Los Angeles Unified School District 4"
+      ]
+    },
+    {
+      "abbreviation": "MUSD",
+      "fullName": "Mojave Unified School District",
+      "type": "District",
+      "aliases": [
+        "Mojave Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "MoorparkUSD",
+      "fullName": "Moorpark Unified School District",
+      "type": "District",
+      "aliases": [
+        "Moorpark Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "OUHSD",
+      "fullName": "Oxnard Union High School District",
+      "type": "District",
+      "aliases": [
+        "Oxnard Union High School District"
+      ]
+    },
+    {
+      "abbreviation": "SMMUSD",
+      "fullName": "Santa Monica-Malibu Unified School District",
+      "type": "District",
+      "aliases": [
+        "Santa Monica-Malibu Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "SPUSD",
+      "fullName": "Santa Paula Unified School District",
+      "type": "District",
+      "aliases": [
+        "Santa Paula Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "SSUSD",
+      "fullName": "Sierra Sands Unified School District",
+      "type": "District",
+      "aliases": [
+        "Sierra Sands Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "SVUSD",
+      "fullName": "Simi Valley Unified School District",
+      "type": "District",
+      "aliases": [
+        "Simi Valley Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "VUSD",
+      "fullName": "Ventura Unified School District",
+      "type": "District",
+      "aliases": [
+        "Ventura Unified School District"
+      ]
+    },
+    {
+      "abbreviation": "VVUHSD",
+      "fullName": "Victor Valley Unified High School District",
+      "type": "District",
+      "aliases": [
+        "Victor Valley Unified High School District"
+      ]
+    },
+    {
+      "abbreviation": "WSUSD",
+      "fullName": "Westside Union School District",
+      "type": "District",
+      "aliases": [
+        "Westside Union School District"
+      ]
+    },
+    {
+      "abbreviation": "NLARC",
+      "fullName": "North Los Angeles Regional Center",
+      "type": "Regional Center",
+      "aliases": [
+        "North Los Angeles Regional Center"
+      ]
+    },
+    {
+      "abbreviation": "ELARC",
+      "fullName": "Eastern Los Angeles Regional Center",
+      "type": "Regional Center",
+      "aliases": [
+        "Eastern Los Angeles Regional Center"
+      ]
+    },
+    {
+      "abbreviation": "KRC",
+      "fullName": "Kern Regional Center",
+      "type": "Regional Center",
+      "aliases": [
+        "Kern Regional Center"
+      ]
+    }
+  ]
+}

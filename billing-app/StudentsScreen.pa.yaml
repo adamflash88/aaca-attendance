@@ -1,0 +1,2297 @@
+Screens:
+  StudentsScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varStuSelId, Blank()); Set(varStuDorMode, ""); Set(varStuSsMode, ""); Set(varStuDorEditId, Blank()); Set(varStuSsEditId, Blank()); Set(varStuDorDelId, Blank()); Set(varStuSsDelId, Blank()); Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Reset(txtStuSearch); Select(btnStuLoadEngine)
+    Children:
+      - conStuRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            Width: =Parent.Width
+          Children:
+            - conStuHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(IsFinance, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                Children:
+                  - lblStuTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Billing"
+                        Wrap: =false
+                  - lblStuIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conStuRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conStuNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =IsFinance
+                      Children:
+                        - btnStuNavHome:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Home"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(HomeScreen)
+                              Size: =14
+                              Text: ="Home"
+                              Width: =110
+                        - btnStuNavFunders:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Funders"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(FundersScreen)
+                              Size: =14
+                              Text: ="Funders"
+                              Width: =110
+                        - btnStuNavServices:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Services"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(ServicesScreen)
+                              Size: =14
+                              Text: ="Services"
+                              Width: =110
+                        - btnStuNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Students (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnStuNavRds:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to RDS Grid"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(RdsScreen)
+                              Size: =14
+                              Text: ="RDS Grid"
+                              Width: =110
+            - conStuGate:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!IsFinance
+                Children:
+                  - lblStuGateTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="You don't have access to AACA Billing"
+                        Wrap: =false
+                  - lblStuGateBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        VerticalAlign: =VerticalAlign.Top
+            - conStuBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conStuRoot.Width >= 1024, Max(conStuListPanel.Height, conStuRight.Height), If(IsBlank(varStuSelId), conStuListPanel.Height, conStuRight.Height))
+                  LayoutAlignItems: =If(conStuRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                  LayoutDirection: =If(conStuRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Visible: =IsFinance
+                Children:
+                  - conStuListPanel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conStuRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =If(conStuRoot.Width >= 1024, 1, 0)
+                        Height: =694 + conStuChips.Height + conStuStatusRow.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =!(conStuRoot.Width < 1024 && !IsBlank(varStuSelId))
+                      Children:
+                        - conStuListHead:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblStuListTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Student billing setup"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Student billing setup"
+                                    Wrap: =false
+                              - btnStuReload:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Reload students, districts of record and service rows"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varStuLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Select(btnStuLoadEngine)
+                                    Size: =14
+                                    Text: ="Reload"
+                                    Width: =88
+                        - lblStuSearch:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Search name or student key"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =18
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Search name or student key"
+                              Wrap: =false
+                        - txtStuSearch:
+                            Control: ModernTextInput
+                            Properties:
+                              AccessibleLabel: ="Search students by name or student key"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Appearance: =Appearance.Outline
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Placeholder: ="e.g. Garcia or CW-1083"
+                              TriggerOutput: =TriggerOutput.Delayed
+                              Type: =TextInputType.Search
+                        - conStuChips:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conStuListPanel.Width - 32 >= 542, 44, conStuListPanel.Width - 32 >= 344, 96, 148)
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutWrap: =true
+                            Children:
+                              - btnStuChipAll:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuType = "All", "All student types (selected)", "Show all student types")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varStuType = "All", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuType = "All", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuType, "All")
+                                    Size: =14
+                                    Text: ="All"
+                                    Width: =64
+                              - btnStuChipSchool:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuType = "School", "School students (selected)", "Show School students only")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varStuType = "School", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuType = "School", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuType, "School")
+                                    Size: =14
+                                    Text: ="School"
+                                    Width: =84
+                              - btnStuChipRc:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuType = "Regional Center Only", "Regional Center Only students (selected)", "Show Regional Center Only students")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varStuType = "Regional Center Only", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuType = "Regional Center Only", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuType, "Regional Center Only")
+                                    Size: =14
+                                    Text: ="Regional Center Only"
+                                    Width: =180
+                              - btnStuChipNoDor:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuNoDor, "Only students with no district of record (on)", "Show only students with no district of record")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varStuNoDor, ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuNoDor, ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =With({next: !varStuNoDor}, Set(varStuNoDor, next))
+                                    Size: =14
+                                    Text: ="No district of record"
+                                    Width: =190
+                        - conStuStatusRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conStuListPanel.Width - 32 >= 396, 44, 96)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutWrap: =true
+                            Children:
+                              - lblStuStatus:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Status filter"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Status"
+                                    Width: =52
+                                    Wrap: =false
+                              - btnStuStatusActive:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuStatus = "Active", "Active students only (selected)", "Show active students only")
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varStuStatus = "Active", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuStatus = "Active", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuStatus, "Active")
+                                    Size: =14
+                                    Text: ="Active"
+                                    Width: =80
+                              - btnStuStatusAll:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varStuStatus = "All", "All statuses (selected)", "Show students of all statuses")
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varStuStatus = "All", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varStuStatus = "All", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuStatus, "All")
+                                    Size: =14
+                                    Text: ="All statuses"
+                                    Width: =120
+                              - btnStuClear:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Clear student filters and search"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuType, "All"); Set(varStuNoDor, false); Set(varStuStatus, "Active"); Reset(txtStuSearch)
+                                    Size: =14
+                                    Text: ="Clear filters"
+                                    Width: =120
+                        - lblStuCount:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With(
+                                    {
+                                        n: CountRows(
+                                            Filter(
+                                                colStudents As s,
+                                                (varStuStatus = "All" || s.StatusText = "Active") &&
+                                                (varStuType = "All" || s.TypeText = varStuType) &&
+                                                (!varStuNoDor || (s.TypeText = "School" && CountIf(colDor, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0)) &&
+                                                (Trim(txtStuSearch.Text) = "" || Lower(Trim(txtStuSearch.Text)) in Lower(s.DisplayName & " " & s.StudentKey))
+                                            )
+                                        ),
+                                        m: CountRows(colStudents)
+                                    },
+                                    If(
+                                        varStuLoading, "Loading students...",
+                                        varStuLoadError <> "", "Could not load students - " & varStuLoadError,
+                                        n = 0, "No students match these filters. Use Clear filters to see all.",
+                                        "Showing " & n & " of " & m & " students"
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - galStuList:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Filtered student list"
+                              FillPortions: =0
+                              Height: =480
+                              Items: |-
+                                =Sort(
+                                    Filter(
+                                        colStudents As s,
+                                        (varStuStatus = "All" || s.StatusText = "Active") &&
+                                        (varStuType = "All" || s.TypeText = varStuType) &&
+                                        (!varStuNoDor || (s.TypeText = "School" && CountIf(colDor, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0)) &&
+                                        (Trim(txtStuSearch.Text) = "" || Lower(Trim(txtStuSearch.Text)) in Lower(s.DisplayName & " " & s.StudentKey))
+                                    ),
+                                    DisplayName,
+                                    SortOrder.Ascending
+                                )
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =100
+                            Children:
+                              - conStuRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.StudentId = varStuSelId, ColorInfoBg, ColorWhite)
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - conStuRowTop:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblStuRowName:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =ThisItem.StudentKey & " - " & ThisItem.DisplayName
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =24
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.StudentKey & " - " & ThisItem.DisplayName
+                                                Wrap: =false
+                                          - btnStuRowOpen:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Open billing setup for " & ThisItem.DisplayName
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: |-
+                                                  =Set(varStuSelId, ThisItem.StudentId); Set(varStuDorMode, ""); Set(varStuSsMode, ""); Set(varStuDorEditId, Blank()); Set(varStuSsEditId, Blank()); Set(varStuDorDelId, Blank()); Set(varStuSsDelId, Blank()); Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                                Size: =14
+                                                Text: ="Open"
+                                                Width: =72
+                                    - lblStuRowMeta:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =If(ThisItem.TypeText = "School" && CountIf(colDor, StudentId = ThisItem.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0, ColorWarnInk, ColorInk)
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: |-
+                                            =With(
+                                                {
+                                                    d: First(Filter(colDor, StudentId = ThisItem.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today()))),
+                                                    k: CountIf(colStuSvc, StudentId = ThisItem.StudentId && !IsExcluded && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today()))
+                                                },
+                                                ThisItem.TypeText & If(ThisItem.StatusText = "Active", "", " · " & ThisItem.StatusText) & " · " &
+                                                If(ThisItem.TypeText = "Regional Center Only", "No district needed", IsBlank(d), "No district of record", "District " & LookUp(colFunders, FunderId = d.FunderId).Abbr) &
+                                                " · " & k & If(k = 1, " active day service", " active day services")
+                                            )
+                                          VerticalAlign: =VerticalAlign.Top
+                  - conStuRight:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conStuRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        DropShadow: =DropShadow.None
+                        FillPortions: =If(conStuRoot.Width >= 1024, 1, 0)
+                        Height: |-
+                          =If(
+                              IsBlank(varStuSelId),
+                              If(conStuRoot.Width >= 1024, 72, 0),
+                              96 + 12 + conStuDor.Height +
+                              If(varStuDorMode <> "" && LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only", 12 + 470, 0) +
+                              12 + conStuSs.Height +
+                              If(varStuSsMode <> "", 12 + 768, 0)
+                          )
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =!IsBlank(varStuSelId) || conStuRoot.Width >= 1024
+                      Children:
+                        - conStuPlaceholder:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =72
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =IsBlank(varStuSelId)
+                            Children:
+                              - lblStuPlaceholder:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =40
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: ="Select Open on a student to see their district of record and service rows."
+                                    VerticalAlign: =VerticalAlign.Top
+                        - conStuHead:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =96
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =12
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!IsBlank(varStuSelId)
+                            Children:
+                              - conStuHeadTop:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblStuHeadName:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =28
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: =LookUp(colStudents, StudentId = varStuSelId).StudentKey & " - " & LookUp(colStudents, StudentId = varStuSelId).DisplayName
+                                          Wrap: =false
+                                    - btnStuBack:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Back to student list"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varStuSelId, Blank()); Set(varStuDorMode, ""); Set(varStuSsMode, "")
+                                          Size: =14
+                                          Text: ="Back to list"
+                                          Visible: =conStuRoot.Width < 1024
+                                          Width: =120
+                              - lblStuHeadMeta:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Type " & LookUp(colStudents, StudentId = varStuSelId).TypeText & " · Status " & LookUp(colStudents, StudentId = varStuSelId).StatusText & " · student details are read-only here"
+                                    Wrap: =false
+                        - conStuDor:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: |-
+                                =32 + 44 + 6 + 36 +
+                                If(LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only", 6 + 20 + 6 + 300, 0) +
+                                If(varStuDorReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varStuDorReceipt.Msg) / 45, 0) + 8), 0) +
+                                If(!IsBlank(varStuDorDelId), 6 + 56, 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!IsBlank(varStuSelId)
+                            Children:
+                              - conStuDorReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varStuDorReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varStuDorReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varStuDorReceipt.Kind <> ""
+                                  Children:
+                                    - lblStuDorReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varStuDorReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varStuDorReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varStuDorReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnStuDorReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss district of record message"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - conStuDorHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblStuDorTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Districts of record"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =24
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Districts of record"
+                                          Wrap: =false
+                                    - btnStuDorAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add a district of record for this student"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varStuDorMode, "new"); Set(varStuDorEditId, Blank()); Set(varStuDorDelId, Blank()); Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Select(btnStuDorResetEngine)
+                                          Size: =14
+                                          Text: ="Add district"
+                                          Visible: =LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only"
+                                          Width: =130
+                              - lblStuDorCaption:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: =If(LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only", "The district of record pays for school days. Rows may not overlap; a blank end date means ongoing.", "Regional Center Only students have no district of record. Regional Center billing uses the funder on each service row.")
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conStuDorConfirm:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorWarnBg
+                                    FillPortions: =0
+                                    Height: =56
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =6
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =6
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =!IsBlank(varStuDorDelId)
+                                  Children:
+                                    - lblStuDorConfirm:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =44
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: |-
+                                            =With({r: LookUp(colDor, DorId = varStuDorDelId)}, "Delete district of record " & LookUp(colFunders, FunderId = r.FunderId).Abbr & " from " & Text(r.StartDate, "mmm d, yyyy") & "?")
+                                    - btnStuDorConfirmYes:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Confirm delete district of record"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorUnexcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varStuSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {snap: LookUp(colDor, DorId = varStuDorDelId)},
+                                                With(
+                                                    {
+                                                        hid: snap.DorId,
+                                                        fAbbr: LookUp(colFunders, FunderId = snap.FunderId).Abbr,
+                                                        stuKey: LookUp(colStudents, StudentId = varStuSelId).StudentKey
+                                                    },
+                                                    If(
+                                                        !IsBlank(hid) && snap.SourceText = "Manual" && !varStuSaving && IsFinance,
+                                                        Set(varStuSaving, true);
+                                                        Set(varStuErr, "");
+                                                        IfError(Remove('Districts of Record', LookUp('Districts of Record', 'District of Record' = hid)); true, Set(varStuErr, FirstError.Message); false);
+                                                        If(
+                                                            varStuErr <> "",
+                                                            Set(varStuDorReceipt, {Kind: "Failed", Msg: "District of record not deleted. " & varStuErr, RecordId: hid}),
+                                                            IfError(
+                                                                Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Soft Delete Districts of Record " & stuKey & " - " & fAbbr, 100), Action: 'Action (Audit Events)'.'Soft Delete', Entity: "Districts of Record", 'Entity ID': Text(hid), Before: JSON({Student: stuKey, Funder: fAbbr, StartDate: snap.StartDate, EndDate: snap.EndDate, Source: snap.SourceText, Note: snap.Note}), After: "", Reason: "District of record removed (row deleted)"});
+                                                                Set(varStuAuditOk, true),
+                                                                Set(varStuAuditOk, false)
+                                                            );
+                                                            Set(varStuDorReceipt, {Kind: "Deleted", Msg: "Deleted district of record " & fAbbr & " " & Text(snap.StartDate, "mmm d, yyyy") & " to " & If(IsBlank(snap.EndDate), "ongoing", Text(snap.EndDate, "mmm d, yyyy")) & ". | Audit " & If(varStuAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                            Set(varStuDorDelId, Blank());
+                                                            Select(btnStuLoadEngine)
+                                                        );
+                                                        Set(varStuSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Delete"
+                                    - btnStuDorConfirmNo:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Keep this district of record"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varStuDorDelId, Blank())
+                                          Size: =14
+                                          Text: ="Keep"
+                                          Width: =80
+                              - lblStuDorCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With({n: CountRows(Filter(colDor, StudentId = varStuSelId))}, If(n = 0, "No district of record yet.", n & If(n = 1, " row", " rows")))
+                                    Visible: =LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only"
+                                    Wrap: =false
+                              - galStuDor:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Districts of record for the selected student"
+                                    FillPortions: =0
+                                    Height: =300
+                                    Items: =Sort(Filter(colDor, StudentId = varStuSelId), StartDate, SortOrder.Descending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =100
+                                    Visible: =LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only"
+                                  Children:
+                                    - conStuDorRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.StartDate <= Today() && (IsBlank(ThisItem.EndDate) || ThisItem.EndDate >= Today()), ColorInfoBg, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =2
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - conStuDorRowTop:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =44
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                              Children:
+                                                - lblStuDorRowMain:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =ColorInk
+                                                      FillPortions: =1
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =40
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =14
+                                                      Text: =LookUp(colFunders, FunderId = ThisItem.FunderId).Abbr & " · " & Text(ThisItem.StartDate, "mmm d, yyyy") & " to " & If(IsBlank(ThisItem.EndDate), "ongoing", Text(ThisItem.EndDate, "mmm d, yyyy"))
+                                                - btnStuDorRowEdit:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Edit district of record " & LookUp(colFunders, FunderId = ThisItem.FunderId).Abbr & " from " & Text(ThisItem.StartDate, "mmm d, yyyy")
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      OnSelect: |-
+                                                        =Set(varStuDorMode, "edit"); Set(varStuDorEditId, ThisItem.DorId); Set(varStuDorDelId, Blank()); Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Select(btnStuDorResetEngine)
+                                                      Size: =14
+                                                      Text: ="Edit"
+                                                      Width: =72
+                                                - btnStuDorRowDelete:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Delete district of record " & LookUp(colFunders, FunderId = ThisItem.FunderId).Abbr & " from " & Text(ThisItem.StartDate, "mmm d, yyyy")
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      OnSelect: =Set(varStuDorDelId, ThisItem.DorId)
+                                                      Size: =14
+                                                      Text: ="Delete"
+                                                      Visible: =ThisItem.SourceText = "Manual"
+                                                      Width: =80
+                                          - lblStuDorRowMeta:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorMuted
+                                                Height: =36
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="Source " & ThisItem.SourceText & If(ThisItem.Note = "", "", " · Note " & ThisItem.Note)
+                                                VerticalAlign: =VerticalAlign.Top
+                        - conStuDorForm:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =470
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!IsBlank(varStuSelId) && varStuDorMode <> "" && LookUp(colStudents, StudentId = varStuSelId).TypeText <> "Regional Center Only"
+                            Children:
+                              - lblStuDorFormTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =44
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =16
+                                    Text: =If(varStuDorMode = "new", "Add district of record", "Edit district of record") & If(LookUp(colDor, DorId = varStuDorEditId).SourceText = "CodeMetro", " (CodeMetro row; saving makes it Manual)", "")
+                                    VerticalAlign: =VerticalAlign.Top
+                              - lblStuDorFunder:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="District (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="District (required)"
+                                    Wrap: =false
+                              - ddStuDorFunder:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="District of record funder"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colFunders, FunderId = LookUp(colDor, DorId = varStuDorEditId).FunderId)
+                                    Height: =36
+                                    ItemDisplayText: =ThisItem.Abbr & " - " & ThisItem.FullName
+                                    Items: |-
+                                      =With({cur: LookUp(colDor, DorId = varStuDorEditId).FunderId}, Sort(Filter(colFunders, (IsActive && TypeText = "District") || FunderId = cur), Abbr))
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuDorStart:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Start date (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Start date (required)"
+                                    Wrap: =false
+                              - dpStuDorStart:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="District of record start date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    DefaultDate: =LookUp(colDor, DorId = varStuDorEditId).StartDate
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuDorEnd:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="End date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="End date"
+                                    Wrap: =false
+                              - dpStuDorEnd:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="District of record end date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    DefaultDate: =LookUp(colDor, DorId = varStuDorEditId).EndDate
+                                    DisplayMode: =If(chkStuDorOngoing.Checked, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - chkStuDorOngoing:
+                                  Control: ModernCheckbox
+                                  Properties:
+                                    AccessibleLabel: ="Ongoing, no end date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varStuDorEditId), true, IsBlank(LookUp(colDor, DorId = varStuDorEditId).EndDate))
+                                    Label: ="Ongoing (no end date)"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuDorNote:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Note"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Note"
+                                    Wrap: =false
+                              - txtStuDorNote:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="District of record note"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colDor, DorId = varStuDorEditId).Note
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuDorValidation:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(Self.Text = "Ready to save.", ColorTeal, ColorUnexcused)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {
+                                              s: dpStuDorStart.SelectedDate,
+                                              e: If(chkStuDorOngoing.Checked, FarFuture, Coalesce(dpStuDorEnd.SelectedDate, FarFuture)),
+                                              editId: Coalesce(varStuDorEditId, ZeroGuid)
+                                          },
+                                          With(
+                                              {clash: First(Filter(colDor, StudentId = varStuSelId && DorId <> editId && StartDate <= e && Coalesce(EndDate, FarFuture) >= s))},
+                                              If(
+                                                  IsBlank(ddStuDorFunder.Selected), "Choose a district.",
+                                                  IsBlank(s), "Start date is required.",
+                                                  !chkStuDorOngoing.Checked && IsBlank(dpStuDorEnd.SelectedDate), "Pick an end date or tick Ongoing.",
+                                                  e < s, "End date must be on or after the start date.",
+                                                  !IsBlank(clash), "Overlaps " & LookUp(colFunders, FunderId = clash.FunderId).Abbr & " " & Text(clash.StartDate, "mmm d, yyyy") & " to " & If(IsBlank(clash.EndDate), "ongoing", Text(clash.EndDate, "mmm d, yyyy")) & ". Change the dates or end that row first.",
+                                                  "Ready to save."
+                                              )
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conStuDorActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnStuDorSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Save district of record"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varStuSaving || lblStuDorValidation.Text <> "Ready to save.", DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =If(
+                                                lblStuDorValidation.Text = "Ready to save." && !varStuSaving && IsFinance,
+                                                Set(varStuSaving, true);
+                                                Set(varStuErr, "");
+                                                With(
+                                                    {
+                                                        editId: varStuDorEditId,
+                                                        idx: Coalesce(varStuDorEditId, ZeroGuid),
+                                                        old: LookUp(colDor, DorId = varStuDorEditId),
+                                                        sid: varStuSelId,
+                                                        stu: LookUp(colStudents, StudentId = varStuSelId),
+                                                        fid: ddStuDorFunder.Selected.FunderId,
+                                                        fAbbr: ddStuDorFunder.Selected.Abbr,
+                                                        s: dpStuDorStart.SelectedDate,
+                                                        e: If(chkStuDorOngoing.Checked, Blank(), dpStuDorEnd.SelectedDate),
+                                                        note: Trim(txtStuDorNote.Text)
+                                                    },
+                                                    IfError(
+                                                        Set(varStuLastDor, If(
+                                                            IsBlank(editId),
+                                                            Patch('Districts of Record', Defaults('Districts of Record'), {Summary: stu.StudentKey & " - " & fAbbr, Student: LookUp(Students, Student = sid), Funder: LookUp(Funders, Funder = fid), 'Start Date': s, 'End Date': e, Source: 'Source (Districts of Record)'.Manual, Note: note}),
+                                                            Patch('Districts of Record', LookUp('Districts of Record', 'District of Record' = idx), {Summary: stu.StudentKey & " - " & fAbbr, Funder: LookUp(Funders, Funder = fid), 'Start Date': s, 'End Date': e, Source: 'Source (Districts of Record)'.Manual, Note: note})
+                                                        ));
+                                                        true,
+                                                        Set(varStuErr, FirstError.Message);
+                                                        false
+                                                    );
+                                                    If(
+                                                        varStuErr <> "",
+                                                        Set(varStuDorReceipt, {Kind: "Failed", Msg: "District of record not saved. " & varStuErr, RecordId: idx}),
+                                                        IfError(
+                                                            Patch('Audit Events', Defaults('Audit Events'), {Summary: Left(If(IsBlank(editId), "Create", "Update") & " Districts of Record " & stu.StudentKey & " - " & fAbbr, 100), Action: If(IsBlank(editId), 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "Districts of Record", 'Entity ID': Text(varStuLastDor.'District of Record'), Before: If(IsBlank(editId), "", JSON({Funder: LookUp(colFunders, FunderId = old.FunderId).Abbr, StartDate: old.StartDate, EndDate: old.EndDate, Source: old.SourceText, Note: old.Note})), After: JSON({Student: stu.StudentKey, Funder: fAbbr, StartDate: s, EndDate: e, Source: "Manual", Note: note}), Reason: "District of record saved in AACA Billing"});
+                                                            Set(varStuAuditOk, true),
+                                                            Set(varStuAuditOk, false)
+                                                        );
+                                                        Set(varStuDorReceipt, {Kind: If(IsBlank(editId), "Created", "Updated"), Msg: If(IsBlank(editId), "Created", "Updated") & " district of record. Student " & stu.StudentKey & " | District " & fAbbr & " | Start " & Text(varStuLastDor.'Start Date', "mmm d, yyyy") & " | End " & If(IsBlank(varStuLastDor.'End Date'), "ongoing", Text(varStuLastDor.'End Date', "mmm d, yyyy")) & " | Source " & If(IsBlank(editId), "", old.SourceText & " -> ") & Text(varStuLastDor.Source) & " | Note " & Coalesce(varStuLastDor.Note, "none") & " | Audit " & If(varStuAuditOk, "written", "FAILED - tell Adam"), RecordId: varStuLastDor.'District of Record'});
+                                                        Set(varStuDorMode, "");
+                                                        Set(varStuDorEditId, Blank());
+                                                        Select(btnStuLoadEngine)
+                                                    )
+                                                );
+                                                Set(varStuSaving, false)
+                                            )
+                                          Size: =14
+                                          Text: ="Save"
+                                          Width: =100
+                                    - btnStuDorCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel district of record changes"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varStuDorMode, ""); Set(varStuDorEditId, Blank())
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+                        - conStuSs:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: |-
+                                =32 + 44 + 6 + 36 + 6 + 20 + 6 + 432 +
+                                If(varStuSsReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varStuSsReceipt.Msg) / 45, 0) + 8), 0) +
+                                If(!IsBlank(varStuSsDelId), 6 + 56, 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!IsBlank(varStuSelId)
+                            Children:
+                              - conStuSsReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varStuSsReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varStuSsReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varStuSsReceipt.Kind <> ""
+                                  Children:
+                                    - lblStuSsReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varStuSsReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varStuSsReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varStuSsReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnStuSsReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss service row message"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - conStuSsHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblStuSsTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Student services"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =24
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =16
+                                          Text: ="Student services"
+                                          Wrap: =false
+                                    - btnStuSsAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add a service row for this student"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varStuSsMode, "new"); Set(varStuSsEditId, Blank()); Set(varStuSsDelId, Blank()); Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Select(btnStuSsResetEngine)
+                                          Size: =14
+                                          Text: ="Add service row"
+                                          Width: =150
+                              - lblStuSsCaption:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Each row is one line on the RDS grid; a 2:1 aide is two rows."
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conStuSsConfirm:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorWarnBg
+                                    FillPortions: =0
+                                    Height: =56
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =6
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =6
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =!IsBlank(varStuSsDelId)
+                                  Children:
+                                    - lblStuSsConfirm:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =44
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Delete service row " & LookUp(colStuSvc, SsId = varStuSsDelId).Summary & "?"
+                                    - btnStuSsConfirmYes:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Confirm delete service row"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorUnexcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varStuSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {snap: LookUp(colStuSvc, SsId = varStuSsDelId)},
+                                                With(
+                                                    {hid: snap.SsId},
+                                                    If(
+                                                        !IsBlank(hid) && snap.SourceText = "Manual" && !varStuSaving && IsFinance,
+                                                        Set(varStuSaving, true);
+                                                        Set(varStuErr, "");
+                                                        IfError(Remove('Student Services', LookUp('Student Services', 'Student Service' = hid)); true, Set(varStuErr, FirstError.Message); false);
+                                                        If(
+                                                            varStuErr <> "",
+                                                            Set(varStuSsReceipt, {Kind: "Failed", Msg: "Service row not deleted. " & varStuErr, RecordId: hid}),
+                                                            IfError(
+                                                                Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Soft Delete Student Services " & snap.Summary, 100), Action: 'Action (Audit Events)'.'Soft Delete', Entity: "Student Services", 'Entity ID': Text(hid), Before: JSON({Summary: snap.Summary, Service: LookUp(colServices, ServiceId = snap.ServiceId).Code, Funder: LookUp(colFunders, FunderId = snap.FunderId).Abbr, StartDate: snap.StartDate, EndDate: snap.EndDate}), After: "", Reason: "Student service removed (row deleted)"});
+                                                                Set(varStuAuditOk, true),
+                                                                Set(varStuAuditOk, false)
+                                                            );
+                                                            Set(varStuSsReceipt, {Kind: "Deleted", Msg: "Deleted service row " & snap.Summary & " (start " & Text(snap.StartDate, "mmm d, yyyy") & "). | Audit " & If(varStuAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                            Set(varStuSsDelId, Blank());
+                                                            Select(btnStuLoadEngine)
+                                                        );
+                                                        Set(varStuSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Delete"
+                                    - btnStuSsConfirmNo:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Keep this service row"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varStuSsDelId, Blank())
+                                          Size: =14
+                                          Text: ="Keep"
+                                          Width: =80
+                              - lblStuSsCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With({n: CountRows(Filter(colStuSvc, StudentId = varStuSelId))}, If(n = 0, "No service rows yet.", n & If(n = 1, " row", " rows")))
+                                    Wrap: =false
+                              - galStuSs:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Service rows for the selected student"
+                                    FillPortions: =0
+                                    Height: =432
+                                    Items: =Sort(Filter(colStuSvc, StudentId = varStuSelId), SvcSort * 100000 + DateDiff(Date(2000, 1, 1), StartDate, TimeUnit.Days), SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =144
+                                  Children:
+                                    - conStuSsRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.IsExcluded, ColorNotEnrolled, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =2
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - conStuSsRowTop:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =44
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                              Children:
+                                                - lblStuSsRowMain:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =If(ThisItem.IsExcluded, ColorMuted, ColorInk)
+                                                      FillPortions: =1
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =40
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =14
+                                                      Text: |-
+                                                        =With({sv: LookUp(colServices, ServiceId = ThisItem.ServiceId)}, sv.Code & " - " & sv.Name)
+                                                - badStuSsExcluded:
+                                                    Control: Badge
+                                                    Properties:
+                                                      AccessibleLabel: ="Excluded from billing"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: ='BadgeCanvas.Appearance'.Tint
+                                                      Content: ="Excluded"
+                                                      FontColor: =ColorInk
+                                                      Height: =24
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      Shape: ='BadgeCanvas.Shape'.Rounded
+                                                      ThemeColor: ='BadgeCanvas.ThemeColor'.Subtle
+                                                      Visible: =ThisItem.IsExcluded
+                                                      Width: =84
+                                          - lblStuSsRowDates:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =If(ThisItem.IsExcluded, ColorMuted, ColorInk)
+                                                Height: =36
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: ="Funder " & LookUp(colFunders, FunderId = ThisItem.FunderId).Abbr & " · " & Text(ThisItem.StartDate, "mmm d, yyyy") & " to " & If(IsBlank(ThisItem.EndDate), "ongoing", Text(ThisItem.EndDate, "mmm d, yyyy")) & " · Frequency " & If(ThisItem.Frequency = "", "not set", ThisItem.Frequency) & " · " & If(IsBlank(ThisItem.Minutes), "minutes not set", ThisItem.Minutes & " min per frequency") & " · ESY " & If(ThisItem.IsEsy, "Yes", "No")
+                                                VerticalAlign: =VerticalAlign.Top
+                                          - conStuSsRowActions:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =44
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                              Children:
+                                                - lblStuSsRowMeta:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Color: =ColorMuted
+                                                      FillPortions: =1
+                                                      Height: =40
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: ="Source " & ThisItem.SourceText & If(ThisItem.Note = "", "", " · Note " & ThisItem.Note)
+                                                - btnStuSsRowEdit:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Edit service row " & ThisItem.Summary
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      OnSelect: |-
+                                                        =Set(varStuSsMode, "edit"); Set(varStuSsEditId, ThisItem.SsId); Set(varStuSsDelId, Blank()); Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid}); Select(btnStuSsResetEngine)
+                                                      Size: =14
+                                                      Text: ="Edit"
+                                                      Width: =72
+                                                - btnStuSsRowDelete:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Delete service row " & ThisItem.Summary
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      OnSelect: =Set(varStuSsDelId, ThisItem.SsId)
+                                                      Size: =14
+                                                      Text: ="Delete"
+                                                      Visible: =ThisItem.SourceText = "Manual"
+                                                      Width: =80
+                        - conStuSsForm:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =768
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!IsBlank(varStuSelId) && varStuSsMode <> ""
+                            Children:
+                              - lblStuSsFormTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =44
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =16
+                                    Text: =If(varStuSsMode = "new", "Add service row", varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", "Edit CodeMetro row (only Excluded and Note can change)", "Edit service row")
+                                    VerticalAlign: =VerticalAlign.Top
+                              - lblStuSsService:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Service (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Service (required)"
+                                    Wrap: =false
+                              - ddStuSsService:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="Service for this row"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colServices, ServiceId = LookUp(colStuSvc, SsId = varStuSsEditId).ServiceId)
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    ItemDisplayText: =ThisItem.Code & " - " & ThisItem.Name
+                                    Items: |-
+                                      =With({cur: LookUp(colStuSvc, SsId = varStuSsEditId).ServiceId}, Sort(Filter(colServices, (IsActive && KindText = "School Day" && Upper(Code) <> "SPED") || ServiceId = cur), Coalesce(SortNum, 9999)))
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuSsFunder:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Funder (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Funder (required)"
+                                    Wrap: =false
+                              - ddStuSsFunder:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="Funder for this service row"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colFunders, FunderId = LookUp(colStuSvc, SsId = varStuSsEditId).FunderId)
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    ItemDisplayText: =ThisItem.Abbr & " - " & ThisItem.FullName
+                                    Items: |-
+                                      =With({cur: LookUp(colStuSvc, SsId = varStuSsEditId).FunderId}, Sort(Filter(colFunders, IsActive || FunderId = cur), Abbr))
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuSsStart:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Start date (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Start date (required)"
+                                    Wrap: =false
+                              - dpStuSsStart:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="Service row start date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    DefaultDate: =LookUp(colStuSvc, SsId = varStuSsEditId).StartDate
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuSsEnd:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="End date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="End date"
+                                    Wrap: =false
+                              - dpStuSsEnd:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="Service row end date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    DefaultDate: =LookUp(colStuSvc, SsId = varStuSsEditId).EndDate
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, chkStuSsOngoing.Checked, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - chkStuSsOngoing:
+                                  Control: ModernCheckbox
+                                  Properties:
+                                    AccessibleLabel: ="Ongoing, no end date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varStuSsEditId), true, IsBlank(LookUp(colStuSvc, SsId = varStuSsEditId).EndDate))
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Label: ="Ongoing (no end date)"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuSsFreq:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Frequency"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Frequency"
+                                    Wrap: =false
+                              - txtStuSsFreq:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Service frequency"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colStuSvc, SsId = varStuSsEditId).Frequency
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Placeholder: ="e.g. Daily"
+                              - lblStuSsMin:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Minutes per frequency"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Minutes per frequency"
+                                    Wrap: =false
+                              - txtStuSsMin:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Minutes per frequency"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: |-
+                                      =With({m: LookUp(colStuSvc, SsId = varStuSsEditId).Minutes}, If(IsBlank(m), "", Text(m)))
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - tglStuSsEsy:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="ESY, extended school year"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varStuSsEditId), false, LookUp(colStuSvc, SsId = varStuSsEditId).IsEsy)
+                                    DisplayMode: =If(varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =44
+                                    Label: ="ESY (extended school year)"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =260
+                              - tglStuSsExcluded:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Excluded from billing"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varStuSsEditId), false, LookUp(colStuSvc, SsId = varStuSsEditId).IsExcluded)
+                                    Height: =44
+                                    Label: ="Excluded from billing"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =260
+                              - lblStuSsNote:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Note"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Note"
+                                    Wrap: =false
+                              - txtStuSsNote:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Service row note"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colStuSvc, SsId = varStuSsEditId).Note
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblStuSsValidation:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(Self.Text = "Ready to save.", ColorTeal, ColorUnexcused)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {
+                                              isCm: varStuSsMode = "edit" && LookUp(colStuSvc, SsId = varStuSsEditId).SourceText = "CodeMetro",
+                                              s: dpStuSsStart.SelectedDate,
+                                              inMin: Trim(txtStuSsMin.Text)
+                                          },
+                                          If(
+                                              isCm, "Ready to save.",
+                                              IsBlank(ddStuSsService.Selected), "Choose a service.",
+                                              IsBlank(ddStuSsFunder.Selected), "Choose a funder.",
+                                              IsBlank(s), "Start date is required.",
+                                              !chkStuSsOngoing.Checked && IsBlank(dpStuSsEnd.SelectedDate), "Pick an end date or tick Ongoing.",
+                                              !chkStuSsOngoing.Checked && dpStuSsEnd.SelectedDate < s, "End date must be on or after the start date.",
+                                              inMin <> "" && (!IsNumeric(inMin) || Value(inMin) < 0), "Minutes must be a number 0 or more.",
+                                              "Ready to save."
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conStuSsActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnStuSsSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Save service row"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varStuSaving || lblStuSsValidation.Text <> "Ready to save.", DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =If(
+                                                lblStuSsValidation.Text = "Ready to save." && !varStuSaving && IsFinance,
+                                                Set(varStuSaving, true);
+                                                Set(varStuErr, "");
+                                                With(
+                                                    {
+                                                        editId: varStuSsEditId,
+                                                        idx: Coalesce(varStuSsEditId, ZeroGuid),
+                                                        old: LookUp(colStuSvc, SsId = varStuSsEditId),
+                                                        sid: varStuSelId,
+                                                        stu: LookUp(colStudents, StudentId = varStuSelId),
+                                                        svId: ddStuSsService.Selected.ServiceId,
+                                                        svCode: ddStuSsService.Selected.Code,
+                                                        fId: ddStuSsFunder.Selected.FunderId,
+                                                        fAbbr: ddStuSsFunder.Selected.Abbr,
+                                                        s: dpStuSsStart.SelectedDate,
+                                                        e: If(chkStuSsOngoing.Checked, Blank(), dpStuSsEnd.SelectedDate),
+                                                        freq: Trim(txtStuSsFreq.Text),
+                                                        inMin: Trim(txtStuSsMin.Text),
+                                                        esy: tglStuSsEsy.Checked,
+                                                        ex: tglStuSsExcluded.Checked,
+                                                        note: Trim(txtStuSsNote.Text)
+                                                    },
+                                                    With(
+                                                        {
+                                                            isCm: !IsBlank(editId) && old.SourceText = "CodeMetro",
+                                                            minVal: If(inMin = "", Blank(), Value(inMin)),
+                                                            n: CountIf(colStuSvc, StudentId = sid && ServiceId = svId && SsId <> idx) + 1,
+                                                            op: If(IsBlank(editId), If(ex, "New row, excluded", "New row"), !old.IsExcluded && ex, "Excluded", old.IsExcluded && !ex, "Included", "No change")
+                                                        },
+                                                        With(
+                                                            {summ: If(!IsBlank(editId) && svId = old.ServiceId && fId = old.FunderId, old.Summary, stu.StudentKey & " - " & svCode & If(n > 1, " #" & n, "") & " - " & fAbbr)},
+                                                            IfError(
+                                                                Set(varStuLastSs, If(
+                                                                    IsBlank(editId),
+                                                                    Patch('Student Services', Defaults('Student Services'), {Summary: summ, Student: LookUp(Students, Student = sid), Service: LookUp(Services, Service = svId), Funder: LookUp(Funders, Funder = fId), 'Start Date': s, 'End Date': e, Frequency: freq, 'Minutes per Frequency': minVal, ESY: esy, Excluded: ex, Source: 'Source (Student Services)'.Manual, Note: note}),
+                                                                    isCm,
+                                                                    Patch('Student Services', LookUp('Student Services', 'Student Service' = idx), {Excluded: ex, Note: note}),
+                                                                    Patch('Student Services', LookUp('Student Services', 'Student Service' = idx), {Summary: summ, Service: LookUp(Services, Service = svId), Funder: LookUp(Funders, Funder = fId), 'Start Date': s, 'End Date': e, Frequency: freq, 'Minutes per Frequency': minVal, ESY: esy, Excluded: ex, Note: note})
+                                                                ));
+                                                                true,
+                                                                Set(varStuErr, FirstError.Message);
+                                                                false
+                                                            );
+                                                            If(
+                                                                varStuErr <> "",
+                                                                Set(varStuSsReceipt, {Kind: "Failed", Msg: "Service row not saved. " & varStuErr, RecordId: idx}),
+                                                                IfError(
+                                                                    Patch('Audit Events', Defaults('Audit Events'), {Summary: Left(If(IsBlank(editId), "Create", "Update") & " Student Services " & varStuLastSs.Summary, 100), Action: If(IsBlank(editId), 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "Student Services", 'Entity ID': Text(varStuLastSs.'Student Service'), Before: If(IsBlank(editId), "", JSON({Summary: old.Summary, StartDate: old.StartDate, EndDate: old.EndDate, Frequency: old.Frequency, Minutes: old.Minutes, ESY: old.IsEsy, Excluded: old.IsExcluded, Note: old.Note})), After: If(isCm, JSON({Excluded: ex, Note: note}), JSON({Summary: summ, Service: svCode, Funder: fAbbr, StartDate: s, EndDate: e, Frequency: freq, Minutes: minVal, ESY: esy, Excluded: ex, Note: note})), Reason: "Student service saved in AACA Billing"});
+                                                                    Set(varStuAuditOk, true),
+                                                                    Set(varStuAuditOk, false)
+                                                                );
+                                                                Set(varStuSsReceipt, {Kind: If(IsBlank(editId), "Created", "Updated"), Msg: If(
+                                                                    isCm,
+                                                                    "Updated CodeMetro service row " & varStuLastSs.Summary & ". Excluded " & If(old.IsExcluded, "Yes", "No") & " -> " & If(varStuLastSs.Excluded, "Yes", "No") & " (" & op & ") | Note " & Coalesce(varStuLastSs.Note, "none") & " | Other fields unchanged (CodeMetro row)",
+                                                                    If(IsBlank(editId), "Created", "Updated") & " service row " & varStuLastSs.Summary & ". Service " & svCode & " | Funder " & fAbbr & " | Start " & Text(varStuLastSs.'Start Date', "mmm d, yyyy") & " | End " & If(IsBlank(varStuLastSs.'End Date'), "ongoing", Text(varStuLastSs.'End Date', "mmm d, yyyy")) & " | Frequency " & Coalesce(varStuLastSs.Frequency, "not set") & " | Minutes " & If(IsBlank(varStuLastSs.'Minutes per Frequency'), "not set", Text(varStuLastSs.'Minutes per Frequency')) & " | ESY " & If(varStuLastSs.ESY, "Yes", "No") & " | Excluded " & If(IsBlank(editId), "", If(old.IsExcluded, "Yes", "No") & " -> ") & If(varStuLastSs.Excluded, "Yes", "No") & " (" & op & ") | Source " & Text(varStuLastSs.Source) & " | Note " & Coalesce(varStuLastSs.Note, "none")
+                                                                ) & " | Audit " & If(varStuAuditOk, "written", "FAILED - tell Adam"), RecordId: varStuLastSs.'Student Service'});
+                                                                Set(varStuSsMode, "");
+                                                                Set(varStuSsEditId, Blank());
+                                                                Select(btnStuLoadEngine)
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                                Set(varStuSaving, false)
+                                            )
+                                          Size: =14
+                                          Text: ="Save"
+                                          Width: =100
+                                    - btnStuSsCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel service row changes"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varStuSsMode, ""); Set(varStuSsEditId, Blank())
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+            - btnStuLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varStuLoading, true);
+                    Set(varStuLoadError, "");
+                    If(
+                        !IsFinance,
+                        Clear(colStudents); Clear(colDor); Clear(colStuSvc); Clear(colFunders); Clear(colServices),
+                        IfError(
+                            Refresh(Students); Refresh('Districts of Record'); Refresh('Student Services'); Refresh(Funders); Refresh(Services);
+                            Concurrent(
+                                ClearCollect(colStudents, ForAll(Students As s, {StudentId: s.Student, StudentKey: Coalesce(s.'External Client ID', ""), DisplayName: Coalesce(s.'Display Name', ""), StatusText: Coalesce(Text(s.'Status (aaca_status)'), ""), TypeText: If(Text(s.'Student Type') = "Regional Center Only", "Regional Center Only", "School")})),
+                                ClearCollect(colDor, ForAll('Districts of Record' As d, {DorId: d.'District of Record', StudentId: d.Student.Student, FunderId: d.Funder.Funder, StartDate: d.'Start Date', EndDate: d.'End Date', SourceText: Coalesce(Text(d.Source), ""), Note: Coalesce(d.Note, "")})),
+                                ClearCollect(colStuSvc, ForAll('Student Services' As x, {SsId: x.'Student Service', StudentId: x.Student.Student, ServiceId: x.Service.Service, FunderId: x.Funder.Funder, SvcSort: Coalesce(x.Service.'Sort Order', 9999), StartDate: x.'Start Date', EndDate: x.'End Date', Frequency: Coalesce(x.Frequency, ""), Minutes: x.'Minutes per Frequency', IsEsy: Coalesce(x.ESY, false), SourceText: Coalesce(Text(x.Source), ""), IsExcluded: Coalesce(x.Excluded, false), Note: Coalesce(x.Note, ""), Summary: Coalesce(x.Summary, "")})),
+                                ClearCollect(colFunders, ForAll(Funders As f, {FunderId: f.Funder, Abbr: Coalesce(f.Abbreviation, ""), FullName: Coalesce(f.'Full Name', ""), TypeText: Coalesce(Text(f.'Funder Type'), ""), QboCustomer: Coalesce(f.'QuickBooks Customer', ""), IsActive: Coalesce(f.Active, false)})),
+                                ClearCollect(colServices, ForAll(Services As s, {ServiceId: s.Service, Code: Coalesce(s.'Service Code', ""), Name: Coalesce(s.Name, ""), KindText: Coalesce(Text(s.Kind), ""), KindRank: If(Text(s.Kind) = "School Day", 1, 2), UnitText: Coalesce(Text(s.'Billing Unit'), ""), QboItem: Coalesce(s.'QuickBooks Item', ""), SortNum: s.'Sort Order', IsBillable: Coalesce(s.Billable, false), NonSchool: Coalesce(s.'Billable on Non-School Days', false), IsActive: Coalesce(s.Active, false)}))
+                            );
+                            true,
+                            Set(varStuLoadError, FirstError.Message);
+                            false
+                        )
+                    );
+                    Set(varStuLoading, false)
+                  Text: ="load"
+                  Visible: =false
+            - btnStuDorResetEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: =Reset(ddStuDorFunder); Reset(dpStuDorStart); Reset(dpStuDorEnd); Reset(chkStuDorOngoing); Reset(txtStuDorNote)
+                  Text: ="reset district form"
+                  Visible: =false
+            - btnStuSsResetEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: =Reset(ddStuSsService); Reset(ddStuSsFunder); Reset(dpStuSsStart); Reset(dpStuSsEnd); Reset(chkStuSsOngoing); Reset(txtStuSsFreq); Reset(txtStuSsMin); Reset(tglStuSsEsy); Reset(tglStuSsExcluded); Reset(txtStuSsNote)
+                  Text: ="reset service form"
+                  Visible: =false

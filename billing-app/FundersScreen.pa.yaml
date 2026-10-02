@@ -1,0 +1,1575 @@
+Screens:
+  FundersScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varFunSelId, Blank());
+        Set(varFunMode, "");
+        Set(varFunAliasDelId, Blank());
+        Set(varFunReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+        Set(varFunAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+        Reset(txtFunSearch);
+        Reset(tglFunInactive);
+        Select(btnFunLoadEngine)
+    Children:
+      - conFunRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conFunHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conFunRoot.Width < 640, 92, 76) + If(IsFinance, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblFunTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Billing"
+                        Wrap: =false
+                  - lblFunIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conFunRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conFunNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =IsFinance
+                      Children:
+                        - btnFunNavHome:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Home"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(HomeScreen)
+                              Size: =14
+                              Text: ="Home"
+                              Width: =110
+                        - btnFunNavFunders:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Funders (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(FundersScreen)
+                              Size: =14
+                              Text: ="Funders"
+                              Width: =110
+                        - btnFunNavServices:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Services"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(ServicesScreen)
+                              Size: =14
+                              Text: ="Services"
+                              Width: =110
+                        - btnFunNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnFunNavRds:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to RDS Grid"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(RdsScreen)
+                              Size: =14
+                              Text: ="RDS Grid"
+                              Width: =110
+            - conFunGate:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!IsFinance
+                Children:
+                  - lblFunGateTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="You don't have access to AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="You don't have access to AACA Billing"
+                        Wrap: =false
+                  - lblFunGateBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        VerticalAlign: =VerticalAlign.Top
+            - conFunBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conFunRoot.Width >= 1024, Max(conFunListPanel.Height, conFunRight.Height), If(varFunMode = "", conFunListPanel.Height, conFunRight.Height))
+                  LayoutAlignItems: =If(conFunRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                  LayoutDirection: =If(conFunRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Visible: =IsFinance
+                Children:
+                  - conFunListPanel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conFunRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =If(conFunRoot.Width >= 1024, 1, 0)
+                        Height: =738 + conFunChips.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =!(conFunRoot.Width < 1024 && varFunMode <> "")
+                      Children:
+                        - conFunListHead:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblFunListTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Funders"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =80
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Funders"
+                                    Wrap: =false
+                              - btnFunReload:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Reload funders"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varFunLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Select(btnFunLoadEngine)
+                                    Size: =14
+                                    Text: ="Reload"
+                                    Width: =88
+                              - btnFunNew:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="New funder"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =Set(varFunSelId, Blank());
+                                      Set(varFunMode, "new");
+                                      Set(varFunAliasDelId, Blank());
+                                      Set(varFunReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                      Set(varFunAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                      Select(btnFunFormResetEngine)
+                                    Size: =14
+                                    Text: ="New funder"
+                                    Width: =120
+                        - lblFunSearch:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Search abbreviation, name or alias"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =18
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Search abbreviation, name or alias"
+                              Wrap: =false
+                        - txtFunSearch:
+                            Control: ModernTextInput
+                            Properties:
+                              AccessibleLabel: ="Search funders by abbreviation, name or alias"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Appearance: =Appearance.Outline
+                              Color: =ColorInk
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Placeholder: ="e.g. LAUSD or Los Angeles"
+                              TriggerOutput: =TriggerOutput.Delayed
+                              Type: =TextInputType.Search
+                        - conFunChips:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conFunListPanel.Width - 32 >= 702, 44, conFunListPanel.Width - 32 >= 454, 96, 148)
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutWrap: =true
+                            Children:
+                              - btnFunChipAll:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Show all funder types" & If(varFunType = "All", " (selected)", "")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varFunType = "All", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varFunType = "All", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "All")
+                                    Size: =14
+                                    Text: ="All"
+                                    Width: =64
+                              - btnFunChipDistrict:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Show District funders" & If(varFunType = "District", " (selected)", "")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varFunType = "District", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varFunType = "District", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "District")
+                                    Size: =14
+                                    Text: ="District"
+                              - btnFunChipRc:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Show Regional Center funders" & If(varFunType = "Regional Center", " (selected)", "")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varFunType = "Regional Center", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varFunType = "Regional Center", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "Regional Center")
+                                    Size: =14
+                                    Text: ="Regional Center"
+                                    Width: =150
+                              - btnFunChipPp:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Show Private Pay funders" & If(varFunType = "Private Pay", " (selected)", "")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varFunType = "Private Pay", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varFunType = "Private Pay", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "Private Pay")
+                                    Size: =14
+                                    Text: ="Private Pay"
+                                    Width: =120
+                              - btnFunChipMissing:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Only funders missing a QuickBooks customer" & If(varFunMissingQbo, " (on)", " (off)")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varFunMissingQbo, ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varFunMissingQbo, ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =With({next: !varFunMissingQbo}, Set(varFunMissingQbo, next))
+                                    Size: =14
+                                    Text: ="Missing QuickBooks customer"
+                                    Width: =240
+                        - conFunFilterRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - tglFunInactive:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Show inactive funders"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    Default: =varFunShowInactive
+                                    Height: =44
+                                    Label: ="Show inactive"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnCheck: =Set(varFunShowInactive, true)
+                                    OnUncheck: =Set(varFunShowInactive, false)
+                                    Width: =160
+                              - btnFunClear:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Clear all funder filters"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =Set(varFunType, "All");
+                                      Set(varFunMissingQbo, false);
+                                      Set(varFunShowInactive, false);
+                                      Reset(txtFunSearch);
+                                      Reset(tglFunInactive)
+                                    Size: =14
+                                    Text: ="Clear filters"
+                                    Width: =120
+                        - lblFunCount:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =If(varFunLoadError <> "", ColorUnexcused, ColorMuted)
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With(
+                                    {
+                                        n: CountRows(
+                                            Filter(
+                                                colFunders As f,
+                                                (varFunShowInactive || f.IsActive) &&
+                                                (varFunType = "All" || f.TypeText = varFunType) &&
+                                                (!varFunMissingQbo || Trim(f.QboCustomer) = "") &&
+                                                (Trim(txtFunSearch.Text) = "" ||
+                                                    Lower(Trim(txtFunSearch.Text)) in Lower(f.Abbr & " " & f.FullName) ||
+                                                    CountIf(colFunderAliases, FunderId = f.FunderId && Lower(Trim(txtFunSearch.Text)) in Lower(AliasText)) > 0)
+                                            )
+                                        ),
+                                        m: CountRows(Filter(colFunders, varFunShowInactive || IsActive))
+                                    },
+                                    If(
+                                        varFunLoading, "Loading funders...",
+                                        varFunLoadError <> "", "Could not load funders - " & varFunLoadError,
+                                        n = 0, "No funders match these filters. Use Clear filters to see all.",
+                                        "Showing " & n & " of " & m & " funders"
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - galFunList:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Funders list"
+                              FillPortions: =0
+                              Height: =480
+                              Items: |-
+                                =Sort(
+                                    Filter(
+                                        colFunders As f,
+                                        (varFunShowInactive || f.IsActive) &&
+                                        (varFunType = "All" || f.TypeText = varFunType) &&
+                                        (!varFunMissingQbo || Trim(f.QboCustomer) = "") &&
+                                        (Trim(txtFunSearch.Text) = "" ||
+                                            Lower(Trim(txtFunSearch.Text)) in Lower(f.Abbr & " " & f.FullName) ||
+                                            CountIf(colFunderAliases, FunderId = f.FunderId && Lower(Trim(txtFunSearch.Text)) in Lower(AliasText)) > 0)
+                                    ),
+                                    Abbr,
+                                    SortOrder.Ascending
+                                )
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =120
+                            Children:
+                              - conFunRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.FunderId = varFunSelId, ColorInfoBg, ColorWhite)
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - conFunRowTop:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblFunRowAbbr:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: ="Funder " & ThisItem.Abbr
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =24
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.Abbr
+                                                Wrap: =false
+                                          - btnFunRowEdit:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Edit funder " & ThisItem.Abbr
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: |-
+                                                  =Set(varFunSelId, ThisItem.FunderId);
+                                                  Set(varFunMode, "edit");
+                                                  Set(varFunAliasDelId, Blank());
+                                                  Set(varFunReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                                  Set(varFunAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                                  Select(btnFunFormResetEngine)
+                                                Size: =14
+                                                Text: ="Edit"
+                                                Width: =72
+                                    - lblFunRowName:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.FullName & " · " & ThisItem.TypeText & If(ThisItem.IsActive, "", " · Inactive") & " · " & CountIf(colFunderAliases, FunderId = ThisItem.FunderId) & " aliases"
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - lblFunRowQbo:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =If(Trim(ThisItem.QboCustomer) = "", ColorWarnInk, ColorInk)
+                                          FontWeight: =If(Trim(ThisItem.QboCustomer) = "", FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =20
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =If(Trim(ThisItem.QboCustomer) = "", "No QuickBooks customer", "QuickBooks customer " & ThisItem.QboCustomer)
+                                          Wrap: =false
+                  - conFunRight:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conFunRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        DropShadow: =DropShadow.None
+                        FillPortions: =If(conFunRoot.Width >= 1024, 1, 0)
+                        Height: =If(varFunMode = "", If(conFunRoot.Width >= 1024, 72, 0), conFunForm.Height + If(varFunMode = "edit", 12 + conFunAliasPanel.Height, 0))
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =varFunMode <> "" || conFunRoot.Width >= 1024
+                      Children:
+                        - conFunPlaceholder:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =72
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varFunMode = ""
+                            Children:
+                              - lblFunPlaceholder:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Select Edit on a funder, or New funder to add one."
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =40
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: ="Select Edit on a funder, or New funder to add one."
+                                    VerticalAlign: =VerticalAlign.Top
+                        - conFunForm:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =488 + If(varFunReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varFunReceipt.Msg) / 45, 0) + 8), 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varFunMode <> ""
+                            Children:
+                              - conFunReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varFunReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varFunReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varFunReceipt.Kind <> ""
+                                  Children:
+                                    - lblFunReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varFunReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varFunReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varFunReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnFunReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss funder save result"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varFunReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - conFunFormHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblFunFormTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =28
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: =If(varFunMode = "new", "New funder", "Edit funder " & LookUp(colFunders, FunderId = varFunSelId).Abbr)
+                                          Wrap: =false
+                                    - btnFunBack:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Back to funders list without saving"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varFunSelId, Blank()); Set(varFunMode, ""); Set(varFunAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Back to list"
+                                          Visible: =conFunRoot.Width < 1024
+                                          Width: =120
+                              - lblFunAbbr:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Abbreviation (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Abbreviation (required)"
+                                    Wrap: =false
+                              - txtFunAbbr:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Funder abbreviation, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =LookUp(colFunders, FunderId = varFunSelId).Abbr
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =100
+                              - lblFunFull:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Full name"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Full name"
+                                    Wrap: =false
+                              - txtFunFull:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Funder full name"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =LookUp(colFunders, FunderId = varFunSelId).FullName
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblFunType:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Funder type (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Funder type (required)"
+                                    Wrap: =false
+                              - rdoFunType:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Funder type, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      ={Value: Coalesce(LookUp(colFunders, FunderId = varFunSelId).TypeText, "District")}
+                                    Height: =36
+                                    Items: =["District", "Regional Center", "Private Pay"]
+                                    Layout: =OptionLayout.Horizontal
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblFunQbo:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="QuickBooks customer"
+                                    Wrap: =false
+                              - txtFunQbo:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="QuickBooks customer name"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =LookUp(colFunders, FunderId = varFunSelId).QboCustomer
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Placeholder: ="Exact customer name in QuickBooks Online"
+                              - tglFunActive:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Funder active"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varFunSelId), true, LookUp(colFunders, FunderId = varFunSelId).IsActive)
+                                    Height: =44
+                                    Label: ="Active"
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =160
+                              - lblFunValidation:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(Self.Text = "Ready to save.", ColorTeal, ColorUnexcused)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {inAbbr: Trim(txtFunAbbr.Text), inType: Coalesce(rdoFunType.Selected.Value, "")},
+                                          With(
+                                              {dup: LookUp(colFunders, Lower(Abbr) = Lower(inAbbr) && FunderId <> Coalesce(varFunSelId, ZeroGuid))},
+                                              If(
+                                                  inAbbr = "", "Abbreviation is required.",
+                                                  !IsBlank(dup), "Abbreviation " & inAbbr & " is already used by " & Coalesce(dup.FullName, dup.Abbr) & ".",
+                                                  inType = "", "Choose a funder type.",
+                                                  "Ready to save."
+                                              )
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conFunActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnFunSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Save funder"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varFunSaving || lblFunValidation.Text <> "Ready to save.", DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =If(
+                                                lblFunValidation.Text = "Ready to save." && !varFunSaving && IsFinance,
+                                                Set(varFunSaving, true);
+                                                Set(varFunErr, "");
+                                                With(
+                                                    {
+                                                        id: varFunSelId,
+                                                        idx: Coalesce(varFunSelId, ZeroGuid),
+                                                        old: LookUp(colFunders, FunderId = varFunSelId),
+                                                        inAbbr: Trim(txtFunAbbr.Text),
+                                                        inFull: Trim(txtFunFull.Text),
+                                                        inType: rdoFunType.Selected.Value,
+                                                        inQbo: Trim(txtFunQbo.Text),
+                                                        act: tglFunActive.Checked
+                                                    },
+                                                    With(
+                                                        {
+                                                            dup: LookUp(Funders, Abbreviation = inAbbr && Funder <> idx),
+                                                            typeOpt: Switch(inType, "District", 'Funder Type (Funders)'.District, "Regional Center", 'Funder Type (Funders)'.'Regional Center', "Private Pay", 'Funder Type (Funders)'.'Private Pay'),
+                                                            op: If(IsBlank(id), "New funder", !old.IsActive && act, "Reactivated", old.IsActive && !act, "Deactivated", "No status change")
+                                                        },
+                                                        If(
+                                                            !IsBlank(dup),
+                                                            Set(varFunReceipt, {Kind: "Blocked", Msg: "Not saved. Abbreviation " & inAbbr & " is already used by another funder (" & dup.'Full Name' & ").", RecordId: idx}),
+                                                            IfError(
+                                                                Set(varFunLastRec, If(IsBlank(id),
+                                                                    Patch(Funders, Defaults(Funders), {Abbreviation: inAbbr, 'Full Name': inFull, 'Funder Type': typeOpt, 'QuickBooks Customer': inQbo, Active: act}),
+                                                                    Patch(Funders, LookUp(Funders, Funder = idx), {Abbreviation: inAbbr, 'Full Name': inFull, 'Funder Type': typeOpt, 'QuickBooks Customer': inQbo, Active: act})));
+                                                                true,
+                                                                Set(varFunErr, FirstError.Message);
+                                                                false
+                                                            );
+                                                            If(
+                                                                varFunErr <> "",
+                                                                Set(varFunReceipt, {Kind: "Failed", Msg: "Funder not saved. " & varFunErr, RecordId: idx}),
+                                                                IfError(
+                                                                    Patch('Audit Events', Defaults('Audit Events'), {Summary: Left(If(IsBlank(id), "Create", "Update") & " Funders " & varFunLastRec.Abbreviation, 100), Action: If(IsBlank(id), 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "Funders", 'Entity ID': Text(varFunLastRec.Funder), Before: If(IsBlank(id), "", JSON({Abbreviation: old.Abbr, FullName: old.FullName, FunderType: old.TypeText, QuickBooksCustomer: old.QboCustomer, Active: old.IsActive})), After: JSON({Abbreviation: inAbbr, FullName: inFull, FunderType: inType, QuickBooksCustomer: inQbo, Active: act}), Reason: "Funder saved in AACA Billing"});
+                                                                    Set(varFunAuditOk, true),
+                                                                    Set(varFunAuditOk, false)
+                                                                );
+                                                                Set(varFunReceipt, {Kind: If(IsBlank(id), "Created", "Updated"), Msg: If(IsBlank(id), "Created", "Updated") & " funder " & varFunLastRec.Abbreviation & ". Abbreviation " & varFunLastRec.Abbreviation & " | Full name " & Coalesce(varFunLastRec.'Full Name', "(blank)") & " | Funder type " & Text(varFunLastRec.'Funder Type') & " | QuickBooks customer " & Coalesce(varFunLastRec.'QuickBooks Customer', "none") & " | Active " & If(IsBlank(id), "", If(old.IsActive, "Yes", "No") & " -> ") & If(varFunLastRec.Active, "Yes", "No") & " (" & op & ") | Audit " & If(varFunAuditOk, "written", "FAILED - tell Adam"), RecordId: varFunLastRec.Funder});
+                                                                Set(varFunSelId, varFunLastRec.Funder);
+                                                                Set(varFunMode, "edit");
+                                                                Select(btnFunLoadEngine);
+                                                                Select(btnFunFormResetEngine)
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                                Set(varFunSaving, false)
+                                            )
+                                          Size: =14
+                                          Text: ="Save"
+                                          Width: =100
+                                    - btnFunCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel funder edit without saving"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varFunSelId, Blank()); Set(varFunMode, ""); Set(varFunAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+                        - conFunAliasPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =486 + If(varFunAliasReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varFunAliasReceipt.Msg) / 45, 0) + 8), 0) + If(!IsBlank(varFunAliasDelId), 62, 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varFunMode = "edit"
+                            Children:
+                              - conFunAliasReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varFunAliasReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varFunAliasReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varFunAliasReceipt.Kind <> ""
+                                  Children:
+                                    - lblFunAliasReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varFunAliasReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varFunAliasReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varFunAliasReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnFunAliasReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss alias change result"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varFunAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - lblFunAliasTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="CodeMetro names (aliases)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="CodeMetro names (aliases)"
+                                    Wrap: =false
+                              - lblFunAliasCaption:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Aliases are the Funding Source names CodeMetro writes. Each one maps to exactly one funder."
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Aliases are the Funding Source names CodeMetro writes. Each one maps to exactly one funder."
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conFunAliasAddRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblFunAliasNew:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="CodeMetro name"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="CodeMetro name"
+                                          Width: =120
+                                          Wrap: =false
+                                    - txtFunAliasNew:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="New CodeMetro Funding Source name"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Placeholder: ="Funding Source name"
+                                    - btnFunAliasAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add alias to this funder"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: |-
+                                            =With({n: NormAlias(txtFunAliasNew.Text)}, With({hit: LookUp(colFunderAliases, AliasText = n)}, If(varFunSaving || n = "" || !IsBlank(hit), DisplayMode.Disabled, DisplayMode.Edit)))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtFunAliasNew.Text), fid: varFunSelId},
+                                                With(
+                                                    {hit: LookUp('Funder Aliases', 'CodeMetro Name' = n)},
+                                                    If(
+                                                        !IsBlank(hit),
+                                                        Set(varFunAliasReceipt, {Kind: "Blocked", Msg: "Not added. " & n & " is already mapped to " & hit.Funder.Abbreviation & ".", RecordId: hit.'Funder Alias'}),
+                                                        n <> "" && !IsBlank(fid) && !varFunSaving && IsFinance,
+                                                        Set(varFunSaving, true);
+                                                        Set(varFunErr, "");
+                                                        IfError(Set(varFunLastAlias, Patch('Funder Aliases', Defaults('Funder Aliases'), {'CodeMetro Name': n, Funder: LookUp(Funders, Funder = fid)})); true, Set(varFunErr, FirstError.Message); false);
+                                                        If(
+                                                            varFunErr <> "",
+                                                            Set(varFunAliasReceipt, {Kind: "Failed", Msg: "Alias not added. " & varFunErr, RecordId: ZeroGuid}),
+                                                            IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Create Funder Aliases " & n, 100), Action: 'Action (Audit Events)'.Create, Entity: "Funder Aliases", 'Entity ID': Text(varFunLastAlias.'Funder Alias'), Before: "", After: JSON({CodeMetroName: n, Funder: LookUp(colFunders, FunderId = fid).Abbr}), Reason: "Funder alias added in AACA Billing"}); Set(varFunAuditOk, true), Set(varFunAuditOk, false));
+                                                            Set(varFunAliasReceipt, {Kind: "Added", Msg: "Added alias " & n & " to " & LookUp(colFunders, FunderId = fid).Abbr & ". | Audit " & If(varFunAuditOk, "written", "FAILED - tell Adam"), RecordId: varFunLastAlias.'Funder Alias'});
+                                                            Reset(txtFunAliasNew);
+                                                            Select(btnFunLoadEngine)
+                                                        );
+                                                        Set(varFunSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Add alias"
+                                          Width: =110
+                              - conFunAliasNotice:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: |-
+                                      =With({n: NormAlias(txtFunAliasNew.Text)}, With({hit: LookUp(colFunderAliases, AliasText = n)}, If(IsBlank(hit) || n = "", ColorWhite, ColorWarnBg)))
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                  Children:
+                                    - lblFunAliasNotice:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =40
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: |-
+                                            =With(
+                                                {n: NormAlias(txtFunAliasNew.Text)},
+                                                With(
+                                                    {hit: LookUp(colFunderAliases, AliasText = n)},
+                                                    If(
+                                                        n = "", "Type the CodeMetro Funding Source name, then select Add alias.",
+                                                        IsBlank(hit), "Will be saved as " & n,
+                                                        hit.FunderId = varFunSelId, "Already mapped to this funder.",
+                                                        "Already mapped to " & LookUp(colFunders, FunderId = hit.FunderId).Abbr & ". Select Move it here to map it to this funder instead."
+                                                    )
+                                                )
+                                            )
+                                    - btnFunAliasMove:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Move this alias to the funder being edited"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varFunSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtFunAliasNew.Text), fid: varFunSelId},
+                                                With(
+                                                    {hit: LookUp(colFunderAliases, AliasText = n && FunderId <> fid)},
+                                                    With(
+                                                        {hid: hit.AliasId, fromAbbr: LookUp(colFunders, FunderId = hit.FunderId).Abbr, toAbbr: LookUp(colFunders, FunderId = fid).Abbr},
+                                                        If(
+                                                            !IsBlank(hid) && !IsBlank(fid) && !varFunSaving && IsFinance,
+                                                            Set(varFunSaving, true);
+                                                            Set(varFunErr, "");
+                                                            IfError(Set(varFunLastAlias, Patch('Funder Aliases', LookUp('Funder Aliases', 'Funder Alias' = hid), {Funder: LookUp(Funders, Funder = fid)})); true, Set(varFunErr, FirstError.Message); false);
+                                                            If(
+                                                                varFunErr <> "",
+                                                                Set(varFunAliasReceipt, {Kind: "Failed", Msg: "Alias not moved. " & varFunErr, RecordId: hid}),
+                                                                IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Update Funder Aliases " & n, 100), Action: 'Action (Audit Events)'.Update, Entity: "Funder Aliases", 'Entity ID': Text(hid), Before: JSON({CodeMetroName: n, Funder: fromAbbr}), After: JSON({CodeMetroName: n, Funder: toAbbr}), Reason: "Funder alias moved in AACA Billing"}); Set(varFunAuditOk, true), Set(varFunAuditOk, false));
+                                                                Set(varFunAliasReceipt, {Kind: "Moved", Msg: "Moved alias " & n & " from " & fromAbbr & " to " & toAbbr & ". | Audit " & If(varFunAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                                Reset(txtFunAliasNew);
+                                                                Select(btnFunLoadEngine)
+                                                            );
+                                                            Set(varFunSaving, false)
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Move it here"
+                                          Visible: |-
+                                            =With({n: NormAlias(txtFunAliasNew.Text)}, With({hit: LookUp(colFunderAliases, AliasText = n)}, !IsBlank(hit) && hit.FunderId <> varFunSelId))
+                                          Width: =120
+                              - conFunAliasConfirm:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorWarnBg
+                                    FillPortions: =0
+                                    Height: =56
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =6
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =6
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =!IsBlank(varFunAliasDelId)
+                                  Children:
+                                    - lblFunAliasConfirm:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =40
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: ="Remove alias " & LookUp(colFunderAliases, AliasId = varFunAliasDelId).AliasText & " from " & LookUp(colFunders, FunderId = varFunSelId).Abbr & "?"
+                                    - btnFunAliasConfirmYes:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Confirm remove alias"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorUnexcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varFunSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {snap: LookUp(colFunderAliases, AliasId = varFunAliasDelId)},
+                                                With(
+                                                    {hid: snap.AliasId, fAbbr: LookUp(colFunders, FunderId = snap.FunderId).Abbr},
+                                                    If(
+                                                        !IsBlank(hid) && !varFunSaving && IsFinance,
+                                                        Set(varFunSaving, true);
+                                                        Set(varFunErr, "");
+                                                        IfError(Remove('Funder Aliases', LookUp('Funder Aliases', 'Funder Alias' = hid)); true, Set(varFunErr, FirstError.Message); false);
+                                                        If(
+                                                            varFunErr <> "",
+                                                            Set(varFunAliasReceipt, {Kind: "Failed", Msg: "Alias not removed. " & varFunErr, RecordId: hid}),
+                                                            IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Soft Delete Funder Aliases " & snap.AliasText, 100), Action: 'Action (Audit Events)'.'Soft Delete', Entity: "Funder Aliases", 'Entity ID': Text(hid), Before: JSON({CodeMetroName: snap.AliasText, Funder: fAbbr}), After: "", Reason: "Funder alias removed (row deleted)"}); Set(varFunAuditOk, true), Set(varFunAuditOk, false));
+                                                            Set(varFunAliasReceipt, {Kind: "Removed", Msg: "Removed alias " & snap.AliasText & " from " & fAbbr & ". | Audit " & If(varFunAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                            Set(varFunAliasDelId, Blank());
+                                                            Select(btnFunLoadEngine)
+                                                        );
+                                                        Set(varFunSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Remove"
+                                    - btnFunAliasConfirmNo:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Keep alias"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varFunAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Keep"
+                                          Width: =80
+                              - lblFunAliasCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With({n: CountRows(Filter(colFunderAliases, FunderId = varFunSelId))}, If(n = 0, "No aliases yet.", n & If(n = 1, " alias", " aliases")))
+                                    Wrap: =false
+                              - galFunAliases:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="CodeMetro aliases for " & LookUp(colFunders, FunderId = varFunSelId).Abbr
+                                    FillPortions: =0
+                                    Height: =260
+                                    Items: =Sort(Filter(colFunderAliases, FunderId = varFunSelId), AliasText)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =52
+                                  Children:
+                                    - conFunAliasRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =ColorWhite
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          PaddingBottom: =4
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =4
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblFunAliasRowText:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: ="Alias " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                Height: =40
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =13
+                                                Text: =ThisItem.AliasText
+                                          - btnFunAliasRowRemove:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Remove alias " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: =Set(varFunAliasDelId, ThisItem.AliasId)
+                                                Size: =14
+                                                Text: ="Remove"
+                                                Width: =88
+            - btnFunFormResetEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: =Reset(txtFunAbbr); Reset(txtFunFull); Reset(rdoFunType); Reset(txtFunQbo); Reset(tglFunActive); Reset(txtFunAliasNew)
+                  Text: ="reset"
+                  Visible: =false
+            - btnFunLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varFunLoading, true);
+                    Set(varFunLoadError, "");
+                    If(
+                        !IsFinance,
+                        Clear(colFunders); Clear(colFunderAliases),
+                        IfError(
+                            Refresh(Funders); Refresh('Funder Aliases');
+                            Concurrent(
+                                ClearCollect(colFunders, ForAll(Funders As f, {FunderId: f.Funder, Abbr: Coalesce(f.Abbreviation, ""), FullName: Coalesce(f.'Full Name', ""), TypeText: Coalesce(Text(f.'Funder Type'), ""), QboCustomer: Coalesce(f.'QuickBooks Customer', ""), IsActive: Coalesce(f.Active, false)})),
+                                ClearCollect(colFunderAliases, ForAll('Funder Aliases' As a, {AliasId: a.'Funder Alias', AliasText: Coalesce(a.'CodeMetro Name', ""), FunderId: a.Funder.Funder}))
+                            );
+                            true,
+                            Set(varFunLoadError, FirstError.Message);
+                            false
+                        )
+                    );
+                    Set(varFunLoading, false)
+                  Text: ="load"
+                  Visible: =false

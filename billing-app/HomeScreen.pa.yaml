@@ -1,0 +1,689 @@
+Screens:
+  HomeScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: =Select(btnHomeLoadEngine)
+    Children:
+      - conHomeRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conHomeHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conHomeRoot.Width < 640, 92, 76) + If(IsFinance, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblHomeTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Billing"
+                        Wrap: =false
+                  - lblHomeIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =UserLabel & ", " & If(IsFinance, "Finance access", "No finance access")
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conHomeRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conHomeNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =IsFinance
+                      Children:
+                        - btnHomeNavHome:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Home (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(HomeScreen)
+                              Size: =14
+                              Text: ="Home"
+                              Width: =110
+                        - btnHomeNavFunders:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Funders"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(FundersScreen)
+                              Size: =14
+                              Text: ="Funders"
+                              Width: =110
+                        - btnHomeNavServices:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Services"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(ServicesScreen)
+                              Size: =14
+                              Text: ="Services"
+                              Width: =110
+                        - btnHomeNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnHomeNavRds:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to RDS Grid"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(RdsScreen)
+                              Size: =14
+                              Text: ="RDS Grid"
+                              Width: =110
+            - conHomeGate:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!IsFinance
+                Children:
+                  - lblHomeGateTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="You don't have access to AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="You don't have access to AACA Billing"
+                        Wrap: =false
+                  - lblHomeGateBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        VerticalAlign: =VerticalAlign.Top
+            - conHomeBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =conHomeStatusRow.Height + 12 + conHomeCards.Height + 12 + conHomeNext.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Visible: =IsFinance
+                Children:
+                  - conHomeStatusRow:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conHomeRoot.Width - 32 >= 516, 44, If(conHomeRoot.Width - 32 >= 368, 96, 128))
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                      Children:
+                        - lblHomeHeading:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Needs attention"
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Bold
+                              Height: =28
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: ="Needs attention"
+                              Width: =200
+                              Wrap: =false
+                        - lblHomeStatus:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =If(varHomeLoading, "Loading counts", varHomeLoadError <> "", "Could not load counts - " & varHomeLoadError, IsBlank(varHomeLoadedAt), "Counts not loaded", "Counts as of " & Text(varHomeLoadedAt, "h:mm AM/PM"))
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =If(varHomeLoadError <> "", ColorUnexcused, ColorMuted)
+                              FillPortions: =1
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =160
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: =If(varHomeLoading, "Loading counts...", varHomeLoadError <> "", "Could not load counts - " & varHomeLoadError, IsBlank(varHomeLoadedAt), "", "Counts as of " & Text(varHomeLoadedAt, "h:mm AM/PM"))
+                        - btnHomeRefresh:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Refresh needs-attention counts"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              DisplayMode: =If(varHomeLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Select(btnHomeLoadEngine)
+                              Size: =14
+                              Text: ="Refresh counts"
+                              Width: =140
+                  - conHomeCards:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: |-
+                          =With({cols: Max(1, RoundDown((conHomeRoot.Width - 32 + 12) / 244, 0))}, RoundUp(4 / cols, 0) * 204 + (RoundUp(4 / cols, 0) - 1) * 12)
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                      Children:
+                        - conHomeFunQboCard:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =204
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Width: =232
+                            Children:
+                              - lblHomeFunQboCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Text(CountRows(Filter(colFunders, IsActive && Trim(QboCustomer) = ""))) & " " & "Funders with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(CountRows(Filter(colFunders, IsActive && Trim(QboCustomer) = "")) > 0, ColorWarnInk, ColorTeal)
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =48
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =32
+                                    Text: =If(varHomeLoading, "...", Text(CountRows(Filter(colFunders, IsActive && Trim(QboCustomer) = ""))))
+                                    Wrap: =false
+                              - lblHomeFunQboTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Funders with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =63
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Funders with no QuickBooks customer"
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnHomeFunQbo:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Review funders with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "All"); Set(varFunMissingQbo, true); Set(varFunShowInactive, false); Navigate(FundersScreen)
+                                    Size: =14
+                                    Text: ="Review funders"
+                                    Width: =Parent.Width - 32
+                        - conHomeSvcQboCard:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =204
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Width: =232
+                            Children:
+                              - lblHomeSvcQboCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Text(CountRows(Filter(colServices, IsActive && Trim(QboItem) = ""))) & " " & "Active services with no QuickBooks item"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(CountRows(Filter(colServices, IsActive && Trim(QboItem) = "")) > 0, ColorWarnInk, ColorTeal)
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =48
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =32
+                                    Text: =If(varHomeLoading, "...", Text(CountRows(Filter(colServices, IsActive && Trim(QboItem) = ""))))
+                                    Wrap: =false
+                              - lblHomeSvcQboTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Active services with no QuickBooks item"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =63
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Active services with no QuickBooks item"
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnHomeSvcQbo:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Review active services with no QuickBooks item"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varSvcKind, "All"); Set(varSvcMissingQbo, true); Set(varSvcShowInactive, false); Navigate(ServicesScreen)
+                                    Size: =14
+                                    Text: ="Review services"
+                                    Width: =Parent.Width - 32
+                        - conHomeStuDorCard:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =204
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Width: =232
+                            Children:
+                              - lblHomeStuDorCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Text(CountRows(Filter(colStudents As s, s.StatusText = "Active" && s.TypeText = "School" && CountIf(colDor, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0))) & " " & "Active School students with no current district of record"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(CountRows(Filter(colStudents As s, s.StatusText = "Active" && s.TypeText = "School" && CountIf(colDor, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0)) > 0, ColorWarnInk, ColorTeal)
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =48
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =32
+                                    Text: =If(varHomeLoading, "...", Text(CountRows(Filter(colStudents As s, s.StatusText = "Active" && s.TypeText = "School" && CountIf(colDor, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())) = 0))))
+                                    Wrap: =false
+                              - lblHomeStuDorTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Active School students with no current district of record"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =63
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Active School students with no current district of record"
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnHomeStuDor:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Review active School students with no current district of record"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varStuType, "All"); Set(varStuNoDor, true); Set(varStuStatus, "Active"); Navigate(StudentsScreen)
+                                    Size: =14
+                                    Text: ="Review students"
+                                    Width: =Parent.Width - 32
+                        - conHomePrivPayCard:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Start
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =204
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Width: =232
+                            Children:
+                              - lblHomePrivPayCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Text(CountRows(Filter(colFunders, TypeText = "Private Pay" && Trim(QboCustomer) = ""))) & " " & "Private Pay funders from CodeMetro with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(CountRows(Filter(colFunders, TypeText = "Private Pay" && Trim(QboCustomer) = "")) > 0, ColorWarnInk, ColorTeal)
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =48
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =32
+                                    Text: =If(varHomeLoading, "...", Text(CountRows(Filter(colFunders, TypeText = "Private Pay" && Trim(QboCustomer) = ""))))
+                                    Wrap: =false
+                              - lblHomePrivPayTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Private Pay funders from CodeMetro with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =63
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Private Pay funders from CodeMetro with no QuickBooks customer"
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnHomePrivPay:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Review Private Pay funders from CodeMetro with no QuickBooks customer"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varFunType, "Private Pay"); Set(varFunMissingQbo, true); Set(varFunShowInactive, true); Navigate(FundersScreen)
+                                    Size: =14
+                                    Text: ="Review Private Pay"
+                                    Width: =Parent.Width - 32
+                  - conHomeNext:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =0
+                        Height: =32 + 21 + 8 + If(conHomeRoot.Width < 640, 120, 60)
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                      Children:
+                        - lblHomeNextTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Coming next"
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              FontWeight: =FontWeight.Semibold
+                              Height: =21
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =14
+                              Text: ="Coming next"
+                              Wrap: =false
+                        - lblHomeNextBody:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: |-
+                                ="Later phases, not in this version: CodeMetro upload and exceptions screens; month close and QuickBooks Online invoice export; RDS PDFs."
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorInk
+                              Height: =If(conHomeRoot.Width < 640, 120, 60)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =13
+                              Text: |-
+                                ="Later phases, not in this version: CodeMetro upload and exceptions screens; month close and QuickBooks Online invoice export; RDS PDFs."
+                              VerticalAlign: =VerticalAlign.Top
+            - btnHomeLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varHomeLoading, true);
+                    Set(varHomeLoadError, "");
+                    If(
+                        !IsFinance,
+                        Clear(colFunders); Clear(colServices); Clear(colStudents); Clear(colDor),
+                        IfError(
+                            Refresh(Funders); Refresh(Services); Refresh(Students); Refresh('Districts of Record');
+                            Concurrent(
+                                ClearCollect(colFunders, ForAll(Funders As f, {FunderId: f.Funder, Abbr: Coalesce(f.Abbreviation, ""), FullName: Coalesce(f.'Full Name', ""), TypeText: Coalesce(Text(f.'Funder Type'), ""), QboCustomer: Coalesce(f.'QuickBooks Customer', ""), IsActive: Coalesce(f.Active, false)})),
+                                ClearCollect(colServices, ForAll(Services As s, {ServiceId: s.Service, Code: Coalesce(s.'Service Code', ""), Name: Coalesce(s.Name, ""), KindText: Coalesce(Text(s.Kind), ""), KindRank: If(Text(s.Kind) = "School Day", 1, 2), UnitText: Coalesce(Text(s.'Billing Unit'), ""), QboItem: Coalesce(s.'QuickBooks Item', ""), SortNum: s.'Sort Order', IsBillable: Coalesce(s.Billable, false), NonSchool: Coalesce(s.'Billable on Non-School Days', false), IsActive: Coalesce(s.Active, false)})),
+                                ClearCollect(colStudents, ForAll(Students As s, {StudentId: s.Student, StudentKey: Coalesce(s.'External Client ID', ""), DisplayName: Coalesce(s.'Display Name', ""), StatusText: Coalesce(Text(s.'Status (aaca_status)'), ""), TypeText: If(Text(s.'Student Type') = "Regional Center Only", "Regional Center Only", "School")})),
+                                ClearCollect(colDor, ForAll('Districts of Record' As d, {DorId: d.'District of Record', StudentId: d.Student.Student, FunderId: d.Funder.Funder, StartDate: d.'Start Date', EndDate: d.'End Date', SourceText: Coalesce(Text(d.Source), ""), Note: Coalesce(d.Note, "")}))
+                            );
+                            Set(varHomeLoadedAt, Now());
+                            true,
+                            Set(varHomeLoadError, FirstError.Message);
+                            false
+                        )
+                    );
+                    Set(varHomeLoading, false)
+                  Text: ="load"
+                  Visible: =false

@@ -1,0 +1,110 @@
+App:
+  Properties:
+    Formulas: |-
+      =// ---------- Identity and finance gate (Staff row for the signed-in user) ----------
+      CurrentUserRow = LookUp(Users, 'Primary Email' = User().Email);
+      CurrentStaff = LookUp(Staff, User.User = CurrentUserRow.User);
+      StaffReady = !IsBlank(CurrentStaff) && CurrentStaff.Active <> false;
+      IsFinance = StaffReady && CurrentStaff.'Finance Access' = true;
+      UserLabel = Coalesce(CurrentUserRow.'Full Name', User().FullName);
+      // ---------- Constants ----------
+      ZeroGuid = GUID("00000000-0000-0000-0000-000000000000");
+      FarFuture = Date(2999, 12, 31);
+      // ---------- Alias normaliser: tabs and non-breaking spaces become spaces, Trim collapses runs, upper case ----------
+      NormAlias(t: Text): Text = Upper(Trim(Substitute(Substitute(t, Char(9), " "), Char(160), " ")));
+      // ---------- Palette (copied from AACA Attendance, plus ColorWarnInk) ----------
+      ColorPaper = RGBA(247, 245, 240, 1);
+      ColorInk = RGBA(27, 42, 65, 1);
+      ColorInkSoft = RGBA(206, 216, 230, 1);
+      ColorWhite = RGBA(255, 255, 255, 1);
+      ColorTeal = RGBA(0, 110, 97, 1);
+      ColorRule = RGBA(214, 209, 199, 1);
+      ColorMuted = RGBA(92, 86, 77, 1);
+      ColorExcused = RGBA(46, 125, 50, 1);
+      ColorUnexcused = RGBA(183, 28, 28, 1);
+      ColorNonSchool = RGBA(222, 219, 212, 1);
+      ColorNotEnrolled = RGBA(238, 236, 231, 1);
+      ColorSaving = RGBA(230, 242, 240, 1);
+      ColorInfoBg = RGBA(224, 240, 237, 1);
+      ColorWarnBg = RGBA(252, 240, 220, 1);
+      ColorErrorBg = RGBA(250, 228, 228, 1);
+      ColorWarnInk = RGBA(138, 74, 0, 1);
+      ColorFlag = RGBA(240, 173, 78, 1);
+      ColorGrid = RGBA(176, 170, 158, 1);
+    OnStart: |-
+      =// Filter state (persists across navigation; Home "needs attention" cards overwrite it before Navigate)
+      Set(varFunType, "All");
+      Set(varFunMissingQbo, false);
+      Set(varFunShowInactive, false);
+      Set(varSvcKind, "All");
+      Set(varSvcMissingQbo, false);
+      Set(varSvcShowInactive, false);
+      Set(varStuType, "All");
+      Set(varStuNoDor, false);
+      Set(varStuStatus, "Active");
+      // Home
+      Set(varHomeLoading, false);
+      Set(varHomeLoadError, "");
+      Set(varHomeLoadedAt, Now());
+      Set(varHomeLoadedAt, Blank());
+      // Funders
+      Set(varFunLoading, false);
+      Set(varFunLoadError, "");
+      Set(varFunSaving, false);
+      Set(varFunErr, "");
+      Set(varFunAuditOk, false);
+      Set(varFunMode, "");
+      Set(varFunSelId, ZeroGuid);
+      Set(varFunSelId, Blank());
+      Set(varFunAliasDelId, ZeroGuid);
+      Set(varFunAliasDelId, Blank());
+      Set(varFunReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      Set(varFunAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      // Services
+      Set(varSvcLoading, false);
+      Set(varSvcLoadError, "");
+      Set(varSvcSaving, false);
+      Set(varSvcErr, "");
+      Set(varSvcAuditOk, false);
+      Set(varSvcMode, "");
+      Set(varSvcSelId, ZeroGuid);
+      Set(varSvcSelId, Blank());
+      Set(varSvcAliasDelId, ZeroGuid);
+      Set(varSvcAliasDelId, Blank());
+      Set(varSvcReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      Set(varSvcAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      // Students
+      Set(varStuLoading, false);
+      Set(varStuLoadError, "");
+      Set(varStuSaving, false);
+      Set(varStuErr, "");
+      Set(varStuAuditOk, false);
+      Set(varStuSelId, ZeroGuid);
+      Set(varStuSelId, Blank());
+      Set(varStuDorMode, "");
+      Set(varStuDorEditId, ZeroGuid);
+      Set(varStuDorEditId, Blank());
+      Set(varStuDorDelId, ZeroGuid);
+      Set(varStuDorDelId, Blank());
+      Set(varStuSsMode, "");
+      Set(varStuSsEditId, ZeroGuid);
+      Set(varStuSsEditId, Blank());
+      Set(varStuSsDelId, ZeroGuid);
+      Set(varStuSsDelId, Blank());
+      Set(varStuDorReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      Set(varStuSsReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+      // RDS grid
+      Set(varRdsLoading, false);
+      Set(varRdsLoadError, "");
+      Set(varRdsPageCapped, false);
+      Set(varRdsMonth, Today());
+      Set(varRdsMonth, Blank());
+      Set(varRdsMonthEnd, Today());
+      Set(varRdsMonthEnd, Blank());
+      Set(varRdsFunderId, ZeroGuid);
+      Set(varRdsFunderId, Blank());
+      Set(varRdsStudentId, ZeroGuid);
+      Set(varRdsStudentId, Blank());
+      Set(varRdsCampusText, "")
+    StartScreen: =HomeScreen
+    Theme: =PowerAppsTheme

@@ -1,0 +1,361 @@
+# Discovery Packet - AACA Billing build 7 (RDS grid), captured 2026-10-01
+
+EDIT mode on the build-6 app (4 screens compiled and saved by the user). Everything in the build-6 packet (appended
+below) still applies. New data sources added by the user and their schemas follow.
+
+## list_data_sources (19, all CdsNative, Writable, Delegatable)
+
+Attendance, Audit Events, Calendar Exceptions, Campuses, CodeMetro Uploads, Districts of Record, Enrollments, Funder
+Aliases, Funders, School Years, Service Aliases, Service Deliveries, Services, Staff, Student Services, Students, Terms,
+Upload Exceptions, Users.
+
+## New billing tables (get_data_source_schema)
+
+### Service Deliveries (`Service Delivery` GUID) - one row per student + funder + service + day
+- Summary (aaca_name): Text; Date: Date (required); Minutes: Number; Sessions: Number
+- Funding Source Type: `'Funding Source Type (Service Deliveries)'` = District | 'Regional Center' | 'Private Pay'
+- Delivery Key: Text ("KEY|yyyy-mm-dd|CODE|FUNDER", unique)
+- Student, Funder, Service: lookups; Upload: lookup -> CodeMetro Uploads
+
+### CodeMetro Uploads (`CodeMetro Upload` GUID)
+- File Name (aaca_name); Uploaded On: DateTime; Date From, Date To: Date
+- Rows In, Rows Matched, Rows in Exceptions, Minutes In, Minutes Matched: Number; Note: Text
+- Status: display name `'Status (aaca_status)'`, option set `'Status (CodeMetro Uploads)'` = Processing | Complete | Failed | Superseded
+
+### Upload Exceptions (`Upload Exception` GUID)
+- Summary; Line: Number; Reason: `'Reason (Upload Exceptions)'` = 'Unknown student' | 'Unknown service' | 'Unknown funder' |
+  'Missing date' | 'Zero or negative minutes' | 'Code and name disagree' | 'Closed month' | Other
+- Student ID, Client Name, CPT Code, Service Name, Funding Source, Funding Source Type: Text; Appt Date: Date; Minutes: Number
+- Status: `'Status (aaca_status)'`, option set `'Status (Upload Exceptions)'` = Open | Resolved | Ignored | Superseded
+- Student: lookup; Upload: lookup; Raw Row: Text
+
+## Data in Dev now (for sizing and testing)
+September 2026: 2,846 Service Deliveries (from 3,521 CodeMetro rows; 2 exceptions), 105 students with deliveries,
+24 funders used. Attendance 2024-08 .. 2026-09 (~11.4k rows; a month is ~600 rows). Student Services 249, Districts of
+Record 103. Default the month picker to September 2026 in Dev (latest month with deliveries).
+
+## Attendance-app tables (schemas copied from the attendance discovery, same Dataverse tables)
+
+### Attendance (unique key: Student + Service + Date)
+- aaca_attendanceid — "Attendance": Guid
+- aaca_recordkey — "Record Key": String (primary name; set to Text(date,"yyyymmdd") & "|" & StudentNumber & "|" & ServiceCode)
+- aaca_date — "Date": Date
+- aaca_present — "Present": Boolean (option set "Present (Attendance)": Yes, No)
+- aaca_isdeleted — "Is Deleted": Boolean (option set "Is Deleted (Attendance)": Yes, No)
+- aaca_student — "Student": lookup Students
+- aaca_service — "Service": lookup Services
+- aaca_enrollment — "Enrollment": lookup Enrollments
+- aaca_teacher — "Teacher": lookup Staff
+- aaca_campus — "Campus": lookup Campuses
+- aaca_schoolyear — "School Year": lookup School Years
+- aaca_term — "Term": lookup Terms
+- aaca_iepratio — "IEP Ratio": option set "IEP Ratio (Attendance)": No Aide, 1:1, 2:1, 3:1, 4:1
+- aaca_classification — "Absence Classification": option set "Absence Classification (Attendance)": Excused, Unexcused (column-secured; read-only in this build)
+- aaca_absencereason — "Absence Reason": lookup Absence Reasons (secured, read-only)
+- aaca_classifiedby — "Classified By": lookup Users (secured, read-only)
+- aaca_classifiedon — "Classified On": DateTime (secured, read-only)
+- aaca_notes — "Notes": String (max 2000)
+- modifiedon — "Modified On": DateTime
+
+### Enrollments
+- aaca_enrollmentid — "Enrollment": Guid; aaca_name — "Name": String
+- aaca_student — "Student": lookup Students; aaca_campus — "Campus": lookup Campuses
+- aaca_teacher — "Teacher": lookup Staff; aaca_service — "Service": lookup Services
+- aaca_schoolyear — "School Year": lookup School Years
+- aaca_program — "Program": option set "Program (Enrollments)": Regular Year, Summer
+- aaca_iepratio — "IEP Ratio": option set "IEP Ratio (Enrollments)": No Aide, 1:1, 2:1, 3:1, 4:1
+- aaca_startdate — "Start Date": Date; aaca_enddate — "End Date": Date (blank = open)
+- aaca_status — "Status (aaca_status)": option set "Status (Enrollments)": Planned, Active, Ended
+
+### Staff
+- aaca_staffid — "Staff": Guid; aaca_name — "Name": String
+- aaca_approle — "App Role": option set "App Role (Staff)": Teacher, Attendance Office, Read-only, System Admin
+- aaca_campus — "Campus": lookup Campuses (blank = all campuses)
+- aaca_user — "User": lookup Users
+- aaca_active — "Active": Boolean (option set "Active (Staff)": Yes, No)
+
+### Students
+- aaca_studentid — "Student": Guid; aaca_displayname — "Display Name": String ("Last, First")
+- aaca_studentnumber — "Student Number": String (STU-000123)
+- aaca_status — "Status (aaca_status)": option set "Status (Students)": Active, Inactive, Archived
+
+### Terms
+- aaca_termid — "Term (aaca_termid)": Guid; aaca_name — "Name": String
+- aaca_schoolyear — "School Year": lookup School Years; aaca_campus — "Campus": lookup Campuses (blank = all)
+- aaca_term — "Term (aaca_term)": option set "Term (Terms)": Q1, Q2, Q3, Q4, Summer
+- aaca_startdate — "Start Date": Date; aaca_enddate — "End Date": Date
+
+### Calendar Exceptions
+- aaca_calendarexceptionid — "Calendar Exception": Guid; aaca_name — "Description": String
+- aaca_date — "Date": Date; aaca_campus — "Campus": lookup Campuses (blank = all)
+- aaca_type — "Type": option set "Type (Calendar Exceptions)": Holiday, Break, Staff Development, Closure, Make-up School Day
+
+### Month Locks
+- aaca_monthlockid — "Month Lock": Guid; aaca_name — "Name": String
+- aaca_campus — "Campus": lookup Campuses; aaca_month — "Month": Date (first of month)
+- aaca_status — "Status (aaca_status)": option set "Status (Month Locks)": Locked, Unlocked
+- aaca_reason — "Reason": String; aaca_lockedon — "Locked On": DateTime; aaca_lockedby — "Locked By": lookup Users
+
+### App Settings
+- aaca_settingid — "Setting": Guid; aaca_key — "Key": String; aaca_value — "Value": String; aaca_description — "Description": String
+- Rows: AllowFutureDates = "false"; AbsenceAlertPerTerm; ConsecutiveAbsenceAlert; UnclassifiedAgingDays
+
+### Services
+- aaca_serviceid — "Service": Guid; aaca_name — "Name": String; aaca_servicecode — "Service Code": String ("SPED")
+- aaca_active — "Active": Boolean
+
+### Campuses
+- aaca_campusid — "Campus": Guid; aaca_name — "Name": String; aaca_code — "Code": String; aaca_active — "Active": Boolean
+
+### School Years
+- aaca_schoolyearid — "School Year": Guid; aaca_name — "Name": String
+- aaca_startdate — "Start Date": Date; aaca_enddate — "End Date": Date
+- aaca_status — "Status (aaca_status)": option set "Status (School Years)": Planned, Current, Closed
+
+
+---
+
+# Build 6 packet (still applies)
+
+# Discovery Packet — AACA Billing build 6 (Phase 1 foundations), captured 2026-10-01 by the orchestrator
+
+New app: environment a4c9f4ce-b971-edf2-beba-e3c29552a316, app 1d5dc650-cc68-4a25-8f71-a7cb591ed3c7 (blank: App.Theme =
+PowerAppsTheme, one empty `Screen1` with LoadingSpinnerColor). CREATE mode: the planner writes App.pa.yaml; replace
+Screen1 (delete it from ScreensOrder; builders write the four new screen files).
+
+Same Dataverse environment and same control catalog as the AACA Attendance app (app fb649976-...); the control
+descriptions below were captured from that session and apply unchanged. Modern controls and coauthoring are enabled.
+The Attendance app source for style reference: `C:/src/aaca-attendance/app/App.pa.yaml`, `Screen1.pa.yaml`,
+`StudentsScreen.pa.yaml` (list + detail pattern, notices, engine buttons).
+
+## list_data_sources (present now, all CdsNative, Writable, Delegatable)
+
+Campuses, Districts of Record, Funder Aliases, Funders, Service Aliases, Services, Staff, Student Services, Students.
+Being added by the user before compile: **Users, Audit Events, Enrollments** (same tables/schemas as the attendance app,
+documented below).
+
+## Billing data source schemas (get_data_source_schema; relevant columns, Display: Type)
+
+### Funders (primary key `Funder` GUID)
+- Abbreviation (aaca_name): Text (primary name, unique key)
+- Full Name: Text; QuickBooks Customer: Text
+- Funder Type: choice `'Funder Type (Funders)'` = District | 'Regional Center' | 'Private Pay' (required)
+- Active: Yes/No choice `'Active (Funders)'` (Boolean-like two-option; use `.Active = 'Active (Funders)'.Yes`)
+- Reverse relations: Funder Aliases, Districts of Record, Student Services
+
+### Funder Aliases (`Funder Alias` GUID)
+- CodeMetro Name (aaca_name): Text, normalised UPPER, unique key
+- Funder: lookup -> Funders; Note: Text
+
+### Services (`Service` GUID)
+- Name (aaca_name): Text; Service Code: Text (unique key); Billing Code: Text (legacy, unused — do not show)
+- Kind: choice `'Kind (Services)'` = 'School Day' | Clinical
+- Billing Unit: choice `'Billing Unit (Services)'` = Days | Hours
+- QuickBooks Item: Text; Sort Order: Number
+- Billable: `'Billable (Services)'` Yes/No; Billable on Non-School Days: `'Billable on Non-School Days (Services)'` Yes/No
+- Active: `'Active (Services)'` Yes/No
+- Reverse: Service Aliases, Student Services, Attendance, Enrollments
+
+### Service Aliases (`Service Alias` GUID)
+- Alias (aaca_name): Text, normalised UPPER; Alias Type: choice `'Alias Type (Service Aliases)'` = 'CPT Code' | 'Service Name'
+  (unique key = Alias + Alias Type); Service: lookup -> Services
+
+### Districts of Record (`District of Record` GUID)
+- Summary (aaca_name): Text (required primary name: write "<Student Key> - <Funder abbreviation>")
+- Student: lookup -> Students; Funder: lookup -> Funders
+- Start Date: Date (required); End Date: Date (blank = ongoing)
+- Source: choice `'Source (Districts of Record)'` = CodeMetro | Manual; Note: Text
+
+### Student Services (`Student Service` GUID)
+- Summary (aaca_name): Text (required: "<Student Key> - <Service Code>[ #n] - <Funder abbreviation>")
+- Student, Service, Funder: lookups; Start Date (required), End Date: Date
+- Frequency: Text; Minutes per Frequency: Number; ESY: `'ESY (Student Services)'` Yes/No
+- Source: `'Source (Student Services)'` = CodeMetro | Manual; Source Key: Text (CodeMetro identity; never edit)
+- Excluded: `'Excluded (Student Services)'` Yes/No; Note: Text
+
+### Students (`Student` GUID)
+- Display Name: Text ("Last, First"); First Name, Last Name: Text; External Client ID: Text (= Student Key, e.g. CW-1083, RC-1145)
+- Status: choice column display name `'Status (aaca_status)'`, option set `'Status (Students)'` = Active | Inactive | Archived
+  (note the display-name clash with statecode `'Status (statecode)'`; in formulas use `'Status (aaca_status)'`)
+- Student Type: `'Student Type (Students)'` = School | 'Regional Center Only' (blank = School)
+- Reverse: Districts of Record, Student Services, Enrollments
+
+### Staff (`Staff` GUID)
+- Name; App Role `'App Role (Staff)'` = Teacher | 'Attendance Office' | 'Read-only' | 'System Admin'
+- Active `'Active (Staff)'` Yes/No; Finance Access `'Finance Access (Staff)'` Yes/No (NEW; the app gate)
+- User: lookup -> Users; Campus: lookup -> Campuses
+
+### Campuses (`Campus` GUID): Name, Code (AV/CW/OX), Active
+
+## Data volumes in Dev now
+31 funders (4 Private Pay), 117 aliases (85 service, 32 funder), 33 services, 146 students (12 Regional Center Only),
+249 Student Services (CodeMetro), 103 Districts of Record (CodeMetro); 14 active School students have no district of record.
+
+
+## Shared tables copied from the Attendance app discovery (build 5)
+
+### Audit Events
+- aaca_auditeventid — "Audit Event": Guid; aaca_name — "Summary": String
+- aaca_action — "Action": option set "Action (Audit Events)": Create, Update, Soft Delete, Restore, Transfer, Discharge, Archive, Unarchive, Reclassify, Lock, Unlock, Override, Rollover
+- aaca_entity — "Entity": String; aaca_entityid — "Entity ID": String
+- aaca_before — "Before": String; aaca_after — "After": String; aaca_reason — "Reason": String
+
+### Users (systemuser; 2,591-line schema, relevant columns only)
+- systemuserid — "User": Guid; internalemailaddress — "Primary Email": String
+- fullname — "Full Name": String; domainname — "User Name": String; azureactivedirectoryobjectid — "Azure AD Object ID": Guid
+
+## describe_control results
+
+### GroupContainer — family Classic
+Creation: `Control: GroupContainer` + `Variant:` (required) AutoLayout | GridLayout | ManualLayout
+Common inputs: BorderColor: Color = RGBA(0,0,0,1); BorderStyle: Enum = BorderStyle.Solid [Enum name: BorderStyle; Dashed, Dotted, None, Solid]; BorderThickness: Number = 0; ContentLanguage: Text; DropShadow: Enum = DropShadow.Light [Enum name: DropShadow; Bold, ExtraBold, Light, None, Regular, Semibold, Semilight]; EnableChildFocus: Boolean = true; Fill: Color = RGBA(0,0,0,0); Height: Number = 200; RadiusBottomLeft/RadiusBottomRight/RadiusTopLeft/RadiusTopRight: Number = 4; Visible: Boolean = true; Width: Number = 500; X, Y: Number = 0
+AutoLayout inputs: LayoutAlignItems: Enum = LayoutAlignItems.Start [Enum name: LayoutAlignItems; Center, End, Start, Stretch]; LayoutDirection: Enum (Required) [Enum name: LayoutDirection; Horizontal, Vertical]; LayoutGap: Number = 0; LayoutJustifyContent: Enum = LayoutJustifyContent.Start [Enum name: LayoutJustifyContent; Center, End, SpaceBetween, Start]; LayoutOverflowX: Enum = LayoutOverflow.Hide [Enum name: LayoutOverflow; Hide, Scroll]; LayoutOverflowY: Enum = LayoutOverflow.Hide [Enum name: LayoutOverflow; Hide, Scroll]; LayoutWrap: Boolean = false; PaddingBottom/PaddingLeft/PaddingRight/PaddingTop: Number = 0
+ManualLayout inputs: ChildTabPriority: Boolean = true; Padding*: Number = 0
+As child of AutoLayout: AlignInContainer: Enum = AlignInContainer.Stretch [Enum name: AlignInContainer; Center, End, SetByContainer, Start, Stretch]; FillPortions: Number = 1; LayoutMaxHeight: Number = 0; LayoutMaxWidth: Number = 0; LayoutMinHeight: Number = 100; LayoutMinWidth: Number = 250
+Outputs include Height, Width, Visible, Fill.
+
+### ModernText — family React
+Creation: `Control: ModernText`
+Inputs: AccessibleLabel: Text; Align: Enum = Align.Left [Enum name: Align; Center, Justify, Left, Right]; AutoHeight: Boolean = false; BorderColor: Color; BorderStyle: Enum [BorderStyle]; BorderThickness: Number; Color: Color; ContentLanguage: Text; DisplayMode: Enum = DisplayMode.Edit [Enum name: DisplayMode; Disabled, Edit, View]; Fill: Color; Font: Enum [Enum name: Font; Arial, Courier New, Dancing Script, Georgia, Great Vibes, Lato, Lato Black, Lato Hairline, Lato Light, Open Sans, Open Sans Condensed, Patrick Hand, Segoe UI, Verdana]; FontWeight: Enum = FontWeight.Normal [Enum name: FontWeight; Bold, Lighter, Normal, Semibold]; Height: Number = 32; Italic: Boolean; OnSelect: Boolean; PaddingBottom/Left/Right/Top: Number = 5; Radius*: Number; Size: Number = 15; Strikethrough: Boolean; Text: Text = "Text"; Underline: Boolean; VerticalAlign: Enum = VerticalAlign.Middle [Enum name: VerticalAlign; Bottom, Middle, Top]; Visible: Boolean = true; Width: Number = 150; Wrap: Boolean = true; X, Y
+As AutoLayout child: AlignInContainer: Enum = AlignInContainer.SetByContainer; FillPortions: Number = 0; LayoutMaxHeight = 0; LayoutMaxWidth = 0; LayoutMinHeight = 32; LayoutMinWidth = 150
+
+### ModernButton — family React
+Creation: `Control: ModernButton`
+Inputs: AccessibleLabel: Text; Align: Enum [Align]; Appearance: Enum = ButtonAppearance.Primary [Enum name: ButtonAppearance; Outline, Primary, Secondary, Subtle, Transparent]; BasePaletteColor: Color; BorderColor: Color; BorderStyle: Enum [BorderStyle]; BorderThickness: Number; Color: Color; ContentLanguage: Text; DisplayMode: Enum = DisplayMode.Edit [DisplayMode]; Font: Enum [Font]; FontWeight: Enum [FontWeight]; Height: Number = 32; Icon: Text = ""; IconRotation: Number = 0; IconStyle: Enum = IconStyle.Outline [Enum name: IconStyle; Filled, Outline]; Italic: Boolean; Layout: Enum = ButtonLayout.IconBefore [Enum name: ButtonLayout; IconAfter, IconBefore, IconOnly, TextOnly]; OnSelect: Boolean; Padding*: Number; Radius*: Number; Size: Number = 0; Strikethrough: Boolean; Text: Text = "Button"; Tooltip: Text; Underline: Boolean; VerticalAlign: Enum [VerticalAlign]; Visible: Boolean = true; Width: Number = 96; X, Y
+NOTE: ModernButton has NO Fill property; surface colour comes from Appearance + BasePaletteColor.
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 96; LayoutMaxHeight/Width = 0
+
+### Classic/Button — family Classic (use for grid cells: supports per-cell Fill)
+Creation: `Control: Classic/Button`
+Inputs: Align: Enum = Align.Center [Align]; AutoDisableOnSelect: Boolean = true; BorderColor: Color = App.Theme.Colors.Primary; BorderStyle: Enum = BorderStyle.Solid [BorderStyle]; BorderThickness: Number = 2; Color: Color; ContentLanguage: Text; DisabledBorderColor: Color = RGBA(244,244,244,1); DisabledColor: Color = RGBA(166,166,166,1); DisabledFill: Color = RGBA(244,244,244,1); DisplayMode: Enum = DisplayMode.Edit [DisplayMode]; Fill: Color = App.Theme.Colors.Primary; FocusedBorderColor: Color = Self.BorderColor; FocusedBorderThickness: Number = 4; Font: Enum = App.Theme.Font [Font]; FontWeight: Enum = FontWeight.Semibold [FontWeight]; Height: Number = 40; HoverBorderColor: Color; HoverColor: Color; HoverFill: Color; Italic: Boolean; OnSelect: Boolean; PaddingBottom/Left/Right/Top: Number = 5; PressedBorderColor: Color; PressedColor: Color = Self.Color; PressedFill: Color; RadiusBottomLeft/Right, RadiusTopLeft/Right: Number = 10; Size: Number = 15; Strikethrough: Boolean; TabIndex: Number = 0; Text: Text = "Button"; Tooltip: Text; Underline: Boolean; VerticalAlign: Enum = VerticalAlign.Middle [VerticalAlign]; Visible: Boolean = true; Width: Number = 160; X, Y
+NOTE: Classic/Button has NO AccessibleLabel property; use Tooltip plus the visible Text letter for status cues.
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 40; LayoutMinWidth = 160; LayoutMaxHeight/Width = 0
+
+### Gallery — family Classic
+Creation: `Control: Gallery` + `Variant:` (required) Horizontal | VariableHeight | Vertical
+Common inputs: BorderStyle: Enum = BorderStyle.Solid [BorderStyle]; ContentLanguage: Text; Default: Record; DisplayMode: Enum = DisplayMode.Edit [DisplayMode]; Fill: Color = RGBA(0,0,0,0); FocusedBorderColor: Color; FocusedBorderThickness: Number = 4; LoadingSpinnerColor: Color; NavigationStep: Number = 1; Selectable: Boolean = true; ShowNavigation: Boolean = false; TabIndex: Number = -1; Transition: Enum = Transition.None [Enum name: Transition; None, Pop, Push]; Visible: Boolean = true
+Vertical / Horizontal variant inputs: AccessibleLabel: Text; BorderColor: Color; BorderThickness: Number = 0; DelayItemLoading: Boolean = true; Height: Number = 575; Items: Table; LoadingSpinner: Enum = LoadingSpinner.Data [Enum name: LoadingSpinner; Controls, Data, None]; ShowScrollbar: Boolean = true; TemplatePadding: Number = 5; TemplateSize: Number; Width: Number = 640; WrapCount: Number = 1; X, Y
+VariableHeight variant: same minus WrapCount, plus MaxTemplateSize: Number = 5000; TemplateSize = 280
+As AutoLayout child: AlignInContainer = Stretch; FillPortions = 1; LayoutMinHeight = 287; LayoutMinWidth = 320; LayoutMaxHeight/Width = 0
+Outputs: AllItems, AllItemsCount, Selected, TemplateHeight, TemplateWidth, TemplatePadding, VisibleIndex, Height, Width
+
+### ModernDropdown — family React
+Creation: `Control: ModernDropdown`
+Inputs: AccessibleLabel: Text; Appearance: Enum = Appearance.FilledDarker [Enum name: Appearance; FilledDarker, FilledLighter, Outline]; BasePaletteColor: Color; BorderColor; BorderStyle [BorderStyle]; BorderThickness; Color; ContentLanguage; Default: Record; DisplayMode: Enum = DisplayMode.Edit [DisplayMode]; Fill: Color; Font [Font]; FontWeight = FontWeight.Normal [FontWeight]; Height: Number = 32; Italic; ItemDisplayText: Text = ThisItem.Value1; Items: Table; OnChange: Boolean; Padding*; Radius*; Required: Boolean = false; Size: Number = 14; Strikethrough; Underline; ValidationState: Enum = ValidationState.None [Enum name: ValidationState; Error, None]; Visible = true; Width: Number = 320; X, Y
+Output: Selected: Record
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 320
+
+### ModernTabList — family React
+Creation: `Control: ModernTabList`
+Inputs: AccessibleLabel: Text; Align: Enum = Align.Left [Align]; Alignment: Enum = LayoutDirection.Horizontal [Enum name: LayoutDirection; Horizontal, Vertical]; Appearance: Enum = TabListAppearance.Transparent [Enum name: TabListAppearance; FilledCircular, Subtle, SubtleCircular, Transparent]; BasePaletteColor: Color; Color: Color; ContentLanguage; Default: Record; DisplayMode [DisplayMode]; Font [Font]; FontWeight [FontWeight]; Height: Number = 60; Italic; ItemDisplayText: Text = ThisItem.Value; Items: Table = Table({Value:"Item 1"},...); OnChange: Boolean; OnSelect: Boolean; Padding*; Size: Number = 14; Strikethrough; TabSize: Enum = TabSize.Large [Enum name: TabSize; Large, Medium, Small]; Underline; Visible = true; Width: Number = 300; X, Y
+Output: Selected: Record
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 60; LayoutMinWidth = 300
+
+### ModernTextInput — family React
+Creation: `Control: ModernTextInput`
+Inputs: AccessibleLabel: Text; Align = Align.Left [Align]; Appearance = Appearance.FilledDarker [Enum name: Appearance; FilledDarker, FilledLighter, Outline]; BasePaletteColor; BorderColor; BorderStyle [BorderStyle]; BorderThickness; Color; ContentLanguage; Default: Text = ""; DisplayMode = DisplayMode.Edit [DisplayMode]; Fill; Font [Font]; FontWeight = Normal [FontWeight]; Height: Number = 32; Italic; MaxLength: Number; OnChange: Boolean; Padding*; Placeholder: Text = "Enter text"; Radius*; Required: Boolean = false; Size: Number = 14; Strikethrough; TriggerOutput: Enum = TriggerOutput.Keypress [Enum name: TriggerOutput; Delayed, FocusOut, Keypress]; Type: Enum = TextInputType.SingleLine [Enum name: TextInputType; Multiline, Password, Search, SingleLine]; Underline; ValidationState = ValidationState.None [ValidationState]; Visible = true; Width: Number = 320; X, Y
+Output: Text: Text
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 320
+
+### ModernDatePicker — family React
+Creation: `Control: ModernDatePicker`
+Inputs: AccessibleLabel: Text; Appearance = Appearance.FilledDarker [Enum name: Appearance; FilledDarker, FilledLighter, Outline]; BasePaletteColor; BorderColor; BorderStyle [BorderStyle]; BorderThickness; Color; ContentLanguage; DateTimeZone: Enum = DateTimeZone.Local [Enum name: DateTimeZone; Local, UTC]; DefaultDate: Date; DisplayMode = DisplayMode.Edit [DisplayMode]; EndDate: Date = Date(Year(Today())+100,12,31); Fill; Font [Font]; FontWeight [FontWeight]; Format: Enum = DatePickerFormat.LongAbbreviated [Enum name: DatePickerFormat; LongAbbreviated, Short, YearMonth]; Height: Number = 32; IsEditable: Boolean = false; Italic; OnChange: Boolean; Padding*; Placeholder: Text = "Select a date"; Radius*; Size: Number = 14; StartDate: Date = Date(1900,1,1); StartOfWeek: Enum = StartOfWeek.Sunday [Enum name: StartOfWeek; Friday, Monday, MondayZero, Saturday, Sunday, Thursday, Tuesday, Wednesday]; Strikethrough; Underline; ValidationState [ValidationState]; Visible = true; Width: Number = 320; X, Y
+Output: SelectedDate: Date
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 320
+
+### ModernSpinner — family React
+Creation: `Control: ModernSpinner`
+Inputs: AccessibleLabel: Text; Appearance: Enum = SpinnerAppearance.Primary [Enum name: SpinnerAppearance; Inverted, Primary]; BasePaletteColor; Color; ContentLanguage; DisplayMode [DisplayMode]; Font [Font]; FontWeight [FontWeight]; Height: Number = 48; Italic; Label: Text = ""; LabelPosition: Enum = SpinnerLabelPosition.After [Enum name: SpinnerLabelPosition; Above, After, Before, Below]; LineHeight: Number; Padding*: Number = 8; Size: Number = 0; SpinnerColor: Color; Strikethrough; Tooltip: Text; TrackColor: Color; Underline; Visible = true; Width: Number = 48; X, Y
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 48; LayoutMinWidth = 48
+
+### Badge — family FluentV9
+Creation: `Control: Badge`
+Inputs: AccessibleLabel: Text; Align: Enum [Align]; Appearance: Enum = "Tint" [Enum name: BadgeCanvas.Appearance; Filled, Ghost, Outline, Tint]; BasePaletteColor: Color; Content: Text = "AB"; ContentLanguage; DisplayMode [DisplayMode]; Font [Font]; FontColor: Color; FontItalic: Boolean; FontSize: Number = 0; FontStrikethrough; FontUnderline; FontWeight [FontWeight]; Height: Number = 32; Shape: Enum = "Circular" [Enum name: BadgeCanvas.Shape; Circular, Rounded, Square]; ThemeColor: Enum = "Brand" [Enum name: BadgeCanvas.ThemeColor; Brand, Danger, Important, Informative, Severe, Subtle, Success, Warning]; VerticalAlign [VerticalAlign]; Visible = true; Width: Number = 32; X, Y
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 32
+
+### ModernIcon — family React
+Creation: `Control: ModernIcon`
+Inputs: AccessibleLabel: Text; BasePaletteColor; BorderColor; BorderStyle [BorderStyle]; BorderThickness; ContentLanguage; DisplayMode = DisplayMode.Edit [DisplayMode]; Fill: Color; Height: Number = 32; Icon: Text = "Add"; IconColor: Color; IconStyle: Enum = IconStyle.Outline [Enum name: IconStyle; Filled, Outline]; OnSelect: Boolean; Padding*: Number = 0; Radius*; Rotation: Number = 0; Tooltip: Text; Visible = true; Width: Number = 32; X, Y
+As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 32
+
+---
+
+## Build 2 addendum (captured 2026-09-29)
+
+Data sources unchanged (App Settings replaces the removed Power Pages "Settings"). Absence Reasons:
+aaca_absencereasonid "Absence Reason": Guid; aaca_name "Name": String; aaca_active "Active": Boolean;
+aaca_sortorder "Sort Order": Number.
+
+Additional Students columns: aaca_firstname "First Name": String; aaca_lastname "Last Name": String;
+aaca_dateofbirth "Date of Birth": Date; aaca_grade "Grade": option set "Grade (Students)": K, 1..12, 12+;
+aaca_externalclientid "External Client ID": String; aaca_archivedon "Archived On": Date;
+aaca_archivedby "Archived By": lookup Users; _ownerid_value "Owner": Polymorphic.
+Enrollments also: aaca_previousenrollment "Previous Enrollment": lookup Enrollments;
+aaca_endreason "End Reason": option set "End Reason (Enrollments)": Transfer, Ratio Change, Discharge, Year End, Correction.
+
+### Verified behaviour formula (compiled PASSED in a Classic/Button OnSelect against this app, then removed)
+
+```
+With({t: First(Filter(Staff, 'App Role' = 'App Role (Staff)'.Teacher)), yr: LookUp('School Years', 'Start Date' <= Today() && 'End Date' >= Today())},
+  With({s: Patch(Students, Defaults(Students), {'First Name': "Probe", 'Last Name': "Only", 'Display Name': "Only, Probe", 'Date of Birth': Date(2015,1,1), Grade: 'Grade (Students)'.'12+', 'Status (aaca_status)': 'Status (Students)'.Active})},
+    Patch(Students, s, {Owner: t.User});                                   // polymorphic Owner accepts a Users record
+    Patch(Enrollments, Defaults(Enrollments), {Name: "x", Student: s, Campus: t.Campus, Teacher: t, Service: First(Services), 'School Year': yr,
+      Program: 'Program (Enrollments)'.'Regular Year', 'IEP Ratio': 'IEP Ratio (Enrollments)'.'No Aide', 'Start Date': Today(),
+      'Status (aaca_status)': 'Status (Enrollments)'.Planned, 'End Reason': 'End Reason (Enrollments)'.Transfer, 'Previous Enrollment': First(Enrollments)});
+    Patch(Students, s, {'Status (aaca_status)': 'Status (Students)'.Archived, 'Archived On': Today(), 'Archived By': LookUp(Users, 'Primary Email' = User().Email)});
+    Patch('Audit Events', Defaults('Audit Events'), {Summary: "x", Action: 'Action (Audit Events)'.Transfer, Entity: "aaca_student", 'Entity ID': Text(s.Student)});
+    Set(varProbeNum, s.'Student Number');                                  // autonumber readable from the Patch result
+    Set(varProbeDup, CountRows(Filter(Students, 'First Name' = "Probe" && 'Last Name' = "Only" && 'Date of Birth' = Date(2015,1,1))))   // no delegation warning
+  ))
+```
+
+### describe_control — new control types for build 2
+
+ModernToggle (React) — `Control: ModernToggle`. Inputs: AccessibleLabel: Text; BasePaletteColor; Color; ContentLanguage; Default: Boolean = false; DisplayMode = DisplayMode.Edit [DisplayMode]; Font [Font]; FontWeight [FontWeight]; Height: Number = 35; Italic; Label: Text = "Label"; LabelPosition: Enum = ToggleLabelPosition.After [Enum name: ToggleLabelPosition; Above, After, Before]; OnCheck: Boolean; OnUncheck: Boolean; Size: Number = 0; Strikethrough; ToggleSize: Number = 40; Tooltip: Text; Underline; Visible = true; Width: Number = 113; X, Y. Output: Checked: Boolean. As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 35; LayoutMinWidth = 113.
+
+ModernCheckbox (React) — `Control: ModernCheckbox`. Inputs: AccessibleLabel: Text; BasePaletteColor; CheckboxSize: Number = 16; Color; ContentLanguage; Default: Boolean = false; DisplayMode = DisplayMode.Edit [DisplayMode]; Font [Font]; FontWeight [FontWeight]; Height: Number = 32; Italic; Label: Text = "Checkbox"; OnCheck: Boolean; OnUncheck: Boolean; Size: Number = 0; Strikethrough; Tooltip: Text; Underline; Visible = true; Width: Number = 160; X, Y. Output: Checked: Boolean. As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 32; LayoutMinWidth = 160.
+
+ModernRadio (React) — `Control: ModernRadio`. Inputs: AccessibleLabel: Text; BasePaletteColor; BorderColor; BorderStyle [BorderStyle]; BorderThickness; Color; ContentLanguage; Default: Record; DisabledColor: Color = RGBA(186,186,186,1); DisplayMode = DisplayMode.Edit [DisplayMode]; Fill: Color; Font [Font]; FontWeight = FontWeight.Normal [FontWeight]; Height: Number = 100; Italic; ItemDisplayText: Text = ThisItem.Value; Items: Table; Layout: Enum = OptionLayout.Vertical [Enum name: OptionLayout; Horizontal, HorizontalStacked, Vertical]; LineHeight: Number = 16; OnChange: Boolean; Padding*; RadioBackgroundFill: Color; RadioBorderColor: Color; RadioSelectionFill: Color; RadioSize: Number = 14; Radius*; Required: Boolean = false; Size: Number = 14; Strikethrough; Underline; Visible = true; Width: Number = 320; X, Y. Output: Selected: Record. As AutoLayout child: AlignInContainer = SetByContainer; FillPortions = 0; LayoutMinHeight = 100; LayoutMinWidth = 320.
+
+All other control types (GroupContainer, ModernText, ModernButton, Classic/Button, Gallery, ModernDropdown,
+ModernTabList, ModernTextInput, ModernDatePicker, ModernSpinner, Badge, ModernIcon) are described above in
+this packet and unchanged.
+
+---
+
+
+## Enrollments (copied from build 5)
+
+- aaca_enrollmentid — "Enrollment": Guid; aaca_name — "Name": String
+- aaca_student — "Student": lookup Students; aaca_campus — "Campus": lookup Campuses
+- aaca_teacher — "Teacher": lookup Staff; aaca_service — "Service": lookup Services
+- aaca_schoolyear — "School Year": lookup School Years
+- aaca_program — "Program": option set "Program (Enrollments)": Regular Year, Summer
+- aaca_iepratio — "IEP Ratio": option set "IEP Ratio (Enrollments)": No Aide, 1:1, 2:1, 3:1, 4:1
+- aaca_startdate — "Start Date": Date; aaca_enddate — "End Date": Date (blank = open)
+- aaca_status — "Status (aaca_status)": option set "Status (Enrollments)": Planned, Active, Ended
+
+
+## Verified Power Fx in THIS app (compile PASSED 2026-10-01 in App.Properties.Formulas, then removed)
+
+Named formulas live under `App: Properties: Formulas: |-` starting with `=` (NOT a top-level `Formulas:` key — that
+fails with "Property 'Formulas' not found"). User-defined functions compile:
+
+```
+NormAlias(t: Text): Text = Upper(Trim(t));
+First('Funder Aliases').Funder.Abbreviation
+First('Service Aliases').Service.'Service Code'
+First(Staff).'Finance Access' = true                         // Yes/No columns are BOOLEAN in Power Fx (not option sets)
+First('Student Services').Excluded = true && First(Services).Billable && First(Funders).Active
+First('Student Services').ESY = false && First('Student Services').Source = 'Source (Student Services)'.CodeMetro
+First(Students).'Status (aaca_status)' = 'Status (Students)'.Active
+First(Students).'Student Type' = 'Student Type (Students)'.'Regional Center Only'
+First('Districts of Record').Funder.'Funder Type' = 'Funder Type (Funders)'.District
+First(Services).Kind = 'Kind (Services)'.'School Day' && First(Services).'Billing Unit' = 'Billing Unit (Services)'.Hours
+CountRows(Filter('Service Aliases', 'Alias Type' = 'Alias Type (Service Aliases)'.'CPT Code'))
+```
+
+Correction to the schema section above: every "Yes/No" column (Active, Billable, Billable on Non-School Days, ESY,
+Excluded, Finance Access) is a Boolean in formulas: write `true`/`false`, never `'X (Table)'.Yes`.
+The attendance app's identity pattern (compiled there): `CurrentUserRow = LookUp(Users, 'Primary Email' = User().Email);`
+`CurrentStaff = LookUp(Staff, User.User = CurrentUserRow.User);` `StaffReady = !IsBlank(CurrentStaff) && CurrentStaff.Active <> false;`

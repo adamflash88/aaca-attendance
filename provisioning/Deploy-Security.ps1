@@ -28,7 +28,16 @@ Connect-Dataverse -EnvironmentUrl $EnvironmentUrl -AccessToken $AccessToken -Use
 #region Role matrix ---------------------------------------------------------------------
 $reference = 'aaca_campus', 'aaca_staff', 'aaca_service', 'aaca_schoolyear', 'aaca_term',
              'aaca_calendarexception', 'aaca_absencereason', 'aaca_monthlock', 'aaca_setting'
-$allTables = @($schema.tables.logicalName)
+# Billing tables (schema "billing": true) belong to the AACA Finance role only: no other AACA role can read them.
+$billingTables = @($schema.tables | Where-Object { $_.PSObject.Properties['billing'] -and $_.billing } | ForEach-Object logicalName)
+$allTables = @($schema.tables.logicalName | Where-Object { $_ -notin $billingTables })
+# An environment can be a solution version behind the schema (e.g. Test): only grant on tables it actually has.
+$present = @{}
+foreach ($p in (Invoke-Dv -Path "privileges?`$select=name&`$filter=startswith(name,'prvReadaaca_')").value) { $present[$p.name.Substring(7).ToLowerInvariant()] = $true }
+$missing = @($schema.tables.logicalName | Where-Object { -not $present.Contains($_) })
+if ($missing) { Write-Warning "Not in this environment yet (skipped): $($missing -join ', ')" }
+$billingTables = @($billingTables | Where-Object { $present.Contains($_) })
+$allTables = @($allTables | Where-Object { $present.Contains($_) })
 $allAccess = 'Create', 'Read', 'Write', 'Delete', 'Append', 'AppendTo', 'Assign', 'Share'
 
 function Grant([hashtable] $m, [string[]] $tables, [string[]] $access, [string] $depth) {
@@ -69,7 +78,16 @@ $roles['AACA Read-only'] = @{ Description = 'Read-only across all campuses for r
 # App system admin (reference data, settings, overrides). Environment admins already have System Administrator.
 $m = @{}
 Grant $m $allTables $allAccess 'Global'
-$roles['AACA System Admin'] = @{ Description = 'Full access to AACA tables, including reference data and settings.'; Matrix = $m }
+$roles['AACA System Admin'] = @{ Description = 'Full access to AACA tables, including reference data and settings (not billing).'; Matrix = $m }
+
+# Finance (billing): an ADD-ON role given alongside a person's app role (Set-AacaFinance.ps1). Full access to billing
+# tables; maintains service billing fields (QuickBooks item, unit); reads students, attendance and calendars org-wide.
+$m = @{}
+Grant $m $billingTables $allAccess 'Global'
+Grant $m ($allTables | Where-Object { $_ -ne 'aaca_auditevent' }) 'Read', 'AppendTo' 'Global'
+Grant $m 'aaca_service' 'Write' 'Global'
+Grant $m 'aaca_auditevent' 'Create', 'Read' 'Global'
+$roles['AACA Finance'] = @{ Description = 'Billing: CodeMetro uploads, mappings, RDS grids, month close, QuickBooks export and RDS PDFs.'; Matrix = $m }
 #endregion
 
 #region Business units ------------------------------------------------------------------
@@ -100,7 +118,7 @@ foreach ($roleName in $roles.Keys) {
     $role = (Invoke-Dv -Path "roles?`$select=roleid&`$filter=name eq '$roleName' and _businessunitid_value eq $($rootBu.businessunitid)").value | Select-Object -First 1
     if (-not $role) {
         $role = New-DvRow 'roles' @{ name = $roleName; description = $def.Description; 'businessunitid@odata.bind' = "/businessunits($($rootBu.businessunitid))" }
-        Add-DvSolutionComponent $role.roleid 20
+        # Not added to the solution: every environment gets its roles from this script (shipping them duplicates them).
         Write-Host "Created role $roleName" -ForegroundColor Green
     }
 
@@ -140,7 +158,7 @@ foreach ($pName in $profiles.Keys) {
     $fsp = (Invoke-Dv -Path "fieldsecurityprofiles?`$select=fieldsecurityprofileid&`$filter=name eq '$pName'").value | Select-Object -First 1
     if (-not $fsp) {
         $fsp = New-DvRow 'fieldsecurityprofiles' @{ name = $pName; description = $p.Description }
-        Add-DvSolutionComponent $fsp.fieldsecurityprofileid 70
+        # Not added to the solution (see roles above).
         Write-Host "Created column security profile $pName" -ForegroundColor Green
     }
     $existing = (Invoke-Dv -Path "fieldpermissions?`$select=fieldpermissionid,entityname,attributelogicalname&`$filter=_fieldsecurityprofileid_value eq $($fsp.fieldsecurityprofileid)").value

@@ -1,0 +1,1899 @@
+Screens:
+  ServicesScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varSvcSelId, Blank());
+        Set(varSvcMode, "");
+        Set(varSvcAliasDelId, Blank());
+        Set(varSvcReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+        Set(varSvcAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+        Reset(tglSvcInactive);
+        Select(btnSvcLoadEngine)
+    Children:
+      - conSvcRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =12
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            PaddingLeft: =16
+            PaddingRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conSvcHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conSvcRoot.Width < 640, 92, 76) + If(IsFinance, 48, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblSvcTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Billing"
+                        Wrap: =false
+                  - lblSvcIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conSvcRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =UserLabel & " · " & If(IsFinance, "Finance access", "No finance access")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conSvcNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =IsFinance
+                      Children:
+                        - btnSvcNavHome:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Home"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(HomeScreen)
+                              Size: =14
+                              Text: ="Home"
+                              Width: =110
+                        - btnSvcNavFunders:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Funders"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(FundersScreen)
+                              Size: =14
+                              Text: ="Funders"
+                              Width: =110
+                        - btnSvcNavServices:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Services (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(ServicesScreen)
+                              Size: =14
+                              Text: ="Services"
+                              Width: =110
+                        - btnSvcNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnSvcNavRds:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to RDS Grid"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              OnSelect: =Navigate(RdsScreen)
+                              Size: =14
+                              Text: ="RDS Grid"
+                              Width: =110
+            - conSvcGate:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 24 + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!IsFinance
+                Children:
+                  - lblSvcGateTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="You don't have access to AACA Billing"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="You don't have access to AACA Billing"
+                        Wrap: =false
+                  - lblSvcGateBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask Adam Bernstein to set up Finance Access.", "AACA Billing is limited to the finance team. Ask Adam Bernstein if you need Finance Access.")
+                        VerticalAlign: =VerticalAlign.Top
+            - conSvcBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conSvcRoot.Width >= 1024, Max(conSvcListPanel.Height, conSvcRight.Height), If(varSvcMode = "", conSvcListPanel.Height, conSvcRight.Height))
+                  LayoutAlignItems: =If(conSvcRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                  LayoutDirection: =If(conSvcRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutGap: =12
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  Visible: =IsFinance
+                Children:
+                  - conSvcListPanel:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conSvcRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorWhite
+                        FillPortions: =If(conSvcRoot.Width >= 1024, 1, 0)
+                        Height: =668 + conSvcChips.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =16
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =16
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =!(conSvcRoot.Width < 1024 && varSvcMode <> "")
+                      Children:
+                        - conSvcListHead:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblSvcListTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Services"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: ="Services"
+                                    Wrap: =false
+                              - btnSvcReload:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Reload services"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Select(btnSvcLoadEngine)
+                                    Size: =14
+                                    Text: ="Reload"
+                                    Width: =88
+                              - btnSvcNew:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="New service"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorWhite
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =Set(varSvcSelId, Blank());
+                                      Set(varSvcMode, "new");
+                                      Set(varSvcAliasDelId, Blank());
+                                      Set(varSvcReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                      Set(varSvcAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                      Select(btnSvcFormResetEngine)
+                                    Size: =14
+                                    Text: ="New service"
+                                    Width: =120
+                        - conSvcChips:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conSvcListPanel.Width - 32 >= 498, 44, conSvcListPanel.Width - 32 >= 280, 96, 148)
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              LayoutWrap: =true
+                            Children:
+                              - btnSvcChipAll:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varSvcKind = "All", "All kinds (selected)", "Show all kinds")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varSvcKind = "All", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varSvcKind = "All", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varSvcKind, "All")
+                                    Size: =14
+                                    Text: ="All"
+                                    Width: =64
+                              - btnSvcChipSchool:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varSvcKind = "School Day", "School Day services (selected)", "Show School Day services")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varSvcKind = "School Day", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varSvcKind = "School Day", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varSvcKind, "School Day")
+                                    Size: =14
+                                    Text: ="School Day"
+                                    Width: =110
+                              - btnSvcChipClinical:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varSvcKind = "Clinical", "Clinical services (selected)", "Show Clinical services")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varSvcKind = "Clinical", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varSvcKind = "Clinical", ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: =Set(varSvcKind, "Clinical")
+                                    Size: =14
+                                    Text: ="Clinical"
+                                    Width: =90
+                              - btnSvcChipMissing:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: =If(varSvcMissingQbo, "Missing QuickBooks item filter (on)", "Show only services missing a QuickBooks item")
+                                    AlignInContainer: =AlignInContainer.Start
+                                    Appearance: =If(varSvcMissingQbo, ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varSvcMissingQbo, ColorWhite, ColorInk)
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =With({next: !varSvcMissingQbo}, Set(varSvcMissingQbo, next))
+                                    Size: =14
+                                    Text: ="Missing QuickBooks item"
+                                    Width: =210
+                        - conSvcFilterRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =44
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - tglSvcInactive:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Show inactive services"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorInk
+                                    Default: =varSvcShowInactive
+                                    Height: =44
+                                    Label: ="Show inactive"
+                                    OnCheck: =Set(varSvcShowInactive, true)
+                                    OnUncheck: =Set(varSvcShowInactive, false)
+                                    Width: =160
+                              - btnSvcClear:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Clear service filters"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    OnSelect: |-
+                                      =Set(varSvcKind, "All");
+                                      Set(varSvcMissingQbo, false);
+                                      Set(varSvcShowInactive, false);
+                                      Reset(tglSvcInactive)
+                                    Size: =14
+                                    Text: ="Clear filters"
+                                    Width: =120
+                        - lblSvcCount:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              Height: =36
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With(
+                                    {
+                                        n: CountRows(Filter(colServices, (varSvcShowInactive || IsActive) && (varSvcKind = "All" || KindText = varSvcKind) && (!varSvcMissingQbo || Trim(QboItem) = ""))),
+                                        m: CountRows(Filter(colServices, varSvcShowInactive || IsActive))
+                                    },
+                                    If(
+                                        varSvcLoading, "Loading services...",
+                                        varSvcLoadError <> "", "Could not load services - " & varSvcLoadError,
+                                        n = 0, "No services match these filters. Use Clear filters to see all.",
+                                        "Showing " & n & " of " & m & " services"
+                                    )
+                                )
+                              VerticalAlign: =VerticalAlign.Top
+                        - galSvcList:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Services list"
+                              FillPortions: =0
+                              Height: =480
+                              Items: |-
+                                =Sort(
+                                    Filter(
+                                        colServices,
+                                        (varSvcShowInactive || IsActive) &&
+                                        (varSvcKind = "All" || KindText = varSvcKind) &&
+                                        (!varSvcMissingQbo || Trim(QboItem) = "")
+                                    ),
+                                    KindRank * 100000 + Coalesce(SortNum, 9999),
+                                    SortOrder.Ascending
+                                )
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =120
+                            Children:
+                              - conSvcRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =If(ThisItem.ServiceId = varSvcSelId, ColorInfoBg, ColorWhite)
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =2
+                                    PaddingBottom: =8
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - conSvcRowTop:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                        Children:
+                                          - lblSvcRowCode:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: ="Service " & ThisItem.Code & " - " & ThisItem.Name
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =42
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.Code & " - " & ThisItem.Name
+                                          - btnSvcRowEdit:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Edit service " & ThisItem.Code
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: |-
+                                                  =Set(varSvcSelId, ThisItem.ServiceId);
+                                                  Set(varSvcMode, "edit");
+                                                  Set(varSvcAliasDelId, Blank());
+                                                  Set(varSvcReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                                  Set(varSvcAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid});
+                                                  Select(btnSvcFormResetEngine)
+                                                Size: =14
+                                                Text: ="Edit"
+                                                Width: =72
+                                    - lblSvcRowMeta:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.KindText & " · " & ThisItem.UnitText & If(ThisItem.NonSchool, " · Non-school days", "") & If(ThisItem.IsBillable, "", " · Not billable") & If(ThisItem.IsActive, "", " · Inactive") & If(IsBlank(ThisItem.SortNum), "", " · Sort " & ThisItem.SortNum)
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - lblSvcRowQbo:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =If(Trim(ThisItem.QboItem) = "", ColorWarnInk, ColorMuted)
+                                          FontWeight: =If(Trim(ThisItem.QboItem) = "", FontWeight.Semibold, FontWeight.Normal)
+                                          Height: =20
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =If(Trim(ThisItem.QboItem) = "", "No QuickBooks item", "QuickBooks item " & ThisItem.QboItem)
+                                          Wrap: =false
+                  - conSvcRight:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        AlignInContainer: =If(conSvcRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        DropShadow: =DropShadow.None
+                        FillPortions: =If(conSvcRoot.Width >= 1024, 1, 0)
+                        Height: =If(varSvcMode = "", If(conSvcRoot.Width >= 1024, 72, 0), conSvcForm.Height + If(varSvcMode = "edit", 12 + conSvcAliasPanel.Height, 0))
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =12
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Visible: =varSvcMode <> "" || conSvcRoot.Width >= 1024
+                      Children:
+                        - conSvcPlaceholder:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =72
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varSvcMode = ""
+                            Children:
+                              - lblSvcPlaceholder:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Select Edit on a service, or New service to add one."
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =40
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: ="Select Edit on a service, or New service to add one."
+                                    VerticalAlign: =VerticalAlign.Top
+                        - conSvcForm:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =756 + If(varSvcReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varSvcReceipt.Msg) / 45, 0) + 8), 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varSvcMode <> ""
+                            Children:
+                              - conSvcReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varSvcReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varSvcReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varSvcReceipt.Kind <> ""
+                                  Children:
+                                    - lblSvcReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varSvcReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varSvcReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varSvcReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnSvcReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss service save result"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varSvcReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - conSvcFormHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblSvcFormTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =28
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: =If(varSvcMode = "new", "New service", "Edit service " & LookUp(colServices, ServiceId = varSvcSelId).Code)
+                                          Wrap: =false
+                                    - btnSvcBack:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Back to services list"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varSvcSelId, Blank());
+                                            Set(varSvcMode, "");
+                                            Set(varSvcAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Back to list"
+                                          Visible: =conSvcRoot.Width < 1024
+                                          Width: =120
+                              - lblSvcCode:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Service code (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Service code (required)"
+                                    Wrap: =false
+                              - txtSvcCode:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Service code"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colServices, ServiceId = varSvcSelId).Code
+                                    DisplayMode: =If(!IsBlank(varSvcSelId) && Upper(LookUp(colServices, ServiceId = varSvcSelId).Code) = "SPED", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =100
+                              - lblSvcName:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Name (required)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Name (required)"
+                                    Wrap: =false
+                              - txtSvcName:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Service name"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colServices, ServiceId = varSvcSelId).Name
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblSvcKind:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Kind"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Kind"
+                                    Wrap: =false
+                              - rdoSvcKind:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Service kind"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      ={Value: Coalesce(LookUp(colServices, ServiceId = varSvcSelId).KindText, "School Day")}
+                                    DisplayMode: =If(!IsBlank(varSvcSelId) && Upper(LookUp(colServices, ServiceId = varSvcSelId).Code) = "SPED", DisplayMode.View, DisplayMode.Edit)
+                                    Height: =36
+                                    Items: =["School Day", "Clinical"]
+                                    Layout: =OptionLayout.Horizontal
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblSvcUnit:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Billing unit"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Billing unit"
+                                    Wrap: =false
+                              - rdoSvcUnit:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Billing unit"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      ={Value: Coalesce(LookUp(colServices, ServiceId = varSvcSelId).UnitText, "Days")}
+                                    Height: =36
+                                    Items: =["Days", "Hours"]
+                                    Layout: =OptionLayout.Horizontal
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                              - lblSvcQbo:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="QuickBooks item"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="QuickBooks item"
+                                    Wrap: =false
+                              - txtSvcQbo:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="QuickBooks item"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: =LookUp(colServices, ServiceId = varSvcSelId).QboItem
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Placeholder: ="Exact item name in QuickBooks Online"
+                              - lblSvcSort:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Sort order"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Sort order"
+                                    Wrap: =false
+                              - txtSvcSort:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Sort order"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Default: |-
+                                      =With({v: LookUp(colServices, ServiceId = varSvcSelId).SortNum}, If(IsBlank(v), "", Text(v)))
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Placeholder: ="e.g. 10"
+                              - tglSvcBillable:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Billable"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varSvcSelId), true, LookUp(colServices, ServiceId = varSvcSelId).IsBillable)
+                                    Height: =44
+                                    Label: ="Billable"
+                                    Width: =160
+                              - tglSvcNonSchool:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Billable on non-school days"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varSvcSelId), false, LookUp(colServices, ServiceId = varSvcSelId).NonSchool)
+                                    Height: =44
+                                    Label: ="Billable on non-school days"
+                                    Width: =260
+                              - tglSvcActive:
+                                  Control: ModernToggle
+                                  Properties:
+                                    AccessibleLabel: ="Service active"
+                                    AlignInContainer: =AlignInContainer.Start
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =ColorInk
+                                    Default: =If(IsBlank(varSvcSelId), true, LookUp(colServices, ServiceId = varSvcSelId).IsActive)
+                                    Height: =44
+                                    Label: ="Active"
+                                    Width: =160
+                              - lblSvcHelp:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =If(!IsBlank(varSvcSelId) && Upper(LookUp(colServices, ServiceId = varSvcSelId).Code) = "SPED", "SPED is the attendance service: its code and kind are fixed.", "Service codes must be unique (upper or lower case does not matter).")
+                                    VerticalAlign: =VerticalAlign.Top
+                              - lblSvcValidation:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(Self.Text = "Ready to save.", ColorTeal, ColorUnexcused)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {inCode: Trim(txtSvcCode.Text), inName: Trim(txtSvcName.Text), inSort: Trim(txtSvcSort.Text)},
+                                          With(
+                                              {dup: LookUp(colServices, Lower(Code) = Lower(inCode) && ServiceId <> Coalesce(varSvcSelId, ZeroGuid))},
+                                              If(
+                                                  inCode = "", "Service code is required.",
+                                                  !IsBlank(dup), "Service code " & inCode & " is already used by " & dup.Name & ".",
+                                                  inName = "", "Name is required.",
+                                                  inSort <> "" && (!IsNumeric(inSort) || Value(inSort) <> RoundDown(Value(inSort), 0)), "Sort order must be a whole number.",
+                                                  IsBlank(rdoSvcKind.Selected) || IsBlank(rdoSvcUnit.Selected), "Choose a kind and a billing unit.",
+                                                  "Ready to save."
+                                              )
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conSvcActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnSvcSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Save service"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varSvcSaving || lblSvcValidation.Text <> "Ready to save.", DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =If(
+                                                lblSvcValidation.Text = "Ready to save." && !varSvcSaving && IsFinance,
+                                                Set(varSvcSaving, true);
+                                                Set(varSvcErr, "");
+                                                With(
+                                                    {
+                                                        id: varSvcSelId,
+                                                        idx: Coalesce(varSvcSelId, ZeroGuid),
+                                                        old: LookUp(colServices, ServiceId = varSvcSelId),
+                                                        inCode: Trim(txtSvcCode.Text),
+                                                        inName: Trim(txtSvcName.Text),
+                                                        inKind: rdoSvcKind.Selected.Value,
+                                                        inUnit: rdoSvcUnit.Selected.Value,
+                                                        inQbo: Trim(txtSvcQbo.Text),
+                                                        inSort: Trim(txtSvcSort.Text),
+                                                        bil: tglSvcBillable.Checked,
+                                                        ns: tglSvcNonSchool.Checked,
+                                                        act: tglSvcActive.Checked
+                                                    },
+                                                    With(
+                                                        {
+                                                            isSped: !IsBlank(id) && Upper(old.Code) = "SPED",
+                                                            dup: LookUp(Services, 'Service Code' = inCode && Service <> idx),
+                                                            kindOpt: Switch(inKind, "School Day", 'Kind (Services)'.'School Day', "Clinical", 'Kind (Services)'.Clinical),
+                                                            unitOpt: Switch(inUnit, "Days", 'Billing Unit (Services)'.Days, "Hours", 'Billing Unit (Services)'.Hours),
+                                                            sortVal: If(inSort = "", Blank(), Value(inSort)),
+                                                            op: If(IsBlank(id), "New service", !old.IsActive && act, "Reactivated", old.IsActive && !act, "Deactivated", "No status change")
+                                                        },
+                                                        If(
+                                                            !IsBlank(dup),
+                                                            Set(varSvcReceipt, {Kind: "Blocked", Msg: "Not saved. Service code " & inCode & " is already used by " & dup.Name & ".", RecordId: idx}),
+                                                            IfError(
+                                                                Set(varSvcLastRec, If(
+                                                                    IsBlank(id),
+                                                                    Patch(Services, Defaults(Services), {'Service Code': inCode, Name: inName, Kind: kindOpt, 'Billing Unit': unitOpt, 'QuickBooks Item': inQbo, 'Sort Order': sortVal, Billable: bil, 'Billable on Non-School Days': ns, Active: act}),
+                                                                    isSped,
+                                                                    Patch(Services, LookUp(Services, Service = idx), {Name: inName, 'Billing Unit': unitOpt, 'QuickBooks Item': inQbo, 'Sort Order': sortVal, Billable: bil, 'Billable on Non-School Days': ns, Active: act}),
+                                                                    Patch(Services, LookUp(Services, Service = idx), {'Service Code': inCode, Name: inName, Kind: kindOpt, 'Billing Unit': unitOpt, 'QuickBooks Item': inQbo, 'Sort Order': sortVal, Billable: bil, 'Billable on Non-School Days': ns, Active: act})
+                                                                ));
+                                                                true,
+                                                                Set(varSvcErr, FirstError.Message);
+                                                                false
+                                                            );
+                                                            If(
+                                                                varSvcErr <> "",
+                                                                Set(varSvcReceipt, {Kind: "Failed", Msg: "Service not saved. " & varSvcErr, RecordId: idx}),
+                                                                IfError(
+                                                                    Patch('Audit Events', Defaults('Audit Events'), {Summary: Left(If(IsBlank(id), "Create", "Update") & " Services " & varSvcLastRec.'Service Code', 100), Action: If(IsBlank(id), 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "Services", 'Entity ID': Text(varSvcLastRec.Service), Before: If(IsBlank(id), "", JSON({ServiceCode: old.Code, Name: old.Name, Kind: old.KindText, BillingUnit: old.UnitText, QuickBooksItem: old.QboItem, SortNumber: old.SortNum, Billable: old.IsBillable, NonSchoolDays: old.NonSchool, Active: old.IsActive})), After: JSON({ServiceCode: varSvcLastRec.'Service Code', Name: inName, Kind: Text(varSvcLastRec.Kind), BillingUnit: inUnit, QuickBooksItem: inQbo, SortNumber: sortVal, Billable: bil, NonSchoolDays: ns, Active: act}), Reason: "Service saved in AACA Billing"});
+                                                                    Set(varSvcAuditOk, true),
+                                                                    Set(varSvcAuditOk, false)
+                                                                );
+                                                                Set(varSvcReceipt, {Kind: If(IsBlank(id), "Created", "Updated"), Msg: If(IsBlank(id), "Created", "Updated") & " service " & varSvcLastRec.'Service Code' & If(isSped, " (code and kind are fixed for SPED)", "") & ". Code " & varSvcLastRec.'Service Code' & " | Name " & varSvcLastRec.Name & " | Kind " & Text(varSvcLastRec.Kind) & " | Billing unit " & Text(varSvcLastRec.'Billing Unit') & " | QuickBooks item " & Coalesce(varSvcLastRec.'QuickBooks Item', "none") & " | Sort order " & If(IsBlank(varSvcLastRec.'Sort Order'), "none", Text(varSvcLastRec.'Sort Order')) & " | Billable " & If(varSvcLastRec.Billable, "Yes", "No") & " | Non-school days " & If(varSvcLastRec.'Billable on Non-School Days', "Yes", "No") & " | Active " & If(IsBlank(id), "", If(old.IsActive, "Yes", "No") & " -> ") & If(varSvcLastRec.Active, "Yes", "No") & " (" & op & ") | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: varSvcLastRec.Service});
+                                                                Set(varSvcSelId, varSvcLastRec.Service);
+                                                                Set(varSvcMode, "edit");
+                                                                Select(btnSvcLoadEngine);
+                                                                Select(btnSvcFormResetEngine)
+                                                            )
+                                                        )
+                                                    )
+                                                );
+                                                Set(varSvcSaving, false)
+                                            )
+                                          Size: =14
+                                          Text: ="Save"
+                                          Width: =100
+                                    - btnSvcCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel service edit"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varSvcSelId, Blank());
+                                            Set(varSvcMode, "");
+                                            Set(varSvcAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+                        - conSvcAliasPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =710 + If(varSvcAliasReceipt.Kind <> "", 6 + 16 + Max(44, 18 * RoundUp(Len(varSvcAliasReceipt.Msg) / 45, 0) + 8), 0) + If(!IsBlank(varSvcAliasDelId), 62, 0)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =6
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =varSvcMode = "edit"
+                            Children:
+                              - conSvcAliasReceipt:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =Switch(varSvcAliasReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                                    FillPortions: =0
+                                    Height: =16 + Max(44, 18 * RoundUp(Len(varSvcAliasReceipt.Msg) / 45, 0) + 8)
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =8
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =varSvcAliasReceipt.Kind <> ""
+                                  Children:
+                                    - lblSvcAliasReceipt:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =varSvcAliasReceipt.Msg
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =18 * RoundUp(Len(varSvcAliasReceipt.Msg) / 45, 0) + 8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: =varSvcAliasReceipt.Msg
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - btnSvcAliasReceiptDismiss:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Dismiss alias result"
+                                          AlignInContainer: =AlignInContainer.Start
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =Set(varSvcAliasReceipt, {Kind: "", Msg: "", RecordId: ZeroGuid})
+                                          Size: =14
+                                          Text: ="Dismiss"
+                                          Width: =88
+                              - lblSvcAliasTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="CodeMetro codes and names (aliases)"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="CodeMetro codes and names (aliases)"
+                                    Wrap: =false
+                              - lblSvcAliasCaption:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Aliases are the CPT codes and service names CodeMetro writes. Each one maps to exactly one service."
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conSvcAliasConfirm:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    BorderColor: =ColorRule
+                                    BorderThickness: =1
+                                    DropShadow: =DropShadow.None
+                                    Fill: =ColorWarnBg
+                                    FillPortions: =0
+                                    Height: =56
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =6
+                                    PaddingLeft: =12
+                                    PaddingRight: =12
+                                    PaddingTop: =6
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                    Visible: =!IsBlank(varSvcAliasDelId)
+                                  Children:
+                                    - lblSvcAliasConfirm:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =44
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: |-
+                                            =With({a: LookUp(colServiceAliases, AliasId = varSvcAliasDelId)}, "Remove " & Lower(a.AliasTypeText) & " " & a.AliasText & " from " & LookUp(colServices, ServiceId = varSvcSelId).Code & "?")
+                                    - btnSvcAliasConfirmYes:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Confirm remove alias"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorUnexcused
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varSvcSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {snap: LookUp(colServiceAliases, AliasId = varSvcAliasDelId)},
+                                                With(
+                                                    {hid: snap.AliasId, sCode: LookUp(colServices, ServiceId = snap.ServiceId).Code},
+                                                    If(
+                                                        !IsBlank(hid) && !varSvcSaving && IsFinance,
+                                                        Set(varSvcSaving, true);
+                                                        Set(varSvcErr, "");
+                                                        IfError(
+                                                            Remove('Service Aliases', LookUp('Service Aliases', 'Service Alias' = hid));
+                                                            true,
+                                                            Set(varSvcErr, FirstError.Message);
+                                                            false
+                                                        );
+                                                        If(
+                                                            varSvcErr <> "",
+                                                            Set(varSvcAliasReceipt, {Kind: "Failed", Msg: "Alias not removed. " & varSvcErr, RecordId: hid}),
+                                                            IfError(
+                                                                Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Soft Delete Service Aliases " & snap.AliasText, 100), Action: 'Action (Audit Events)'.'Soft Delete', Entity: "Service Aliases", 'Entity ID': Text(hid), Before: JSON({Alias: snap.AliasText, AliasType: snap.AliasTypeText, Service: sCode}), After: "", Reason: "Service alias removed (row deleted)"});
+                                                                Set(varSvcAuditOk, true),
+                                                                Set(varSvcAuditOk, false)
+                                                            );
+                                                            Set(varSvcAliasReceipt, {Kind: "Removed", Msg: "Removed " & Lower(snap.AliasTypeText) & " " & snap.AliasText & " from " & sCode & ". | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                            Set(varSvcAliasDelId, Blank());
+                                                            Select(btnSvcLoadEngine)
+                                                        );
+                                                        Set(varSvcSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Remove"
+                                    - btnSvcAliasConfirmNo:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Keep alias"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varSvcAliasDelId, Blank())
+                                          Size: =14
+                                          Text: ="Keep"
+                                          Width: =80
+                              - lblSvcCptTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="CPT codes (" & CountRows(Filter(colServiceAliases, ServiceId = varSvcSelId && AliasTypeText = "CPT Code")) & ")"
+                                    Wrap: =false
+                              - conSvcCptAddRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblSvcCptNew:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="CPT code"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="CPT code"
+                                          Width: =110
+                                          Wrap: =false
+                                    - txtSvcCptNew:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="New CPT code"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =Appearance.Outline
+                                          FillPortions: =1
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Placeholder: ="e.g. 97153"
+                                    - btnSvcCptAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add CPT code"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: |-
+                                            =With({n: NormAlias(txtSvcCptNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "CPT Code")}, If(varSvcSaving || n = "" || !IsBlank(hit), DisplayMode.Disabled, DisplayMode.Edit)))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtSvcCptNew.Text), sid: varSvcSelId},
+                                                With(
+                                                    {hit: LookUp('Service Aliases', Alias = n && 'Alias Type' = 'Alias Type (Service Aliases)'.'CPT Code')},
+                                                    If(
+                                                        !IsBlank(hit),
+                                                        Set(varSvcAliasReceipt, {Kind: "Blocked", Msg: "Not added. " & n & " is already mapped to " & hit.Service.'Service Code' & ".", RecordId: hit.'Service Alias'}),
+                                                        n <> "" && !IsBlank(sid) && !varSvcSaving && IsFinance,
+                                                        Set(varSvcSaving, true);
+                                                        Set(varSvcErr, "");
+                                                        IfError(
+                                                            Set(varSvcLastAlias, Patch('Service Aliases', Defaults('Service Aliases'), {Alias: n, 'Alias Type': 'Alias Type (Service Aliases)'.'CPT Code', Service: LookUp(Services, Service = sid)}));
+                                                            true,
+                                                            Set(varSvcErr, FirstError.Message);
+                                                            false
+                                                        );
+                                                        If(
+                                                            varSvcErr <> "",
+                                                            Set(varSvcAliasReceipt, {Kind: "Failed", Msg: "CPT code not added. " & varSvcErr, RecordId: ZeroGuid}),
+                                                            IfError(
+                                                                Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Create Service Aliases " & n, 100), Action: 'Action (Audit Events)'.Create, Entity: "Service Aliases", 'Entity ID': Text(varSvcLastAlias.'Service Alias'), Before: "", After: JSON({Alias: n, AliasType: "CPT Code", Service: LookUp(colServices, ServiceId = sid).Code}), Reason: "Service alias added in AACA Billing"});
+                                                                Set(varSvcAuditOk, true),
+                                                                Set(varSvcAuditOk, false)
+                                                            );
+                                                            Set(varSvcAliasReceipt, {Kind: "Added", Msg: "Added CPT code " & n & " to " & LookUp(colServices, ServiceId = sid).Code & ". | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: varSvcLastAlias.'Service Alias'});
+                                                            Reset(txtSvcCptNew);
+                                                            Select(btnSvcLoadEngine)
+                                                        );
+                                                        Set(varSvcSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Add"
+                                          Width: =88
+                              - conSvcCptNotice:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: |-
+                                      =With({n: NormAlias(txtSvcCptNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "CPT Code")}, If(n = "" || IsBlank(hit), ColorWhite, ColorWarnBg)))
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                  Children:
+                                    - lblSvcCptNotice:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =40
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: |-
+                                            =With({n: NormAlias(txtSvcCptNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "CPT Code")}, If(n = "", "Type a CPT code, then select Add.", IsBlank(hit), "Will be saved as " & n, hit.ServiceId = varSvcSelId, "Already mapped to this service.", "Already mapped to " & LookUp(colServices, ServiceId = hit.ServiceId).Code & ". Select Move it here to map it to this service instead.")))
+                                    - btnSvcCptMove:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Move CPT code to this service"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varSvcSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtSvcCptNew.Text), sid: varSvcSelId},
+                                                With(
+                                                    {hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "CPT Code" && ServiceId <> sid)},
+                                                    With(
+                                                        {hid: hit.AliasId, fromCode: LookUp(colServices, ServiceId = hit.ServiceId).Code, toCode: LookUp(colServices, ServiceId = sid).Code},
+                                                        If(
+                                                            !IsBlank(hid) && n <> "" && !IsBlank(sid) && !varSvcSaving && IsFinance,
+                                                            Set(varSvcSaving, true);
+                                                            Set(varSvcErr, "");
+                                                            IfError(
+                                                                Set(varSvcLastAlias, Patch('Service Aliases', LookUp('Service Aliases', 'Service Alias' = hid), {Service: LookUp(Services, Service = sid)}));
+                                                                true,
+                                                                Set(varSvcErr, FirstError.Message);
+                                                                false
+                                                            );
+                                                            If(
+                                                                varSvcErr <> "",
+                                                                Set(varSvcAliasReceipt, {Kind: "Failed", Msg: "CPT code not moved. " & varSvcErr, RecordId: hid}),
+                                                                IfError(
+                                                                    Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Update Service Aliases " & n, 100), Action: 'Action (Audit Events)'.Update, Entity: "Service Aliases", 'Entity ID': Text(hid), Before: JSON({Alias: n, AliasType: "CPT Code", Service: fromCode}), After: JSON({Alias: n, AliasType: "CPT Code", Service: toCode}), Reason: "Service alias moved in AACA Billing"});
+                                                                    Set(varSvcAuditOk, true),
+                                                                    Set(varSvcAuditOk, false)
+                                                                );
+                                                                Set(varSvcAliasReceipt, {Kind: "Moved", Msg: "Moved CPT code " & n & " from " & fromCode & " to " & toCode & ". | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                                Reset(txtSvcCptNew);
+                                                                Select(btnSvcLoadEngine)
+                                                            );
+                                                            Set(varSvcSaving, false)
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Move it here"
+                                          Visible: |-
+                                            =With({n: NormAlias(txtSvcCptNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "CPT Code")}, !IsBlank(hit) && hit.ServiceId <> varSvcSelId))
+                                          Width: =120
+                              - galSvcCpt:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="CPT codes for this service"
+                                    FillPortions: =0
+                                    Height: =176
+                                    Items: =Sort(Filter(colServiceAliases, ServiceId = varSvcSelId && AliasTypeText = "CPT Code"), AliasText)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =52
+                                  Children:
+                                    - conSvcCptRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =ColorWhite
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          PaddingBottom: =4
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =4
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblSvcCptRowText:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: ="CPT code " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                Height: =40
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =13
+                                                Text: =ThisItem.AliasText
+                                          - btnSvcCptRowRemove:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Remove CPT code " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: =Set(varSvcAliasDelId, ThisItem.AliasId)
+                                                Size: =14
+                                                Text: ="Remove"
+                                                Width: =88
+                              - lblSvcSnmTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: ="Service names (" & CountRows(Filter(colServiceAliases, ServiceId = varSvcSelId && AliasTypeText = "Service Name")) & ")"
+                                    Wrap: =false
+                              - conSvcSnmAddRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblSvcSnmNew:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Service name"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Service name"
+                                          Width: =110
+                                          Wrap: =false
+                                    - txtSvcSnmNew:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="New service name alias"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =Appearance.Outline
+                                          FillPortions: =1
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          Placeholder: ="Name exactly as CodeMetro writes it"
+                                    - btnSvcSnmAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add service name"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: |-
+                                            =With({n: NormAlias(txtSvcSnmNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "Service Name")}, If(varSvcSaving || n = "" || !IsBlank(hit), DisplayMode.Disabled, DisplayMode.Edit)))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtSvcSnmNew.Text), sid: varSvcSelId},
+                                                With(
+                                                    {hit: LookUp('Service Aliases', Alias = n && 'Alias Type' = 'Alias Type (Service Aliases)'.'Service Name')},
+                                                    If(
+                                                        !IsBlank(hit),
+                                                        Set(varSvcAliasReceipt, {Kind: "Blocked", Msg: "Not added. " & n & " is already mapped to " & hit.Service.'Service Code' & ".", RecordId: hit.'Service Alias'}),
+                                                        n <> "" && !IsBlank(sid) && !varSvcSaving && IsFinance,
+                                                        Set(varSvcSaving, true);
+                                                        Set(varSvcErr, "");
+                                                        IfError(
+                                                            Set(varSvcLastAlias, Patch('Service Aliases', Defaults('Service Aliases'), {Alias: n, 'Alias Type': 'Alias Type (Service Aliases)'.'Service Name', Service: LookUp(Services, Service = sid)}));
+                                                            true,
+                                                            Set(varSvcErr, FirstError.Message);
+                                                            false
+                                                        );
+                                                        If(
+                                                            varSvcErr <> "",
+                                                            Set(varSvcAliasReceipt, {Kind: "Failed", Msg: "Service name not added. " & varSvcErr, RecordId: ZeroGuid}),
+                                                            IfError(
+                                                                Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Create Service Aliases " & n, 100), Action: 'Action (Audit Events)'.Create, Entity: "Service Aliases", 'Entity ID': Text(varSvcLastAlias.'Service Alias'), Before: "", After: JSON({Alias: n, AliasType: "Service Name", Service: LookUp(colServices, ServiceId = sid).Code}), Reason: "Service alias added in AACA Billing"});
+                                                                Set(varSvcAuditOk, true),
+                                                                Set(varSvcAuditOk, false)
+                                                            );
+                                                            Set(varSvcAliasReceipt, {Kind: "Added", Msg: "Added service name " & n & " to " & LookUp(colServices, ServiceId = sid).Code & ". | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: varSvcLastAlias.'Service Alias'});
+                                                            Reset(txtSvcSnmNew);
+                                                            Select(btnSvcLoadEngine)
+                                                        );
+                                                        Set(varSvcSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Add"
+                                          Width: =88
+                              - conSvcSnmNotice:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Fill: |-
+                                      =With({n: NormAlias(txtSvcSnmNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "Service Name")}, If(n = "" || IsBlank(hit), ColorWhite, ColorWarnBg)))
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingLeft: =8
+                                    PaddingRight: =8
+                                    RadiusBottomLeft: =6
+                                    RadiusBottomRight: =6
+                                    RadiusTopLeft: =6
+                                    RadiusTopRight: =6
+                                  Children:
+                                    - lblSvcSnmNotice:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =40
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =13
+                                          Text: |-
+                                            =With({n: NormAlias(txtSvcSnmNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "Service Name")}, If(n = "", "Type a service name, then select Add.", IsBlank(hit), "Will be saved as " & n, hit.ServiceId = varSvcSelId, "Already mapped to this service.", "Already mapped to " & LookUp(colServices, ServiceId = hit.ServiceId).Code & ". Select Move it here to map it to this service instead.")))
+                                    - btnSvcSnmMove:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Move service name to this service"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(varSvcSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: |-
+                                            =With(
+                                                {n: NormAlias(txtSvcSnmNew.Text), sid: varSvcSelId},
+                                                With(
+                                                    {hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "Service Name" && ServiceId <> sid)},
+                                                    With(
+                                                        {hid: hit.AliasId, fromCode: LookUp(colServices, ServiceId = hit.ServiceId).Code, toCode: LookUp(colServices, ServiceId = sid).Code},
+                                                        If(
+                                                            !IsBlank(hid) && n <> "" && !IsBlank(sid) && !varSvcSaving && IsFinance,
+                                                            Set(varSvcSaving, true);
+                                                            Set(varSvcErr, "");
+                                                            IfError(
+                                                                Set(varSvcLastAlias, Patch('Service Aliases', LookUp('Service Aliases', 'Service Alias' = hid), {Service: LookUp(Services, Service = sid)}));
+                                                                true,
+                                                                Set(varSvcErr, FirstError.Message);
+                                                                false
+                                                            );
+                                                            If(
+                                                                varSvcErr <> "",
+                                                                Set(varSvcAliasReceipt, {Kind: "Failed", Msg: "Service name not moved. " & varSvcErr, RecordId: hid}),
+                                                                IfError(
+                                                                    Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Update Service Aliases " & n, 100), Action: 'Action (Audit Events)'.Update, Entity: "Service Aliases", 'Entity ID': Text(hid), Before: JSON({Alias: n, AliasType: "Service Name", Service: fromCode}), After: JSON({Alias: n, AliasType: "Service Name", Service: toCode}), Reason: "Service alias moved in AACA Billing"});
+                                                                    Set(varSvcAuditOk, true),
+                                                                    Set(varSvcAuditOk, false)
+                                                                );
+                                                                Set(varSvcAliasReceipt, {Kind: "Moved", Msg: "Moved service name " & n & " from " & fromCode & " to " & toCode & ". | Audit " & If(varSvcAuditOk, "written", "FAILED - tell Adam"), RecordId: hid});
+                                                                Reset(txtSvcSnmNew);
+                                                                Select(btnSvcLoadEngine)
+                                                            );
+                                                            Set(varSvcSaving, false)
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: ="Move it here"
+                                          Visible: |-
+                                            =With({n: NormAlias(txtSvcSnmNew.Text)}, With({hit: LookUp(colServiceAliases, AliasText = n && AliasTypeText = "Service Name")}, !IsBlank(hit) && hit.ServiceId <> varSvcSelId))
+                                          Width: =120
+                              - galSvcSnm:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Service names for this service"
+                                    FillPortions: =0
+                                    Height: =176
+                                    Items: =Sort(Filter(colServiceAliases, ServiceId = varSvcSelId && AliasTypeText = "Service Name"), AliasText)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =52
+                                  Children:
+                                    - conSvcSnmRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =ColorWhite
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          PaddingBottom: =4
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =4
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblSvcSnmRowText:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: ="Service name " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Color: =ColorInk
+                                                FillPortions: =1
+                                                Height: =40
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =13
+                                                Text: =ThisItem.AliasText
+                                          - btnSvcSnmRowRemove:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Remove service name " & ThisItem.AliasText
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                OnSelect: =Set(varSvcAliasDelId, ThisItem.AliasId)
+                                                Size: =14
+                                                Text: ="Remove"
+                                                Width: =88
+            - btnSvcLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varSvcLoading, true);
+                    Set(varSvcLoadError, "");
+                    If(
+                        !IsFinance,
+                        Clear(colServices); Clear(colServiceAliases),
+                        IfError(
+                            Refresh(Services); Refresh('Service Aliases');
+                            Concurrent(
+                                ClearCollect(colServices, ForAll(Services As s, {ServiceId: s.Service, Code: Coalesce(s.'Service Code', ""), Name: Coalesce(s.Name, ""), KindText: Coalesce(Text(s.Kind), ""), KindRank: If(Text(s.Kind) = "School Day", 1, 2), UnitText: Coalesce(Text(s.'Billing Unit'), ""), QboItem: Coalesce(s.'QuickBooks Item', ""), SortNum: s.'Sort Order', IsBillable: Coalesce(s.Billable, false), NonSchool: Coalesce(s.'Billable on Non-School Days', false), IsActive: Coalesce(s.Active, false)})),
+                                ClearCollect(colServiceAliases, ForAll('Service Aliases' As a, {AliasId: a.'Service Alias', AliasText: Coalesce(a.Alias, ""), AliasTypeText: Coalesce(Text(a.'Alias Type'), ""), ServiceId: a.Service.Service}))
+                            );
+                            true,
+                            Set(varSvcLoadError, FirstError.Message);
+                            false
+                        )
+                    );
+                    Set(varSvcLoading, false)
+                  Text: ="load"
+                  Visible: =false
+            - btnSvcFormResetEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: =Reset(txtSvcCode); Reset(txtSvcName); Reset(rdoSvcKind); Reset(rdoSvcUnit); Reset(txtSvcQbo); Reset(txtSvcSort); Reset(tglSvcBillable); Reset(tglSvcNonSchool); Reset(tglSvcActive); Reset(txtSvcCptNew); Reset(txtSvcSnmNew)
+                  Text: ="reset"
+                  Visible: =false

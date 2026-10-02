@@ -14,7 +14,8 @@ Transformation rules (see docs/architecture.md, AACA rules confirmed 2026-09-29)
 - One Enrollments (roster) row = one continuous enrollment. No splitting at quarters, ESY or school-year boundaries.
   A new row exists only for a transfer or IEP ratio change. End reasons: next row with a different teacher/campus =
   Transfer; different ratio only = Ratio Change; End Date with no following row = Archived (student archived).
-- Student status is derived: an open enrollment = Active, otherwise Archived.
+- Student status is derived: an open enrollment = Active, otherwise Archived. RC- (Regional Center Only) students have
+  no enrollment; their status comes from the sheet (blank = Active).
 - Attendance keeps the teacher from the sheet as the historical snapshot and links to the enrollment covering the date.
   Rows on weekends or Closed / Work Only days are skipped as clerical errors and listed in the report.
 """
@@ -33,6 +34,7 @@ ROLE_VALUES = {"Teacher": 582100000, "Attendance Office": 582100001, "Read-only"
 RATIO_VALUES = {"No Aide": 582100000, "1:1": 582100001, "2:1": 582100002, "3:1": 582100003, "4:1": 582100004}
 GRADE_VALUES = {g: 582100000 + i for i, g in enumerate(["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "12+"])}
 STUDENT_STATUS = {"Active": 582100000, "Inactive": 582100001, "Archived": 582100002}
+TYPE_SCHOOL, TYPE_RC_ONLY = 582100000, 582100001  # Student Type
 TERM_VALUES = {"Q1": 582100000, "Q2": 582100001, "Q3": 582100002, "Q4": 582100003, "ESY": 582100004}
 # Calendar Exception Type: Closed -> Closure, Work Only -> Staff Development (labels to be renamed to match), Make-up
 DAYTYPE_VALUES = {"Closed": 582100003, "Work Only": 582100002, "Make-up School Day": 582100004}
@@ -154,7 +156,9 @@ def build(path: Path, today: dt.date):
             rep.warn("Students sharing a name (kept separate by key)", f"{last}, {first}: keys {name_seen[nm]} and {key}")
         name_seen[nm] = key
         students[key] = {"key": key, "last": last, "first": first, "display": f"{last}, {first}",
-                         "dob": as_date(r.get("Date of Birth")), "grade": GRADE_VALUES.get(grade), "statusGiven": status or None}
+                         "dob": as_date(r.get("Date of Birth")), "grade": GRADE_VALUES.get(grade), "statusGiven": status or None,
+                         # RC- keys = Regional Center Only students: services outside school, no enrollment or attendance.
+                         "type": TYPE_RC_ONLY if key.upper().startswith("RC-") else TYPE_SCHOOL}
 
     # ---------------- Quarters -> Terms, School Years, periods ----------------
     terms = []
@@ -384,6 +388,12 @@ def build(path: Path, today: dt.date):
 
     # ---------------- Student status ----------------
     for key, st in students.items():
+        if st["type"] == TYPE_RC_ONLY:
+            if any(seg["key"] == key for seg in segments):
+                rep.error(f"{key} {st['display']}: Regional Center Only (RC-) students cannot have roster rows")
+            # No enrollment by design: status comes from the sheet (blank = Active).
+            st["status"] = STUDENT_STATUS[st["statusGiven"] or "Active"]
+            continue
         open_now = any(seg["key"] == key and (seg["end"] is None or seg["end"] >= today) for seg in segments)
         # AACA rule: an enrollment end date with no following enrollment means the student is archived.
         derived = "Active" if open_now else "Archived"

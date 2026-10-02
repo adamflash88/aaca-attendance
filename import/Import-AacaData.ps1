@@ -151,6 +151,7 @@ Step "Students ($($plan.students.Count))"
 $targets = [System.Collections.Generic.List[object]]::new()
 foreach ($s in $plan.students) {
     $row = @{ aaca_displayname = $s.display; aaca_firstname = $s.first; aaca_lastname = $s.last; aaca_externalclientid = $s.key; aaca_status = [int]$s.status }
+    if ($s.PSObject.Properties['type']) { $row.aaca_studenttype = [int]$s.type }
     if ($s.dob -and "$($s.dob)" -ne 'None') { $row.aaca_dateofbirth = D $s.dob }
     if ($s.grade) { $row.aaca_grade = [int]$s.grade }
     if ($s.status -eq 582100002) { $row.aaca_archivedon = $today.ToString('yyyy-MM-dd'); $row['aaca_archivedby@odata.bind'] = "/systemusers($me)" }
