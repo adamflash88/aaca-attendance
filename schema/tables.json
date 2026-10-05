@@ -255,6 +255,397 @@
           ],
           "default": 582100000,
           "description": "Regional Center Only students receive services outside school (RC- keys); they have no enrollment or attendance. Blank = School."
+        },
+        {
+          "logicalName": "aaca_middlename",
+          "type": "text",
+          "displayName": "Middle Name",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_gender",
+          "type": "choice",
+          "displayName": "Gender",
+          "options": [
+            [
+              582100000,
+              "Male"
+            ],
+            [
+              582100001,
+              "Female"
+            ],
+            [
+              582100002,
+              "Non-binary"
+            ],
+            [
+              582100003,
+              "Not specified"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_ethnicity",
+          "type": "choice",
+          "displayName": "Ethnicity",
+          "description": "CALPADS categories.",
+          "options": [
+            [
+              582100000,
+              "Hispanic or Latino"
+            ],
+            [
+              582100001,
+              "American Indian or Alaska Native"
+            ],
+            [
+              582100002,
+              "Asian"
+            ],
+            [
+              582100003,
+              "Black or African American"
+            ],
+            [
+              582100004,
+              "Filipino"
+            ],
+            [
+              582100005,
+              "Native Hawaiian or Pacific Islander"
+            ],
+            [
+              582100006,
+              "White"
+            ],
+            [
+              582100007,
+              "Two or More Races"
+            ],
+            [
+              582100008,
+              "Declined to State"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_preferredcontact",
+          "type": "choice",
+          "displayName": "Preferred Method of Contact",
+          "options": [
+            [
+              582100000,
+              "Any"
+            ],
+            [
+              582100001,
+              "Email"
+            ],
+            [
+              582100002,
+              "Phone"
+            ],
+            [
+              582100003,
+              "Text message"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_addresstype",
+          "type": "choice",
+          "displayName": "Address Type",
+          "options": [
+            [
+              582100000,
+              "Home"
+            ],
+            [
+              582100001,
+              "Mailing"
+            ],
+            [
+              582100002,
+              "Other"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_street",
+          "type": "text",
+          "displayName": "Street Address",
+          "maxLength": 200
+        },
+        {
+          "logicalName": "aaca_unit",
+          "type": "text",
+          "displayName": "Unit",
+          "maxLength": 50
+        },
+        {
+          "logicalName": "aaca_city",
+          "type": "text",
+          "displayName": "City",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_state",
+          "type": "text",
+          "displayName": "State",
+          "maxLength": 20
+        },
+        {
+          "logicalName": "aaca_zip",
+          "type": "text",
+          "displayName": "ZIP",
+          "maxLength": 20
+        },
+        {
+          "logicalName": "aaca_allergies",
+          "type": "memo",
+          "displayName": "Allergies",
+          "maxLength": 2000
+        },
+        {
+          "logicalName": "aaca_dietaryrestrictions",
+          "type": "memo",
+          "displayName": "Dietary Restrictions",
+          "maxLength": 2000
+        },
+        {
+          "logicalName": "aaca_medicalreleaseonfile",
+          "type": "bool",
+          "displayName": "Medical Release on File",
+          "default": false
+        },
+        {
+          "logicalName": "aaca_nextgrade",
+          "type": "choice",
+          "displayName": "Next Grade Assignment",
+          "options": [
+            [
+              582100000,
+              "K"
+            ],
+            [
+              582100001,
+              "1"
+            ],
+            [
+              582100002,
+              "2"
+            ],
+            [
+              582100003,
+              "3"
+            ],
+            [
+              582100004,
+              "4"
+            ],
+            [
+              582100005,
+              "5"
+            ],
+            [
+              582100006,
+              "6"
+            ],
+            [
+              582100007,
+              "7"
+            ],
+            [
+              582100008,
+              "8"
+            ],
+            [
+              582100009,
+              "9"
+            ],
+            [
+              582100010,
+              "10"
+            ],
+            [
+              582100011,
+              "11"
+            ],
+            [
+              582100012,
+              "12"
+            ],
+            [
+              582100013,
+              "12+"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_ieptype",
+          "type": "choice",
+          "displayName": "IEP Type",
+          "options": [
+            [
+              582100000,
+              "Initial"
+            ],
+            [
+              582100001,
+              "Annual"
+            ],
+            [
+              582100002,
+              "Triennial"
+            ],
+            [
+              582100003,
+              "Amendment"
+            ],
+            [
+              582100004,
+              "30-Day Interim"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_iepdate",
+          "type": "date",
+          "displayName": "Current Active IEP Date"
+        },
+        {
+          "logicalName": "aaca_enrollmentformsonfile",
+          "type": "bool",
+          "displayName": "Current Year Enrollment Forms on File",
+          "default": false
+        },
+        {
+          "logicalName": "aaca_spedqualifier",
+          "type": "choice",
+          "displayName": "SPED Qualifier",
+          "description": "California special education eligibility category.",
+          "options": [
+            [
+              582100000,
+              "Autism"
+            ],
+            [
+              582100001,
+              "Intellectual Disability"
+            ],
+            [
+              582100002,
+              "Speech or Language Impairment"
+            ],
+            [
+              582100003,
+              "Other Health Impairment"
+            ],
+            [
+              582100004,
+              "Emotional Disturbance"
+            ],
+            [
+              582100005,
+              "Specific Learning Disability"
+            ],
+            [
+              582100006,
+              "Multiple Disabilities"
+            ],
+            [
+              582100007,
+              "Orthopedic Impairment"
+            ],
+            [
+              582100008,
+              "Hard of Hearing"
+            ],
+            [
+              582100009,
+              "Deaf"
+            ],
+            [
+              582100010,
+              "Visual Impairment"
+            ],
+            [
+              582100011,
+              "Deaf-Blindness"
+            ],
+            [
+              582100012,
+              "Traumatic Brain Injury"
+            ],
+            [
+              582100013,
+              "Established Medical Disability"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_districtrepname",
+          "type": "text",
+          "displayName": "District Rep Name",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_cbirelease",
+          "type": "choice",
+          "displayName": "CBI Release Type",
+          "description": "Community-based instruction release.",
+          "options": [
+            [
+              582100000,
+              "Full"
+            ],
+            [
+              582100001,
+              "Limited"
+            ],
+            [
+              582100002,
+              "None"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_mediarelease",
+          "type": "choice",
+          "displayName": "Media Release Type",
+          "options": [
+            [
+              582100000,
+              "Full"
+            ],
+            [
+              582100001,
+              "Limited"
+            ],
+            [
+              582100002,
+              "None"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_transportation",
+          "type": "bool",
+          "displayName": "Transportation Services",
+          "default": false
+        },
+        {
+          "logicalName": "aaca_transportcompany",
+          "type": "text",
+          "displayName": "Transportation Company",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_transportphone",
+          "type": "text",
+          "displayName": "Transportation Phone",
+          "maxLength": 30
         }
       ],
       "keys": [
@@ -1074,10 +1465,10 @@
       "logicalName": "aaca_guardianlink",
       "displayName": "Guardian Link",
       "pluralName": "Guardian Links",
-      "description": "Family portal: links a parent or guardian (Contact) to one student. Only linked, active guardians see the student in the portal. Owned by the student's campus team.",
+      "description": "Family portal: links a parent or guardian (Contact) to one student. Only linked, active guardians see the student in the portal. Owned by the student's campus team. Name = the guardian's display name (e.g. 'Jose Lopez'), shown to co-guardians instead of their contact details.",
       "primaryName": {
         "logicalName": "aaca_name",
-        "displayName": "Name",
+        "displayName": "Guardian Name",
         "maxLength": 200
       },
       "columns": [
@@ -1196,6 +1587,69 @@
           "logicalName": "aaca_processedon",
           "type": "datetime",
           "displayName": "Processed On"
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_emergencycontact",
+      "displayName": "Emergency Contact",
+      "pluralName": "Emergency Contacts",
+      "description": "A student's emergency contact (up to 3, by priority). Shown read-only to the student's guardians in the family portal.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Name",
+        "maxLength": 100
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_relationship",
+          "type": "text",
+          "displayName": "Relationship",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_phone",
+          "type": "text",
+          "displayName": "Phone",
+          "maxLength": 30,
+          "required": true
+        },
+        {
+          "logicalName": "aaca_priority",
+          "type": "int",
+          "displayName": "Priority",
+          "min": 1,
+          "max": 9
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_studentmedication",
+      "displayName": "Student Medication",
+      "pluralName": "Student Medications",
+      "description": "A medication a student takes. Shown read-only to the student's guardians in the family portal.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Medication",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_dosage",
+          "type": "text",
+          "displayName": "Dosage",
+          "maxLength": 100
+        },
+        {
+          "logicalName": "aaca_frequency",
+          "type": "text",
+          "displayName": "Frequency",
+          "maxLength": 200
+        },
+        {
+          "logicalName": "aaca_sortorder",
+          "type": "int",
+          "displayName": "Sort Order"
         }
       ]
     },
@@ -1968,6 +2422,36 @@
       "logicalName": "aaca_processedby",
       "displayName": "Processed By",
       "target": "systemuser"
+    },
+    {
+      "table": "aaca_student",
+      "logicalName": "aaca_casemanager",
+      "displayName": "Case Manager",
+      "target": "aaca_staff",
+      "onDelete": "RemoveLink"
+    },
+    {
+      "table": "aaca_student",
+      "logicalName": "aaca_enrollmentyear",
+      "displayName": "Enrollment Year",
+      "target": "aaca_schoolyear",
+      "onDelete": "RemoveLink"
+    },
+    {
+      "table": "aaca_emergencycontact",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student",
+      "required": true,
+      "onDelete": "Cascade"
+    },
+    {
+      "table": "aaca_studentmedication",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student",
+      "required": true,
+      "onDelete": "Cascade"
     },
     {
       "table": "aaca_funderalias",

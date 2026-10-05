@@ -58,6 +58,62 @@ billable-notice rule (notice < 24h before 9:00am PT school start, or none = bill
 1. Branding (logo, colours from autismacademy.org) and site name.
 2. Enrollment web app: where it stores parent emails (Dataverse table? SharePoint? other) for the import.
 
+## Student profile (added 2026-10-05, PROPOSED - awaiting Adam's review)
+
+Parents get a **read-only child profile** per linked child (staff maintain it). Reference: Adam's old model-driven
+"Student" contact form (tabs: Student Information, Contact Information, Guardian Information, Medical,
+Administrative). Decisions: parents see **everything** on it (incl. SPED qualifier, case manager, district rep,
+aide ratio, CBI release); mask exemption dropped; co-guardians see each other's **name + relationship only**;
+staff edit in a new model-driven app **"AACA Student Records"**; initial data via a **CSV template** Adam fills in.
+
+### Schema
+
+New columns on `aaca_student` (one row per student; teachers already read it, which is useful for allergies):
+
+| Column | Type | Notes |
+|---|---|---|
+| `aaca_middlename` | text 100 | |
+| `aaca_gender` | choice | Male, Female, Non-binary, Not specified |
+| `aaca_ethnicity` | choice | CALPADS: Hispanic or Latino, American Indian or Alaska Native, Asian, Black or African American, Filipino, Native Hawaiian or Pacific Islander, White, Two or More Races, Declined to State |
+| `aaca_preferredcontact` | choice | Any, Email, Phone, Text message |
+| `aaca_addresstype` | choice | Home, Mailing, Other |
+| `aaca_street`, `aaca_unit`, `aaca_city`, `aaca_state`, `aaca_zip` | text | home address |
+| `aaca_allergies`, `aaca_dietaryrestrictions` | memo 2000 | |
+| `aaca_medicalreleaseonfile` | bool | |
+| `aaca_nextgrade` | choice | same values as Grade |
+| `aaca_ieptype` | choice | Initial, Annual, Triennial, Amendment, 30-Day Interim |
+| `aaca_iepdate` | date | Current active IEP date |
+| `aaca_enrollmentformsonfile` | bool | Current year enrollment forms on file |
+| `aaca_spedqualifier` | choice | Autism, Intellectual Disability, Speech or Language Impairment, Other Health Impairment, Emotional Disturbance, Specific Learning Disability, Multiple Disabilities, Orthopedic Impairment, Hard of Hearing, Deaf, Visual Impairment, Deaf-Blindness, Traumatic Brain Injury, Established Medical Disability |
+| `aaca_casemanager` -> `aaca_staff` | lookup | |
+| `aaca_districtrepname` | text 100 | |
+| `aaca_enrollmentyear` -> `aaca_schoolyear` | lookup | |
+| `aaca_cbirelease`, `aaca_mediarelease` | choice | Full, Limited, None |
+| `aaca_transportation` | bool | Transportation services |
+| `aaca_transportcompany`, `aaca_transportphone` | text | |
+
+Already in the schema (not duplicated): first/last name, DOB (age computed in the portal), grade, campus + aide
+ratio (active enrollment), school district (current District of Record).
+
+New tables (owned by the campus team, like students):
+- `aaca_emergencycontact`: student, name, relationship, phone, priority (1-3).
+- `aaca_studentmedication`: student, medication, dosage, frequency/time, sort order.
+
+Guardians: existing `aaca_guardianlink` + `contact`. The link's name holds the guardian's display name (e.g.
+"Jose Lopez") so a co-guardian is shown from the link (name + relationship) without exposing their contact row;
+the signed-in guardian's own details (email, phone, address) come from their own contact (self scope).
+
+Deferred (later cards): student photo (image column), report cards & transcripts (documents), behavior services.
+
+### Portal
+Dashboard child chips become child cards -> `/children/:id` profile: sticky section links (Overview, Home &
+emergency, Guardians, Health, School & services), stacked panels, "Something wrong? Contact your campus office".
+
+### Permissions (Guardian web role, read only)
+student, emergency contact, medication, enrollment (campus/ratio), District of Record: parental via guardian
+link. Other guardians' links: parental via student (fields: name, relationship). Own contact: self.
+Reference lookups (campus, staff name, school year, funder name): global read, name column only.
+
 ## Related decisions already made (attendance app, same discussion)
 
 - Absences tab + new Transportation tab (daily: both ways / to only / from only / none; pre-filled from

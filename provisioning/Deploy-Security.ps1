@@ -54,6 +54,8 @@ Grant $m $reference 'Read', 'AppendTo' 'Global'
 Grant $m 'aaca_student', 'aaca_enrollment' 'Read', 'AppendTo' 'Local'
 Grant $m 'aaca_attendance' 'Read' 'Local'
 Grant $m 'aaca_attendance' 'Create', 'Write', 'Append' 'Basic'
+# Student profile: teachers see emergency contacts and medications for their campus (safety).
+Grant $m 'aaca_emergencycontact', 'aaca_studentmedication' 'Read' 'Local'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Basic'
 $roles['AACA Teacher'] = @{ Description = 'Marks students present (1) and undoes own marks; views campus attendance.'; Matrix = $m }
 
@@ -71,6 +73,8 @@ Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Append' 'Local'
 # guardians are. Guardian onboarding (creating links) is a later phase.
 Grant $m 'aaca_absencenotice' 'Read', 'Write', 'Append' 'Local'
 Grant $m 'aaca_guardianlink' 'Read' 'Local'
+# Student profile (AACA Student Records app): office maintains emergency contacts and medications.
+Grant $m 'aaca_emergencycontact', 'aaca_studentmedication' 'Create', 'Read', 'Write', 'Delete', 'Append', 'Assign' 'Local'
 Grant $m 'aaca_auditevent' 'Create', 'Read' 'Local'
 $roles['AACA Attendance Office'] = @{ Description = 'Campus office: students, assignments, ratios, parent-report approval and absence classification, month locks.'; Matrix = $m }
 
@@ -99,7 +103,7 @@ $roles['AACA Finance'] = @{ Description = 'Billing: CodeMetro uploads, mappings,
 $m = @{}
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Read', 'AppendTo' 'Basic'
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Append' 'Basic'
-Grant $m 'aaca_guardianlink', 'aaca_absencenotice' 'Read', 'Append' 'Basic'
+Grant $m 'aaca_guardianlink', 'aaca_absencenotice', 'aaca_emergencycontact', 'aaca_studentmedication' 'Read', 'Append' 'Basic'
 Grant $m $reference 'Read', 'AppendTo' 'Global'
 $roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments, attendance and family-portal records.'; Matrix = $m }
 #endregion
