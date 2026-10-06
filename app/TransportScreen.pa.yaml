@@ -1,0 +1,1932 @@
+Screens:
+  TransportScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varTrnSaving, false);
+        Set(varTrnLoading, false);
+        Set(varTrnStuMode, "");
+        Set(varTrnSelStId, Blank());
+        Set(varTrnReceipt, {Kind: "", Title: ""});
+        Clear(colTrnReceiptLines);
+        If(varTrnView <> "students", Set(varTrnView, "daily"));
+        If(StudentCampusLock <> ZeroGuid, Set(varTrnCampusId, StudentCampusLock));
+        Set(varTrnDate, Today());
+        ClearCollect(colTrnCampusOpts, ForAll(Sort(Campuses, Name, SortOrder.Ascending) As c, {CampusId: c.Campus, CampusName: c.Name}));
+        If(varTrnCampusId = ZeroGuid, Set(varTrnCampusId, Coalesce(First(colTrnCampusOpts).CampusId, ZeroGuid)));
+        Select(btnTrnStuLoadEngine);
+        Select(btnTrnLoadEngine);
+        Select(btnTrnBannerEngine)
+    Children:
+      - conTrnRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =8
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conTrnHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 100, 48), 0) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =If(CanClassify, 0, 12)
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblTrnTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Attendance"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Attendance"
+                        Wrap: =false
+                  - lblTrnIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conTrnRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =Coalesce(CurrentUserRow.'Full Name', User().FullName) & " · " & RoleLabel & " · " & If(!StaffReady, "no campus", IsBlank(CurrentStaff.Campus), "All campuses", CurrentStaff.Campus.Name)
+                        VerticalAlign: =VerticalAlign.Top
+                  - conTrnNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conTrnRoot.Width < 640, 96, 44) + If(CanClassify, 8, 0)
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanManageStudents
+                      Children:
+                        - btnTrnNavAttendance:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Attendance"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(Screen1)
+                              Size: =14
+                              Text: ="Attendance"
+                              Width: =110
+                        - btnTrnNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnTrnNavAbsences:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Absences"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(AbsencesScreen)
+                              Size: =14
+                              Text: ="Absences"
+                              Width: =110
+                        - btnTrnNavTransport:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Transportation (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(TransportScreen)
+                              Size: =14
+                              Text: ="Transportation"
+                              Visible: =CanClassify
+                              Width: =140
+                  - conTrnHdrTabs:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorPaper
+                        FillPortions: =0
+                        Height: =If(conTrnRoot.Width < 640, 112, 60)
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                        PaddingBottom: =8
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =8
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanClassify
+                      Children:
+                        - btnTrnHdrDaily:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Daily confirmation" & If(varTrnView = "daily", " (current view)", "")
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =If(varTrnView = "daily", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                              BasePaletteColor: =ColorTeal
+                              Color: =If(varTrnView = "daily", ColorWhite, ColorInk)
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Set(varTrnView, "daily"); Select(btnTrnLoadEngine); Select(btnTrnBannerEngine)
+                              Size: =14
+                              Text: ="Daily"
+                              Width: =130
+                        - btnTrnHdrStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Students with transportation" & If(varTrnView = "students", " (current view)", "")
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =If(varTrnView = "students", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                              BasePaletteColor: =ColorTeal
+                              Color: =If(varTrnView = "students", ColorWhite, ColorInk)
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Set(varTrnView, "students")
+                              Size: =14
+                              Text: ="Students"
+                              Width: =130
+                        - lblTrnCampus:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Campus"
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Campus"
+                              Width: =56
+                              Wrap: =false
+                        - ddTrnCampus:
+                            Control: ModernDropdown
+                            Properties:
+                              AccessibleLabel: ="Campus"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =Appearance.Outline
+                              Color: =ColorInk
+                              Default: =LookUp(colTrnCampusOpts, CampusId = varTrnCampusId)
+                              DisplayMode: =If(StudentCampusLock = ZeroGuid && !varTrnLoading && !varTrnSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                              Height: =36
+                              ItemDisplayText: =ThisItem.CampusName
+                              Items: =colTrnCampusOpts
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnChange: |-
+                                =Set(varTrnCampusId, Coalesce(Self.Selected.CampusId, ZeroGuid));
+                                Set(varTrnStuMode, "");
+                                Set(varTrnSelStId, Blank());
+                                Select(btnTrnStuLoadEngine);
+                                Select(btnTrnLoadEngine);
+                                Select(btnTrnBannerEngine)
+                              Width: =220
+            - conTrnDenied:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + If(conTrnRoot.Width < 640, 48, 24) + 8 + If(conTrnRoot.Width < 640, 112, 48) + 8 + 44 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!CanClassify
+                Children:
+                  - lblTrnDeniedTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="Transportation is not available for your role"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =If(conTrnRoot.Width < 640, 48, 24)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="Transportation is not available for your role"
+                        VerticalAlign: =VerticalAlign.Top
+                  - lblTrnDeniedBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =If(conTrnRoot.Width < 640, 112, 48)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask a System Admin to set you up.", "Only the Attendance Office and System Admin roles manage transportation. Teachers and Read-only users record and view attendance on the Attendance screen.")
+                        VerticalAlign: =VerticalAlign.Top
+                  - btnTrnDeniedBack:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Back to Attendance"
+                        AlignInContainer: =AlignInContainer.Start
+                        Appearance: =ButtonAppearance.Secondary
+                        Color: =ColorInk
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Navigate(Screen1)
+                        Size: =14
+                        Text: ="Back to Attendance"
+                        Width: =190
+            - conTrnBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conTrnReceipt.Visible, conTrnReceipt.Height + 8, 0) + If(conTrnDailyView.Visible, conTrnDailyView.Height, 0) + If(conTrnStuView.Visible, conTrnStuView.Height, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =CanClassify
+                Children:
+                  - conTrnReceipt:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =Switch(varTrnReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, ColorInfoBg)
+                        FillPortions: =0
+                        Height: =8 + If(conTrnRoot.Width < 640, 84, 44) + If(CountRows(colTrnReceiptLines) > 0, 4 + galTrnReceipt.Height, 0) + 8
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =8
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =varTrnReceipt.Kind <> ""
+                      Children:
+                        - conTrnReceiptTop:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conTrnRoot.Width < 640, 84, 44)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblTrnReceiptTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =varTrnReceipt.Title
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conTrnRoot.Width < 640, 84, 44)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: =varTrnReceipt.Title
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnTrnReceiptClose:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Close result"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varTrnReceipt, {Kind: "", Title: ""}); Clear(colTrnReceiptLines)
+                                    Size: =14
+                                    Text: ="Close"
+                                    Width: =88
+                        - galTrnReceipt:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Transportation result details"
+                              FillPortions: =0
+                              Height: =Min(400, RoundUp(CountRows(colTrnReceiptLines) / If(conTrnRoot.Width < 640, 1, conTrnRoot.Width < 1024, 2, 3), 0) * 40)
+                              Items: =colTrnReceiptLines
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =40
+                              Visible: =CountRows(colTrnReceiptLines) > 0
+                              WrapCount: =If(conTrnRoot.Width < 640, 1, conTrnRoot.Width < 1024, 2, 3)
+                            Children:
+                              - conTrnRcptRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    PaddingBottom: =2
+                                    PaddingRight: =8
+                                    PaddingTop: =2
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - lblTrnRcptLabel:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =ThisItem.Label
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.Label
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =120
+                                    - lblTrnRcptValue:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =ThisItem.Label & " " & ThisItem.Value
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.Value
+                                          VerticalAlign: =VerticalAlign.Top
+                  - conTrnDailyView:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =conTrnBanner.Height + 8 + conTrnDayPanel.Height
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanClassify && varTrnView = "daily"
+                      Children:
+                        - conTrnBanner:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =If(CountRows(Filter(colTrnDays, Missing > 0)) > 0, ColorWarnBg, ColorInfoBg)
+                              FillPortions: =0
+                              Height: =12 + If(conTrnRoot.Width < 640, 44, 24) + 4 + 18 + If(CountRows(Filter(colTrnDays, Missing > 0)) > 0, 4 + 44, 0) + 12
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =12
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =12
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                            Children:
+                              - lblTrnBannerTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conTrnRoot.Width < 640, 44, 24)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =16
+                                    Text: |-
+                                      =With(
+                                          {k: CountRows(Filter(colTrnDays, Missing > 0)), t: CountRows(colTrnDays), cn: LookUp(colTrnCampusOpts, CampusId = varTrnCampusId).CampusName},
+                                          If(
+                                              t = 0, "No school days in the last 4 weeks at " & cn & ".",
+                                              k = 0, "All of the last " & t & " school days are confirmed at " & cn & ".",
+                                              k & " school day" & If(k = 1, "", "s") & " not confirmed · last " & t & " school days at " & cn
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - lblTrnDeadline:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Confirm each school day by the end of the day."
+                                    Wrap: =false
+                              - galTrnBannerDays:
+                                  Control: Gallery
+                                  Variant: Horizontal
+                                  Properties:
+                                    AccessibleLabel: ="School days not confirmed"
+                                    FillPortions: =0
+                                    Height: =44
+                                    Items: =Filter(colTrnDays, Missing > 0)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =148
+                                    Visible: =CountRows(Filter(colTrnDays, Missing > 0)) > 0
+                                  Children:
+                                    - btnTrnBannerDay:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: =Concatenate("Open ", Text(ThisItem.D, "dddd mmmm d"), ", ", Text(ThisItem.Missing), " not confirmed")
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varTrnLoading || varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          OnSelect: =Set(varTrnDate, ThisItem.D); Reset(dpTrnDate); Select(btnTrnLoadEngine)
+                                          Size: =14
+                                          Text: =Text(ThisItem.D, "ddd m/d") & " (" & ThisItem.Missing & ")"
+                                          Width: =Parent.TemplateWidth - 8
+                        - conTrnDayPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =0
+                              Height: =16 + 44 + 8 + 58 + 8 + If(conTrnRoot.Width < 640, 54, 36) + 8 + If(conTrnRoot.Width < 640, 88, 44) + If(CountRows(colTrnDaily) > 0, 8 + galTrnDayList.Height, 0) + 16
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                            Children:
+                              - conTrnDayHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblTrnDayTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Daily confirmation"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =120
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =20
+                                          Text: ="Daily confirmation"
+                                          Wrap: =false
+                                    - btnTrnReload:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Reload transportation data"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varTrnLoading || varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Select(btnTrnStuLoadEngine); Select(btnTrnLoadEngine); Select(btnTrnBannerEngine)
+                                          Size: =14
+                                          Text: ="Reload"
+                                          Width: =80
+                              - conTrnDateField:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    AlignInContainer: =AlignInContainer.Start
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =58
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Width: =240
+                                  Children:
+                                    - lblTrnDate:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: ="Date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Date"
+                                          Wrap: =false
+                                    - dpTrnDate:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: ="Date to confirm"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =varTrnDate
+                                          DisplayMode: =If(varTrnLoading || varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =Today()
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varTrnDate, Self.SelectedDate); Select(btnTrnLoadEngine)
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                              - lblTrnDayCount:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(varTrnLoadError <> "", ColorUnexcused, ColorInk)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conTrnRoot.Width < 640, 54, 36)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {n: CountRows(colTrnDaily), ok: CountRows(Filter(colTrnDaily, LogId <> ZeroGuid)), cn: LookUp(colTrnCampusOpts, CampusId = varTrnCampusId).CampusName},
+                                          If(
+                                              varTrnLoading, "Loading...",
+                                              varTrnLoadError <> "", "Could not load: " & varTrnLoadError & ". Use Reload to try again.",
+                                              !varTrnIsSchoolDay, "Not a school day at " & cn & " - " & varTrnDayReason & ". Nothing to confirm.",
+                                              n = 0, "No students with transportation at " & cn & " on " & Text(varTrnDate, "ddd mmm d, yyyy") & ".",
+                                              n & " students with transportation · " & cn & " · " & Text(varTrnDate, "ddd mmm d, yyyy") & " · " & ok & " confirmed, " & (n - ok) & " not confirmed"
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                              - conTrnConfirmRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =If(conTrnRoot.Width < 640, 88, 44)
+                                    LayoutAlignItems: =If(conTrnRoot.Width < 640, LayoutAlignItems.Stretch, LayoutAlignItems.Center)
+                                    LayoutDirection: =If(conTrnRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - btnTrnConfirm:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: =Concatenate("Confirm transportation for ", Text(varTrnDate, "dddd mmmm d"))
+                                          AlignInContainer: =If(conTrnRoot.Width < 640, AlignInContainer.Start, AlignInContainer.Center)
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && varTrnIsSchoolDay && varTrnDate <= Today() && CountRows(colTrnDaily) > 0 && CountRows(Filter(colTrnDaily, Pick = "")) = 0 && CountRows(Filter(colTrnDaily, LogId = ZeroGuid || Pick <> SavedStatus)) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =ClearCollect(colTrnWork, ForAll(Filter(colTrnDaily, Pick <> "" && (LogId = ZeroGuid || Pick <> SavedStatus)) As r, {StudentId: r.StudentId, Status: r.Pick}));
+                                            Set(varTrnReq, {Scope: "day"});
+                                            Select(btnTrnSaveEngine);
+                                            Select(btnTrnBannerEngine)
+                                          Size: =14
+                                          Text: |-
+                                            =With({k: CountRows(Filter(colTrnDaily, LogId = ZeroGuid || Pick <> SavedStatus))}, If(CountRows(colTrnDaily) > 0 && k = 0, "All confirmed", "Confirm day (" & k & ")"))
+                                          Width: =190
+                                    - lblTrnConfirmHint:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =If(conTrnRoot.Width < 640, AlignInContainer.Stretch, AlignInContainer.Center)
+                                          Color: =ColorInk
+                                          FillPortions: =If(conTrnRoot.Width < 640, 0, 1)
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: |-
+                                            =With(
+                                                {n: CountRows(colTrnDaily), b: CountRows(Filter(colTrnDaily, Pick = "")), k: CountRows(Filter(colTrnDaily, LogId = ZeroGuid || Pick <> SavedStatus))},
+                                                If(
+                                                    varTrnLoading, "",
+                                                    !varTrnIsSchoolDay, "Not a school day. Nothing to confirm.",
+                                                    n = 0, "No students to confirm.",
+                                                    b > 0, b & " row(s) still need a status: Round trip, Drop off only, Pick up only or No transportation.",
+                                                    k = 0, "Every row is confirmed. Changing a status on a row saves it straight away.",
+                                                    "Ready: " & k & " row(s) will be saved for " & Text(varTrnDate, "ddd mmm d") & "."
+                                                )
+                                            )
+                                          VerticalAlign: =VerticalAlign.Top
+                              - galTrnDayList:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: =Concatenate("Students with transportation on ", Text(varTrnDate, "dddd mmmm d"))
+                                    FillPortions: =0
+                                    Height: =Min(If(conTrnRoot.Width < 1024, 3, 7), CountRows(colTrnDaily)) * If(conTrnRoot.Width < 1024, 224, 88)
+                                    Items: =colTrnDaily
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conTrnRoot.Width < 1024, 224, 88)
+                                    Visible: =CountRows(colTrnDaily) > 0
+                                  Children:
+                                    - conTrnDayRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =ColorWhite
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =If(conTrnRoot.Width < 1024, LayoutAlignItems.Stretch, LayoutAlignItems.Center)
+                                          LayoutDirection: =If(conTrnRoot.Width < 1024, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                                          LayoutGap: =8
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - conTrnDayInfo:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                AlignInContainer: =If(conTrnRoot.Width < 1024, AlignInContainer.Stretch, AlignInContainer.Center)
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =If(conTrnRoot.Width < 1024, 0, 1)
+                                                Height: =If(conTrnRoot.Width < 1024, 102, 66)
+                                                LayoutAlignItems: =LayoutAlignItems.Stretch
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutGap: =4
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =If(conTrnRoot.Width < 1024, 0, 300)
+                                              Children:
+                                                - lblTrnDayName:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorInk
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =22
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =14
+                                                      Text: =ThisItem.StudentName & " · " & ThisItem.KeyBase
+                                                      Wrap: =false
+                                                - lblTrnDayMeta:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorInk
+                                                      Height: =If(conTrnRoot.Width < 1024, 36, 18)
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: |-
+                                                        ="Usual: " & ThisItem.Pattern & " · Attendance: " & ThisItem.AttText
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                - lblTrnDayStatus:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =If(ThisItem.LogId <> ZeroGuid, ColorTeal, ThisItem.Pick = "", ColorUnexcused, ColorMuted)
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =If(conTrnRoot.Width < 1024, 36, 18)
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: |-
+                                                        =If(
+                                                            ThisItem.LogId <> ZeroGuid,
+                                                            "Confirmed by " & If(ThisItem.ByName = "", "unknown", ThisItem.ByName) & " at " & Text(ThisItem.OnTime, "h:mm AM/PM") & If(Date(Year(ThisItem.OnTime), Month(ThisItem.OnTime), Day(ThisItem.OnTime)) <> varTrnDate, " on " & Text(ThisItem.OnTime, "m/d"), "") & " · " & ThisItem.SavedStatus,
+                                                            ThisItem.Pick = "", "Not confirmed · choose a status",
+                                                            "Not confirmed · " & ThisItem.Pick & If(ThisItem.Pick = ThisItem.Prefill, If(ThisItem.AttKind = "absent", " (pre-filled: absent)", " (pre-filled: left early)"), " (chosen, not saved)")
+                                                        )
+                                                      VerticalAlign: =VerticalAlign.Top
+                                          - conTrnDayOpts:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                AlignInContainer: =If(conTrnRoot.Width < 1024, AlignInContainer.Stretch, AlignInContainer.Center)
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =If(conTrnRoot.Width < 1024, 96, 44)
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                LayoutWrap: =true
+                                                Width: =If(conTrnRoot.Width < 1024, Parent.Width - 16, 544)
+                                              Children:
+                                                - btnTrnOptRound:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("Round trip for ", ThisItem.StudentName, If(ThisItem.Pick = "Round trip", " (selected)", ""))
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =If(ThisItem.Pick = "Round trip", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                                      BasePaletteColor: =ColorTeal
+                                                      Color: =If(ThisItem.Pick = "Round trip", ColorWhite, ColorInk)
+                                                      DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && varTrnIsSchoolDay && varTrnDate <= Today(), DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =If(
+                                                            ThisItem.LogId = ZeroGuid,
+                                                            Patch(colTrnDaily, LookUp(colTrnDaily, StudentId = ThisItem.StudentId), {Pick: "Round trip"}),
+                                                            ThisItem.SavedStatus <> "Round trip",
+                                                            ClearCollect(colTrnWork, {StudentId: ThisItem.StudentId, Status: "Round trip"});
+                                                            Set(varTrnReq, {Scope: "row"});
+                                                            Select(btnTrnSaveEngine)
+                                                        )
+                                                      Size: =14
+                                                      Text: ="Round trip"
+                                                      Width: =110
+                                                - btnTrnOptDrop:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("Drop off only for ", ThisItem.StudentName, If(ThisItem.Pick = "Drop off only", " (selected)", ""))
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =If(ThisItem.Pick = "Drop off only", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                                      BasePaletteColor: =ColorTeal
+                                                      Color: =If(ThisItem.Pick = "Drop off only", ColorWhite, ColorInk)
+                                                      DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && varTrnIsSchoolDay && varTrnDate <= Today(), DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =If(
+                                                            ThisItem.LogId = ZeroGuid,
+                                                            Patch(colTrnDaily, LookUp(colTrnDaily, StudentId = ThisItem.StudentId), {Pick: "Drop off only"}),
+                                                            ThisItem.SavedStatus <> "Drop off only",
+                                                            ClearCollect(colTrnWork, {StudentId: ThisItem.StudentId, Status: "Drop off only"});
+                                                            Set(varTrnReq, {Scope: "row"});
+                                                            Select(btnTrnSaveEngine)
+                                                        )
+                                                      Size: =14
+                                                      Text: ="Drop off only"
+                                                      Width: =130
+                                                - btnTrnOptPick:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("Pick up only for ", ThisItem.StudentName, If(ThisItem.Pick = "Pick up only", " (selected)", ""))
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =If(ThisItem.Pick = "Pick up only", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                                      BasePaletteColor: =ColorTeal
+                                                      Color: =If(ThisItem.Pick = "Pick up only", ColorWhite, ColorInk)
+                                                      DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && varTrnIsSchoolDay && varTrnDate <= Today(), DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =If(
+                                                            ThisItem.LogId = ZeroGuid,
+                                                            Patch(colTrnDaily, LookUp(colTrnDaily, StudentId = ThisItem.StudentId), {Pick: "Pick up only"}),
+                                                            ThisItem.SavedStatus <> "Pick up only",
+                                                            ClearCollect(colTrnWork, {StudentId: ThisItem.StudentId, Status: "Pick up only"});
+                                                            Set(varTrnReq, {Scope: "row"});
+                                                            Select(btnTrnSaveEngine)
+                                                        )
+                                                      Size: =14
+                                                      Text: ="Pick up only"
+                                                      Width: =120
+                                                - btnTrnOptNone:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("No transportation for ", ThisItem.StudentName, If(ThisItem.Pick = "No transportation", " (selected)", ""))
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =If(ThisItem.Pick = "No transportation", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                                      BasePaletteColor: =ColorTeal
+                                                      Color: =If(ThisItem.Pick = "No transportation", ColorWhite, ColorInk)
+                                                      DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && varTrnIsSchoolDay && varTrnDate <= Today(), DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =If(
+                                                            ThisItem.LogId = ZeroGuid,
+                                                            Patch(colTrnDaily, LookUp(colTrnDaily, StudentId = ThisItem.StudentId), {Pick: "No transportation"}),
+                                                            ThisItem.SavedStatus <> "No transportation",
+                                                            ClearCollect(colTrnWork, {StudentId: ThisItem.StudentId, Status: "No transportation"});
+                                                            Set(varTrnReq, {Scope: "row"});
+                                                            Select(btnTrnSaveEngine)
+                                                        )
+                                                      Size: =14
+                                                      Text: ="No transportation"
+                                                      Width: =160
+                  - conTrnStuView:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conTrnRoot.Width >= 1024, Max(conTrnStuListPanel.Height, conTrnStuPanel.Height), If(conTrnStuListPanel.Visible, conTrnStuListPanel.Height, 0) + If(conTrnStuListPanel.Visible && conTrnStuPanel.Visible, 8, 0) + If(conTrnStuPanel.Visible, conTrnStuPanel.Height, 0))
+                        LayoutAlignItems: =If(conTrnRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                        LayoutDirection: =If(conTrnRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanClassify && varTrnView = "students"
+                      Children:
+                        - conTrnStuListPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conTrnRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conTrnRoot.Width >= 1024, 2, 0)
+                              Height: =16 + If(conTrnRoot.Width < 640, 96, 44) + If(CountRows(Filter(colTrnStAll, varTrnShowEnded || Active)) > 0, 8 + galTrnStuList.Height, 0) + 16
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!(conTrnRoot.Width < 1024 && varTrnStuMode <> "")
+                            Children:
+                              - conTrnStuListHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =If(conTrnRoot.Width < 640, 96, 44)
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    LayoutWrap: =true
+                                  Children:
+                                    - lblTrnStuListTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =200
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: ="Students with transportation (" & CountRows(Filter(colTrnStAll, varTrnShowEnded || Active)) & ")"
+                                          Wrap: =false
+                                    - chkTrnShowEnded:
+                                        Control: ModernCheckbox
+                                        Properties:
+                                          AccessibleLabel: ="Show ended transportation"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          Default: =varTrnShowEnded
+                                          Height: =44
+                                          Label: ="Show ended"
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnCheck: =Set(varTrnShowEnded, true)
+                                          OnUncheck: =Set(varTrnShowEnded, false)
+                                          Width: =140
+                                    - btnTrnStuAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add a student to transportation"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varTrnSelStId, Blank()); Set(varTrnStuMode, "add"); Reset(cboTrnStuPick); Reset(dpTrnStuStart); Reset(rdoTrnStuPattern); Reset(txtTrnStuNote)
+                                          Size: =14
+                                          Text: ="Add student"
+                                          Width: =130
+                              - galTrnStuList:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Students with transportation"
+                                    FillPortions: =0
+                                    Height: =Min(If(conTrnRoot.Width < 640, 3, 5), CountRows(Filter(colTrnStAll, varTrnShowEnded || Active))) * If(conTrnRoot.Width < 640, 216, 130)
+                                    Items: =SortByColumns(Filter(colTrnStAll, varTrnShowEnded || Active), "StudentName", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conTrnRoot.Width < 640, 216, 130)
+                                    Visible: =CountRows(Filter(colTrnStAll, varTrnShowEnded || Active)) > 0
+                                  Children:
+                                    - conTrnStuRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.StId = varTrnSelStId, ColorInfoBg, !ThisItem.Active, ColorNonSchool, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =4
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblTrnStuRowName:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =If(conTrnRoot.Width < 640, 40, 22)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =14
+                                                Text: =ThisItem.StudentName & " · " & ThisItem.KeyBase & If(ThisItem.Active, "", " · ended")
+                                                VerticalAlign: =VerticalAlign.Top
+                                          - lblTrnStuRowMeta:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                Height: =If(conTrnRoot.Width < 640, 54, 36)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: |-
+                                                  =ThisItem.Pattern & " · " & Text(ThisItem.StartDate, "mmm d, yyyy") & " - " & If(IsBlank(ThisItem.EndDate), "ongoing", Text(ThisItem.EndDate, "mmm d, yyyy")) & " · " & If(ThisItem.SourceText = "", "no source", ThisItem.SourceText) & If(ThisItem.Note = "", "", " · Note: " & Left(ThisItem.Note, 120))
+                                                VerticalAlign: =VerticalAlign.Top
+                                          - conTrnStuRowActions:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =If(conTrnRoot.Width < 640, 96, 44)
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =LayoutDirection.Horizontal
+                                                LayoutGap: =8
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                LayoutWrap: =true
+                                              Children:
+                                                - btnTrnStuRowChange:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("Change pattern for ", ThisItem.StudentName)
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      DisplayMode: =If(CanClassify && ThisItem.Active && !varTrnSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: =Set(varTrnSelStId, ThisItem.StId); Set(varTrnStuMode, "change"); Reset(rdoTrnStuPattern); Reset(txtTrnStuNote)
+                                                      Size: =14
+                                                      Text: ="Change pattern"
+                                                      Width: =150
+                                                - btnTrnStuRowEnd:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: =Concatenate("End transportation for ", ThisItem.StudentName)
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Secondary
+                                                      Color: =ColorInk
+                                                      DisplayMode: =If(CanClassify && ThisItem.Active && !varTrnSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                                                      Height: =44
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: =Set(varTrnSelStId, ThisItem.StId); Set(varTrnStuMode, "end"); Reset(dpTrnStuEnd)
+                                                      Size: =14
+                                                      Text: ="End transportation"
+                                                      Width: =170
+                        - conTrnStuPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conTrnRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conTrnRoot.Width >= 1024, 1, 0)
+                              Height: =32 + Switch(varTrnStuMode, "add", 442, "change", 376, "end", 254, 86)
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =conTrnRoot.Width >= 1024 || varTrnStuMode <> ""
+                            Children:
+                              - lblTrnStuPanelTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: =Switch(varTrnStuMode, "add", "Add transportation", "change", "Change pattern", "end", "End transportation", "Transportation details")
+                                    Wrap: =false
+                              - lblTrnStuFacts:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =54
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With({s: LookUp(colTrnStAll, StId = varTrnSelStId)}, If(IsBlank(s), "Choose Add student, or Change pattern / End transportation on a row.", s.StudentName & " · " & s.KeyBase & Char(10) & "Now " & s.Pattern & " · " & Text(s.StartDate, "mmm d, yyyy") & " - " & If(IsBlank(s.EndDate), "ongoing", Text(s.EndDate, "mmm d, yyyy")) & " · " & s.SourceText))
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varTrnStuMode <> "add"
+                              - lblTrnStuPick:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Student, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Student *"
+                                    Visible: =varTrnStuMode = "add"
+                                    Wrap: =false
+                              - cboTrnStuPick:
+                                  Control: ModernCombobox
+                                  Properties:
+                                    AccessibleLabel: ="Student"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DefaultSelectedItems: =[]
+                                    DisplayMode: =If(varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    InputTextPlaceholder: ="Type a name or Student Key"
+                                    ItemDisplayText: =ThisItem.Label
+                                    Items: =Filter(colTrnCampStu, !(StudentId in Filter(colTrnStAll, Active).StudentId))
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    SelectMultiple: =false
+                                    Visible: =varTrnStuMode = "add"
+                              - lblTrnStuStart:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Start date, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Start date *"
+                                    Visible: =varTrnStuMode = "add"
+                                    Wrap: =false
+                              - dpTrnStuStart:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="Start date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DefaultDate: =Today()
+                                    DisplayMode: =If(varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    EndDate: =DateAdd(Today(), 365, TimeUnit.Days)
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    StartDate: =Date(FirstSchoolYear, 1, 1)
+                                    Visible: =varTrnStuMode = "add"
+                              - lblTrnStuPattern:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Usual pattern, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Usual pattern *"
+                                    Visible: =varTrnStuMode in ["add", "change"]
+                                    Wrap: =false
+                              - rdoTrnStuPattern:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="Usual pattern"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      =If(varTrnStuMode = "change", {Value: LookUp(colTrnStAll, StId = varTrnSelStId).Pattern}, {Value: "Round trip"})
+                                    DisplayMode: =If(varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =96
+                                    Items: =TransportPatternOptions
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =varTrnStuMode in ["add", "change"]
+                              - lblTrnStuNote:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Note, optional"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Note (optional)"
+                                    Visible: =varTrnStuMode in ["add", "change"]
+                                    Wrap: =false
+                              - txtTrnStuNote:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Note"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =If(varTrnStuMode = "change", LookUp(colTrnStAll, StId = varTrnSelStId).Note, "")
+                                    DisplayMode: =If(varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =2000
+                                    Placeholder: ="e.g. grandparent drops off on Fridays"
+                                    Visible: =varTrnStuMode in ["add", "change"]
+                              - lblTrnStuEnd:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="End date, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="End date *"
+                                    Visible: =varTrnStuMode = "end"
+                                    Wrap: =false
+                              - dpTrnStuEnd:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: ="End date"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DefaultDate: =Today()
+                                    DisplayMode: =If(varTrnSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    EndDate: =DateAdd(Today(), 365, TimeUnit.Days)
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    StartDate: =Date(FirstSchoolYear, 1, 1)
+                                    Visible: =varTrnStuMode = "end"
+                              - lblTrnStuCheck:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(StartsWith(Self.Text, "Ready"), ColorExcused, ColorUnexcused)
+                                    Height: =54
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With(
+                                          {s: LookUp(colTrnStAll, StId = varTrnSelStId), p: rdoTrnStuPattern.Selected.Value},
+                                          Switch(
+                                              varTrnStuMode,
+                                              "add", If(
+                                                  CountRows(cboTrnStuPick.SelectedItems) <> 1, "Pick a student (only students without active transportation are listed).",
+                                                  IsBlank(dpTrnStuStart.SelectedDate), "Choose the start date.",
+                                                  !(p in TransportPatternOptions.Value), "Choose the usual pattern.",
+                                                  "Ready: adds " & First(cboTrnStuPick.SelectedItems).StudentName & " from " & Text(dpTrnStuStart.SelectedDate, "mmm d, yyyy") & " as " & p & " (Source Manual)."
+                                              ),
+                                              "change", If(
+                                                  IsBlank(s) || !s.Active, "Choose Change pattern on an active row.",
+                                                  !(p in TransportPatternOptions.Value), "Choose the usual pattern.",
+                                                  p = s.Pattern && Trim(txtTrnStuNote.Text) = s.Note, "Nothing changed yet.",
+                                                  "Ready: saves " & p & " for " & s.StudentName & " (was " & s.Pattern & ")."
+                                              ),
+                                              "end", If(
+                                                  IsBlank(s) || !s.Active, "Choose End transportation on an active row.",
+                                                  IsBlank(dpTrnStuEnd.SelectedDate), "Choose the end date.",
+                                                  dpTrnStuEnd.SelectedDate < s.StartDate, "The end date cannot be before the start date (" & Text(s.StartDate, "mmm d, yyyy") & ").",
+                                                  "Ready: ends transportation for " & s.StudentName & " on " & Text(dpTrnStuEnd.SelectedDate, "mmm d, yyyy") & "."
+                                              ),
+                                              ""
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varTrnStuMode <> ""
+                              - conTrnStuActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =varTrnStuMode <> ""
+                                  Children:
+                                    - btnTrnStuSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =If(varTrnStuMode = "end", ColorUnexcused, ColorTeal)
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanClassify && !varTrnSaving && !varTrnLoading && StartsWith(lblTrnStuCheck.Text, "Ready"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =With(
+                                                {
+                                                    mode: varTrnStuMode,
+                                                    s: LookUp(colTrnStAll, StId = varTrnSelStId),
+                                                    p: rdoTrnStuPattern.Selected.Value,
+                                                    note: Left(Trim(txtTrnStuNote.Text), 2000),
+                                                    stu: First(cboTrnStuPick.SelectedItems),
+                                                    sd: dpTrnStuStart.SelectedDate,
+                                                    ed: dpTrnStuEnd.SelectedDate
+                                                },
+                                                With(
+                                                    {pat: Switch(p, "Round trip", 'Usual Pattern (Student Transportation)'.'Round trip', "Drop off only", 'Usual Pattern (Student Transportation)'.'Drop off only', "Pick up only", 'Usual Pattern (Student Transportation)'.'Pick up only')},
+                                                    If(
+                                                        !CanClassify || varTrnSaving || !StartsWith(lblTrnStuCheck.Text, "Ready"),
+                                                        Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved. " & lblTrnStuCheck.Text}); Clear(colTrnReceiptLines),
+                                                        mode = "add",
+                                                        Set(varTrnSaving, true);
+                                                        With(
+                                                            {dup: With({q: stu.StudentId, c0: varTrnCampusId}, LookUp('Student Transportation', Student.Student = q && Campus.Campus = c0 && (IsBlank('End Date') || 'End Date' >= Today())))},
+                                                            If(
+                                                                !IsBlank(dup),
+                                                                Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " already has active transportation (added by someone else). Use Reload."}); Clear(colTrnReceiptLines),
+                                                                With(
+                                                                    {wr: IfError(Patch('Student Transportation', Defaults('Student Transportation'), {Summary: Left(stu.KeyBase & " - transportation", 100), Student: stu.StuRec, Campus: stu.CampRec, 'Start Date': sd, 'Usual Pattern': pat, Source: 'Source (Student Transportation)'.Manual, Note: note}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varTrnReceipt, {Kind: "Failed", Title: "Not saved · " & stu.StudentName & " · the save failed; press Add transportation to retry"}); Clear(colTrnReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transportation added " & wr.Summary, 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_studenttransport", 'Entity ID': Text(wr.'Student Transportation'), Before: "", After: JSON({Pattern: Text(wr.'Usual Pattern'), Start: Text(wr.'Start Date', "yyyy-mm-dd"), Source: Text(wr.Source), Note: Coalesce(wr.Note, "")}), Reason: "Added in Transportation, Students"}), Blank())},
+                                                                            Collect(colTrnStAll, {StId: wr.'Student Transportation', StRec: wr, StudentId: stu.StudentId, StudentName: stu.StudentName, KeyBase: stu.KeyBase, Pattern: Text(wr.'Usual Pattern'), StartDate: wr.'Start Date', EndDate: wr.'End Date', SourceText: Text(wr.Source), Note: Coalesce(wr.Note, ""), Active: true});
+                                                                            Set(varTrnSelStId, wr.'Student Transportation');
+                                                                            Set(varTrnReceipt, {Kind: "Added", Title: "Transportation added · " & stu.StudentName & " · " & Text(wr.'Usual Pattern') & " from " & Text(wr.'Start Date', "mmm d, yyyy")});
+                                                                            ClearCollect(
+                                                                                colTrnReceiptLines,
+                                                                                {Label: "Student", Value: stu.StudentName},
+                                                                                {Label: "Student key", Value: stu.KeyBase},
+                                                                                {Label: "Pattern", Value: Text(wr.'Usual Pattern')},
+                                                                                {Label: "Start", Value: Text(wr.'Start Date', "mmm d, yyyy")},
+                                                                                {Label: "End", Value: If(IsBlank(wr.'End Date'), "ongoing", Text(wr.'End Date', "mmm d, yyyy"))},
+                                                                                {Label: "Source", Value: Text(wr.Source)},
+                                                                                {Label: "Note", Value: If(Coalesce(wr.Note, "") = "", "None", wr.Note)},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Create written")}
+                                                                            );
+                                                                            Set(varTrnStuMode, ""); Reset(cboTrnStuPick); Reset(txtTrnStuNote)
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varTrnSaving, false),
+                                                        mode = "change",
+                                                        Set(varTrnSaving, true);
+                                                        With(
+                                                            {live: With({q: s.StId}, LookUp('Student Transportation', ThisRecord.'Student Transportation' = q))},
+                                                            If(
+                                                                IsBlank(live) || (!IsBlank(live.'End Date') && live.'End Date' < Today()),
+                                                                Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved · " & s.StudentName & " · this transportation row was removed or has ended. Use Reload."}); Clear(colTrnReceiptLines),
+                                                                With(
+                                                                    {wr: IfError(Patch('Student Transportation', live, {'Usual Pattern': pat, Note: note}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varTrnReceipt, {Kind: "Failed", Title: "Not saved · " & s.StudentName & " · the save failed; press Save pattern to retry"}); Clear(colTrnReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transportation pattern " & wr.Summary, 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_studenttransport", 'Entity ID': Text(wr.'Student Transportation'), Before: JSON({Pattern: Text(live.'Usual Pattern'), Note: Coalesce(live.Note, "")}), After: JSON({Pattern: Text(wr.'Usual Pattern'), Note: Coalesce(wr.Note, "")}), Reason: "Pattern changed in Transportation, Students"}), Blank())},
+                                                                            Patch(colTrnStAll, s, {Pattern: Text(wr.'Usual Pattern'), Note: Coalesce(wr.Note, ""), StRec: wr});
+                                                                            Set(varTrnReceipt, {Kind: "Changed", Title: "Pattern saved · " & s.StudentName & " · " & Text(wr.'Usual Pattern') & " (was " & Text(live.'Usual Pattern') & ")"});
+                                                                            ClearCollect(
+                                                                                colTrnReceiptLines,
+                                                                                {Label: "Student", Value: s.StudentName & " · " & s.KeyBase},
+                                                                                {Label: "Pattern before", Value: Text(live.'Usual Pattern')},
+                                                                                {Label: "Pattern now", Value: Text(wr.'Usual Pattern')},
+                                                                                {Label: "Note", Value: If(Coalesce(wr.Note, "") = "", "None", wr.Note)},
+                                                                                {Label: "Start", Value: Text(wr.'Start Date', "mmm d, yyyy")},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Update written")}
+                                                                            );
+                                                                            Set(varTrnStuMode, "")
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varTrnSaving, false),
+                                                        mode = "end",
+                                                        Set(varTrnSaving, true);
+                                                        With(
+                                                            {live: With({q: s.StId}, LookUp('Student Transportation', ThisRecord.'Student Transportation' = q))},
+                                                            If(
+                                                                IsBlank(live) || (!IsBlank(live.'End Date') && live.'End Date' < Today()) || ed < live.'Start Date',
+                                                                Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved · " & s.StudentName & " · the row was removed or ended, or the end date is before the start date. Use Reload."}); Clear(colTrnReceiptLines),
+                                                                With(
+                                                                    {wr: IfError(Patch('Student Transportation', live, {'End Date': ed}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varTrnReceipt, {Kind: "Failed", Title: "Not saved · " & s.StudentName & " · the save failed; press End transportation to retry"}); Clear(colTrnReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transportation ended " & wr.Summary, 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_studenttransport", 'Entity ID': Text(wr.'Student Transportation'), Before: JSON({EndDate: If(IsBlank(live.'End Date'), "", Text(live.'End Date', "yyyy-mm-dd"))}), After: JSON({EndDate: Text(wr.'End Date', "yyyy-mm-dd")}), Reason: "Ended in Transportation, Students"}), Blank())},
+                                                                            Patch(colTrnStAll, s, {EndDate: wr.'End Date', Active: IsBlank(wr.'End Date') || wr.'End Date' >= Today(), StRec: wr});
+                                                                            Set(varTrnReceipt, {Kind: "Ended", Title: "Transportation ended · " & s.StudentName & " · " & Text(wr.'End Date', "mmm d, yyyy")});
+                                                                            ClearCollect(
+                                                                                colTrnReceiptLines,
+                                                                                {Label: "Student", Value: s.StudentName & " · " & s.KeyBase},
+                                                                                {Label: "Pattern", Value: Text(wr.'Usual Pattern')},
+                                                                                {Label: "Start", Value: Text(wr.'Start Date', "mmm d, yyyy")},
+                                                                                {Label: "End", Value: Text(wr.'End Date', "mmm d, yyyy")},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Update written")}
+                                                                            );
+                                                                            Set(varTrnStuMode, "")
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varTrnSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: =Switch(varTrnStuMode, "add", "Add transportation", "change", "Save pattern", "end", "End transportation", "Save")
+                                          Width: =170
+                                    - btnTrnStuCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varTrnStuMode, ""); Set(varTrnSelStId, Blank()); Reset(cboTrnStuPick); Reset(txtTrnStuNote)
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+            - btnTrnStuLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varTrnLoading, true);
+                    Set(varTrnLoadError, "");
+                    If(
+                        !CanClassify || varTrnCampusId = ZeroGuid,
+                        Clear(colTrnStAll); Clear(colTrnCampEnr); Clear(colTrnCampStu),
+                        IfError(
+                            With(
+                                {c0: varTrnCampusId},
+                                Concurrent(
+                                    ClearCollect(colTrnStAll, ForAll(Filter('Student Transportation', Campus.Campus = c0) As t, {StId: t.'Student Transportation', StRec: t, StudentId: t.Student.Student, StudentName: Coalesce(t.Student.'Display Name', "Unknown student"), KeyBase: With({k: Trim(Coalesce(t.Student.'External Client ID', ""))}, If(k = "", Coalesce(t.Student.'Student Number', ""), k)), Pattern: Text(t.'Usual Pattern'), StartDate: t.'Start Date', EndDate: t.'End Date', SourceText: Text(t.Source), Note: Coalesce(t.Note, ""), Active: IsBlank(t.'End Date') || t.'End Date' >= Today()})),
+                                    ClearCollect(colTrnCampEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && (IsBlank('End Date') || 'End Date' >= Today())) As e, {StudentId: e.Student.Student, StudentName: Coalesce(e.Student.'Display Name', "Unnamed student"), KeyBase: With({k: Trim(Coalesce(e.Student.'External Client ID', ""))}, If(k = "", Coalesce(e.Student.'Student Number', ""), k)), StuRec: e.Student, CampRec: e.Campus}))
+                                )
+                            ); true,
+                            Set(varTrnLoadError, FirstError.Message)
+                        );
+                        ClearCollect(colTrnCampStu, Sort(ForAll(Distinct(colTrnCampEnr, StudentId) As g, With({en: LookUp(colTrnCampEnr, StudentId = g.Value)}, {StudentId: g.Value, StudentName: en.StudentName, KeyBase: en.KeyBase, StuRec: en.StuRec, CampRec: en.CampRec, Label: en.StudentName & " · " & en.KeyBase})), StudentName, SortOrder.Ascending))
+                    );
+                    Set(varTrnLoading, false)
+                  Text: ="stu load"
+                  Visible: =false
+            - btnTrnLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varTrnLoading, true);
+                    Set(varTrnLoadError, "");
+                    If(
+                        !CanClassify || varTrnCampusId = ZeroGuid || IsBlank(varTrnDate),
+                        Clear(colTrnDaily); Set(varTrnIsSchoolDay, false); Set(varTrnDayReason, "no campus or date"),
+                        With(
+                            {c0: varTrnCampusId, d: varTrnDate},
+                            IfError(
+                                Concurrent(
+                                    ClearCollect(colTrnDayTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d)),
+                                    ClearCollect(colTrnDayExc, Filter('Calendar Exceptions', Date = d)),
+                                    ClearCollect(colTrnDayEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && 'Start Date' <= d && (IsBlank('End Date') || 'End Date' >= d)) As e, {EStudentId: e.Student.Student})),
+                                    ClearCollect(colTrnDayAtt, ForAll(Filter(Attendance, Campus.Campus = c0 && Date = d && 'Is Deleted' = false) As r, {AStudentId: r.Student.Student, APresent: r.Present = true, ALeft: r.'Left Early' = true, AAt: r.'Left Early At'})),
+                                    ClearCollect(colTrnDayLogs, ForAll(Filter('Daily Transport', Date = d) As g, {LStudentId: g.Student.Student, LogId: g.'Daily Transport', LStatus: Text(g.'Transport Status'), LBy: Coalesce(g.'Confirmed By'.'Full Name', ""), LOn: g.'Confirmed On'}))
+                                ); true,
+                                Set(varTrnLoadError, FirstError.Message)
+                            );
+                            With(
+                                {
+                                    t: First(Filter(colTrnDayTerms, IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0)),
+                                    x: LookUp(colTrnDayExc, (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day'),
+                                    mk: !IsBlank(LookUp(colTrnDayExc, (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type = 'Type (Calendar Exceptions)'.'Make-up School Day')),
+                                    wk: Weekday(d, StartOfWeek.Monday) >= 6
+                                },
+                                Set(varTrnIsSchoolDay, !IsBlank(t) && (mk || (!wk && IsBlank(x))));
+                                Set(varTrnDayReason, If(IsBlank(t), "outside any term", mk, "", !IsBlank(x), Text(x.Type) & " - " & x.Description, wk, "weekend", ""))
+                            );
+                            ClearCollect(
+                                colTrnDaily,
+                                Sort(
+                                    ForAll(
+                                        Filter(colTrnStAll, StartDate <= d && (IsBlank(EndDate) || EndDate >= d) && StudentId in colTrnDayEnr.EStudentId) As s,
+                                        With(
+                                            {a: LookUp(colTrnDayAtt, AStudentId = s.StudentId), lg: LookUp(colTrnDayLogs, LStudentId = s.StudentId)},
+                                            With(
+                                                {ak: If(IsBlank(a), "none", a.APresent && a.ALeft, "leftearly", a.APresent, "present", "absent")},
+                                                With(
+                                                    {pf: Switch(ak, "absent", "No transportation", "leftearly", "Drop off only", "")},
+                                                    {
+                                                        StudentId: s.StudentId, StId: s.StId, StRec: s.StRec, StudentName: s.StudentName, KeyBase: s.KeyBase, Pattern: s.Pattern,
+                                                        AttKind: ak,
+                                                        AttText: Switch(ak, "present", "Present", "leftearly", "Left early " & Text(a.AAt, "h:mm AM/PM"), "absent", "Absent", "Not marked"),
+                                                        LogId: Coalesce(lg.LogId, ZeroGuid),
+                                                        SavedStatus: Coalesce(lg.LStatus, ""),
+                                                        ByName: Coalesce(lg.LBy, ""),
+                                                        OnTime: lg.LOn,
+                                                        Prefill: pf,
+                                                        Pick: If(IsBlank(lg), pf, lg.LStatus)
+                                                    }
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    StudentName,
+                                    SortOrder.Ascending
+                                )
+                            )
+                        )
+                    );
+                    Set(varTrnLoading, false)
+                  Text: ="day load"
+                  Visible: =false
+            - btnTrnBannerEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =If(
+                        !CanClassify || varTrnCampusId = ZeroGuid,
+                        Clear(colTrnDays),
+                        With(
+                            {c0: varTrnCampusId, w0: DateAdd(Today(), -27, TimeUnit.Days), w1: Today()},
+                            IfError(
+                                Concurrent(
+                                    ClearCollect(colTrnWinTerms, Filter(Terms, 'Start Date' <= w1 && 'End Date' >= w0)),
+                                    ClearCollect(colTrnWinExc, Filter('Calendar Exceptions', Date >= w0 && Date <= w1)),
+                                    ClearCollect(colTrnWinEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && 'Start Date' <= w1 && (IsBlank('End Date') || 'End Date' >= w0)) As e, {EStudentId: e.Student.Student, EStart: e.'Start Date', EEnd: e.'End Date'})),
+                                    ClearCollect(colTrnWinLogs, ForAll(Filter('Daily Transport', Campus.Campus = c0 && Date >= w0 && Date <= w1) As g, {LStudentId: g.Student.Student, LDate: g.Date}))
+                                ); true,
+                                Set(varTrnLoadError, FirstError.Message)
+                            );
+                            ClearCollect(
+                                colTrnWinDays,
+                                ForAll(
+                                    Sequence(28, 0) As n,
+                                    With(
+                                        {d: DateAdd(w1, -n.Value, TimeUnit.Days)},
+                                        With(
+                                            {
+                                                t: First(Filter(colTrnWinTerms, ThisRecord.'Start Date' <= d && ThisRecord.'End Date' >= d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0))),
+                                                x: LookUp(colTrnWinExc, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day'),
+                                                mk: !IsBlank(LookUp(colTrnWinExc, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type = 'Type (Calendar Exceptions)'.'Make-up School Day'))
+                                            },
+                                            {D: d, IsSchool: !IsBlank(t) && (mk || (Weekday(d, StartOfWeek.Monday) < 6 && IsBlank(x)))}
+                                        )
+                                    )
+                                )
+                            );
+                            ClearCollect(
+                                colTrnDays,
+                                ForAll(
+                                    FirstN(Sort(Filter(colTrnWinDays, IsSchool), D, SortOrder.Descending), 10) As dd,
+                                    With(
+                                        {exp: Filter(colTrnStAll, StartDate <= dd.D && (IsBlank(EndDate) || EndDate >= dd.D) && StudentId in Filter(colTrnWinEnr, EStart <= dd.D && (IsBlank(EEnd) || EEnd >= dd.D)).EStudentId)},
+                                        {D: dd.D, Expected: CountRows(exp), Missing: CountRows(Filter(exp, !(StudentId in Filter(colTrnWinLogs, LDate = dd.D).LStudentId)))}
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  Text: ="banner"
+                  Visible: =false
+            - btnTrnSaveEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =With(
+                        {d: varTrnDate, me: CurrentUserRow, n: CountRows(colTrnWork), scope: varTrnReq.Scope, cn: LookUp(colTrnCampusOpts, CampusId = varTrnCampusId).CampusName},
+                        If(
+                            !CanClassify || varTrnSaving || n = 0 || !varTrnIsSchoolDay || d > Today() || !(scope in ["day", "row"]),
+                            Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved. Choose a school day on or before today and a status for each student."}); Clear(colTrnReceiptLines),
+                            Set(varTrnSaving, true);
+                            Clear(colTrnLog);
+                            ForAll(
+                                colTrnWork As w,
+                                With(
+                                    {r: LookUp(colTrnDaily, StudentId = w.StudentId)},
+                                    With(
+                                        {
+                                            k: r.KeyBase & "|" & Text(d, "yyyy-mm-dd"),
+                                            st: Switch(w.Status, "Round trip", 'Transport Status (Daily Transport)'.'Round trip', "Drop off only", 'Transport Status (Daily Transport)'.'Drop off only', "Pick up only", 'Transport Status (Daily Transport)'.'Pick up only', "No transportation", 'Transport Status (Daily Transport)'.'No transportation')
+                                        },
+                                        With(
+                                            {live: If(IsBlank(r) || r.KeyBase = "", Blank(), LookUp('Daily Transport', 'Log Key' = k))},
+                                            With(
+                                                {
+                                                    wr: If(
+                                                        IsBlank(r) || r.KeyBase = "" || IsBlank(st),
+                                                        Blank(),
+                                                        IfError(
+                                                            Patch(
+                                                                'Daily Transport',
+                                                                Coalesce(live, Defaults('Daily Transport')),
+                                                                {Summary: Left(r.KeyBase & " " & Text(d, "m/d") & " transport", 100), Student: r.StRec.Student, Campus: r.StRec.Campus, Date: d, 'Transport Status': st, 'Confirmed On': Now(), 'Confirmed By': me, 'Log Key': k}
+                                                            ),
+                                                            Blank()
+                                                        )
+                                                    )
+                                                },
+                                                With(
+                                                    {au: If(!IsBlank(wr), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transport " & k & " " & Text(wr.'Transport Status'), 100), Action: If(IsBlank(live), 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "aaca_transportlog", 'Entity ID': Text(wr.'Daily Transport'), Before: If(IsBlank(live), "", JSON({Status: Text(live.'Transport Status'), ConfirmedBy: Coalesce(live.'Confirmed By'.'Full Name', ""), ConfirmedOn: Text(live.'Confirmed On', "yyyy-mm-dd hh:mm")})), After: JSON({Status: Text(wr.'Transport Status'), ConfirmedBy: Coalesce(wr.'Confirmed By'.'Full Name', ""), ConfirmedOn: Text(wr.'Confirmed On', "yyyy-mm-dd hh:mm")}), Reason: If(scope = "row", "Changed after confirmation", "Daily transport confirmed")}), Blank()))},
+                                                    If(!IsBlank(wr), Patch(colTrnDaily, r, {LogId: wr.'Daily Transport', SavedStatus: Text(wr.'Transport Status'), Pick: Text(wr.'Transport Status'), ByName: Coalesce(wr.'Confirmed By'.'Full Name', ""), OnTime: wr.'Confirmed On'}));
+                                                    Collect(colTrnLog, {StudentName: Coalesce(r.StudentName, "Unknown student"), Before: If(IsBlank(live), "", Text(live.'Transport Status')), Status: If(IsBlank(wr), w.Status, Text(wr.'Transport Status')), ByName: If(IsBlank(wr), "", Coalesce(wr.'Confirmed By'.'Full Name', "")), OnText: If(IsBlank(wr), "", Text(wr.'Confirmed On', "h:mm AM/PM")), LogKey: k, Outcome: If(IsBlank(wr), "failed", IsBlank(live), "created", "updated"), AuditOk: !IsBlank(au)})
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            );
+                            With(
+                                {cr: CountRows(Filter(colTrnLog, Outcome = "created")), up: CountRows(Filter(colTrnLog, Outcome = "updated")), fl: CountRows(Filter(colTrnLog, Outcome = "failed")), g: First(colTrnLog)},
+                                If(
+                                    scope = "row",
+                                    Set(varTrnReceipt, {Kind: If(fl > 0, "Failed", "Updated"), Title: If(fl > 0, "Not saved · " & g.StudentName & " · " & Text(d, "ddd mmm d") & " · the save failed; click the status again to retry", "Updated · " & g.StudentName & " · " & Text(d, "ddd mmm d") & " · " & g.Status & If(g.Before = "", "", " (was " & g.Before & ")"))});
+                                    ClearCollect(
+                                        colTrnReceiptLines,
+                                        {Label: "Student", Value: g.StudentName},
+                                        {Label: "Date", Value: Text(d, "ddd mmm d, yyyy")},
+                                        {Label: "Before", Value: If(g.Before = "", "No row", g.Before)},
+                                        {Label: "Now", Value: If(fl > 0, "Not saved", g.Status)},
+                                        {Label: "Confirmed by", Value: If(fl > 0, "-", g.ByName)},
+                                        {Label: "Confirmed at", Value: If(fl > 0, "-", g.OnText)},
+                                        {Label: "Log key", Value: g.LogKey},
+                                        {Label: "Audit event", Value: If(g.AuditOk, If(g.Outcome = "created", "Create written", "Update written"), "NOT written")}
+                                    ),
+                                    Set(varTrnReceipt, {Kind: If(cr + up = 0, "Failed", "Confirmed"), Title: "Day confirmed · " & Text(d, "ddd mmm d, yyyy") & " · " & (cr + up) & " saved (" & cr & " created, " & up & " updated), " & fl & " failed"});
+                                    ClearCollect(
+                                        colTrnReceiptLines,
+                                        {Label: "Operation", Value: "Confirm day"},
+                                        {Label: "Date", Value: Text(d, "ddd mmm d, yyyy")},
+                                        {Label: "Campus", Value: cn},
+                                        {Label: "Confirmed by", Value: Coalesce(LookUp(colTrnLog, ByName <> "").ByName, "-")},
+                                        ForAll(colTrnLog As g2, {Label: g2.StudentName, Value: If(g2.Outcome = "failed", "FAILED · not saved", g2.Status & " · " & g2.Outcome & If(g2.AuditOk, " · audit written", " · audit NOT written"))})
+                                    )
+                                )
+                            );
+                            Clear(colTrnWork);
+                            Set(varTrnSaving, false)
+                        )
+                    )
+                  Text: ="save"
+                  Visible: =false

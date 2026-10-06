@@ -3,3 +3,4 @@ EditorState:
     - Screen1
     - StudentsScreen
     - AbsencesScreen
+    - TransportScreen

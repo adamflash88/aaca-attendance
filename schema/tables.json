@@ -101,6 +101,13 @@
           "displayName": "Finance Access",
           "default": false,
           "description": "Shows the Billing app to this person. Data access comes from the AACA Finance security role."
+        },
+        {
+          "logicalName": "aaca_siteadministrator",
+          "type": "bool",
+          "displayName": "Site Administrator",
+          "default": false,
+          "description": "Receives the weekly open-items summary for their campus."
         }
       ]
     },
@@ -1197,6 +1204,24 @@
           "displayName": "Parent Reported Absent",
           "default": false,
           "description": "A parent reported this day absent but the teacher had already marked present: the office decides (Classify tab)."
+        },
+        {
+          "logicalName": "aaca_leftearly",
+          "type": "bool",
+          "displayName": "Left Early",
+          "default": false,
+          "description": "Office-recorded partial day: the student attended and left early."
+        },
+        {
+          "logicalName": "aaca_leftearlyat",
+          "type": "datetime",
+          "displayName": "Left Early At"
+        },
+        {
+          "logicalName": "aaca_leftearlyreason",
+          "type": "text",
+          "displayName": "Left Early Reason",
+          "maxLength": 500
         }
       ],
       "keys": [
@@ -2263,6 +2288,141 @@
           "maxLength": 4000
         }
       ]
+    },
+    {
+      "logicalName": "aaca_studenttransport",
+      "displayName": "Student Transportation",
+      "pluralName": "Student Transportation",
+      "description": "A student receives transportation services from Start to End (blank = ongoing), with their usual pattern. Managed by campus office staff.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_startdate",
+          "type": "date",
+          "displayName": "Start Date",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_enddate",
+          "type": "date",
+          "displayName": "End Date"
+        },
+        {
+          "logicalName": "aaca_pattern",
+          "type": "choice",
+          "displayName": "Usual Pattern",
+          "options": [
+            [
+              582100000,
+              "Round trip"
+            ],
+            [
+              582100001,
+              "Drop off only"
+            ],
+            [
+              582100002,
+              "Pick up only"
+            ]
+          ],
+          "required": true
+        },
+        {
+          "logicalName": "aaca_source",
+          "type": "choice",
+          "displayName": "Source",
+          "options": [
+            [
+              582100000,
+              "CodeMetro"
+            ],
+            [
+              582100001,
+              "Manual"
+            ]
+          ]
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "text",
+          "displayName": "Note",
+          "maxLength": 500
+        }
+      ]
+    },
+    {
+      "logicalName": "aaca_transportlog",
+      "displayName": "Daily Transport",
+      "pluralName": "Daily Transport",
+      "description": "How a transported student was handled on one school day, confirmed by campus office staff by the end of the day.",
+      "primaryName": {
+        "logicalName": "aaca_name",
+        "displayName": "Summary",
+        "maxLength": 200
+      },
+      "columns": [
+        {
+          "logicalName": "aaca_date",
+          "type": "date",
+          "displayName": "Date",
+          "required": true
+        },
+        {
+          "logicalName": "aaca_status",
+          "type": "choice",
+          "displayName": "Transport Status",
+          "options": [
+            [
+              582100000,
+              "Round trip"
+            ],
+            [
+              582100001,
+              "Drop off only"
+            ],
+            [
+              582100002,
+              "Pick up only"
+            ],
+            [
+              582100003,
+              "No transportation"
+            ]
+          ],
+          "required": true
+        },
+        {
+          "logicalName": "aaca_confirmedon",
+          "type": "datetime",
+          "displayName": "Confirmed On"
+        },
+        {
+          "logicalName": "aaca_note",
+          "type": "text",
+          "displayName": "Note",
+          "maxLength": 500
+        },
+        {
+          "logicalName": "aaca_logkey",
+          "type": "text",
+          "displayName": "Log Key",
+          "maxLength": 100,
+          "description": "StudentKey|yyyy-mm-dd (one row per student per day)"
+        }
+      ],
+      "keys": [
+        {
+          "logicalName": "aaca_transportlog_key",
+          "displayName": "Log Key",
+          "columns": [
+            "aaca_logkey"
+          ]
+        }
+      ]
     }
   ],
   "lookups": [
@@ -2600,6 +2760,42 @@
       "logicalName": "aaca_student",
       "displayName": "Student",
       "target": "aaca_student"
+    },
+    {
+      "table": "aaca_studenttransport",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
+    },
+    {
+      "table": "aaca_studenttransport",
+      "logicalName": "aaca_campus",
+      "displayName": "Campus",
+      "target": "aaca_campus"
+    },
+    {
+      "table": "aaca_transportlog",
+      "logicalName": "aaca_student",
+      "displayName": "Student",
+      "target": "aaca_student"
+    },
+    {
+      "table": "aaca_transportlog",
+      "logicalName": "aaca_campus",
+      "displayName": "Campus",
+      "target": "aaca_campus"
+    },
+    {
+      "table": "aaca_transportlog",
+      "logicalName": "aaca_studenttransport",
+      "displayName": "Student Transportation",
+      "target": "aaca_studenttransport"
+    },
+    {
+      "table": "aaca_transportlog",
+      "logicalName": "aaca_confirmedby",
+      "displayName": "Confirmed By",
+      "target": "systemuser"
     }
   ]
 }

@@ -68,7 +68,9 @@ Grant $m 'aaca_student', 'aaca_enrollment' 'Create', 'Read', 'Write', 'Append', 
 Grant $m 'aaca_attendance' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 Grant $m 'aaca_calendarexception', 'aaca_monthlock' 'Create', 'Write', 'Append' 'Local'
 Grant $m 'aaca_absencereason' 'Create', 'Write' 'Global'
-Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Append' 'Local'
+Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Write', 'Append' 'Local'   # Write: Mapping Errors Dismiss updates an error row
+# Transportation section: which students are transported and the daily confirmation.
+Grant $m 'aaca_studenttransport', 'aaca_transportlog' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 # Family portal: process their campus's absence notices (parents create them through the portal) and see who the
 # guardians are. Guardian onboarding (creating links) is a later phase.
 Grant $m 'aaca_absencenotice' 'Read', 'Write', 'Append' 'Local'
@@ -105,6 +107,7 @@ Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Read', 'AppendTo'
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Append' 'Basic'
 # Absence report intake flow gives each processed/error report record to the campus team.
 Grant $m 'aaca_reportdecision' 'Read', 'Append' 'Basic'
+Grant $m 'aaca_studenttransport', 'aaca_transportlog' 'Read', 'Append' 'Basic'
 Grant $m 'aaca_guardianlink', 'aaca_absencenotice', 'aaca_emergencycontact', 'aaca_studentmedication' 'Read', 'Append' 'Basic'
 Grant $m $reference 'Read', 'AppendTo' 'Global'
 $roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments, attendance and family-portal records.'; Matrix = $m }

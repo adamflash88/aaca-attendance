@@ -7,6 +7,7 @@ Screens:
         Set(varAbsMeSaving, false);
         Set(varAbsSelId, Blank());
         Set(varAbsReasonId, Blank());
+        Set(varAbsAddMode, "");
         Set(varAbsReceipt, {Kind: "", Title: ""});
         Clear(colAbsReceiptLines);
         If(varAbsView <> "errors", Set(varAbsView, "classify"));
@@ -49,7 +50,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conAbsRoot.Width < 640, 92, 76) + If(CanManageStudents, 48, 0) + If(CanClassify, 60, 0)
+                  Height: =If(conAbsRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAbsRoot.Width < 640, 100, 48), 0) + If(CanClassify, 60, 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -101,11 +102,12 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(CanClassify, 52, 44)
+                        Height: =If(conAbsRoot.Width < 640, 96, 44) + If(CanClassify, 8, 0)
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
+                        LayoutWrap: =true
                         PaddingLeft: =16
                         PaddingRight: =16
                         RadiusBottomLeft: =0
@@ -156,6 +158,22 @@ Screens:
                               Size: =14
                               Text: ="Absences"
                               Width: =110
+                        - btnAbsNavTransport:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Transportation"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(TransportScreen)
+                              Size: =14
+                              Text: ="Transportation"
+                              Visible: =CanClassify
+                              Width: =140
                   - conAbsHdrTabs:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -1811,6 +1829,41 @@ Screens:
                     Set(varAbsMeLoading, false)
                   Text: ="me load"
                   Visible: =false
+            - btnAbsAddLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varAbsAddErr, "");
+                    IfError(
+                        With(
+                            {c0: varAbsCampusId},
+                            ClearCollect(
+                                colAbsAddEnr,
+                                ForAll(
+                                    Filter(Enrollments, Campus.Campus = c0) As e,
+                                    {EnrId: e.Enrollment, StudentId: e.Student.Student, StudentName: Coalesce(e.Student.'Display Name', "Unnamed student"), StudentNumber: Coalesce(e.Student.'Student Number', ""), ServiceId: e.Service.Service, ServiceCode: Coalesce(e.Service.'Service Code', "SPED"), TeacherName: Coalesce(e.Teacher.Name, "No teacher"), StartDate: e.'Start Date', EndDate: e.'End Date', EnrRec: e}
+                                )
+                            )
+                        ); true,
+                        Set(varAbsAddErr, FirstError.Message)
+                    );
+                    ClearCollect(
+                        colAbsAddStu,
+                        Sort(
+                            ForAll(
+                                Distinct(Filter(colAbsAddEnr, IsBlank(EndDate) || EndDate >= DateAdd(Today(), -365, TimeUnit.Days)), StudentId) As g,
+                                With({en: First(Sort(Filter(colAbsAddEnr, StudentId = g.Value), StartDate, SortOrder.Descending))}, {StudentId: g.Value, StudentName: en.StudentName, StudentNumber: en.StudentNumber, Label: en.StudentName & " · " & en.StudentNumber})
+                            ),
+                            StudentName,
+                            SortOrder.Ascending
+                        )
+                    )
+                  Text: ="add load"
+                  Visible: =false
             - conAbsClassifyView:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -2324,7 +2377,7 @@ Screens:
                               RadiusBottomRight: =6
                               RadiusTopLeft: =6
                               RadiusTopRight: =6
-                              Visible: =!(conAbsRoot.Width < 1024 && !IsBlank(varAbsSelId))
+                              Visible: =!(conAbsRoot.Width < 1024 && (!IsBlank(varAbsSelId) || varAbsAddMode <> ""))
                             Children:
                               - conAbsListHeadV:
                                   Control: GroupContainer
@@ -2452,7 +2505,7 @@ Screens:
                                                 Items: =colAbsCampusOpts
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
-                                                OnChange: =Set(varAbsCampusId, Coalesce(Self.Selected.CampusId, ZeroGuid)); Set(varAbsTeacherId, ZeroGuid); Reset(ddAbsTeacherV); Select(btnAbsLoadEngine)
+                                                OnChange: =Set(varAbsCampusId, Coalesce(Self.Selected.CampusId, ZeroGuid)); Set(varAbsTeacherId, ZeroGuid); Set(varAbsAddMode, ""); Reset(ddAbsTeacherV); Select(btnAbsLoadEngine)
                                     - conAbsTeacherFieldV:
                                         Control: GroupContainer
                                         Variant: AutoLayout
@@ -3209,7 +3262,7 @@ Screens:
                               DropShadow: =DropShadow.None
                               Fill: =ColorWhite
                               FillPortions: =If(conAbsRoot.Width >= 1024, 1, 0)
-                              Height: =16 + If(IsBlank(varAbsSelId), 28 + 8 + 60, 28 + 8 + 72 + 8 + 22 + Max(36, CountRows(colAbsReasons) * 32) + 8 + 36 + 8 + 44) + 16
+                              Height: =16 + If(!IsBlank(varAbsSelId), 28 + 8 + 72 + 8 + 22 + Max(36, CountRows(colAbsReasons) * 32) + 8 + 36 + 8 + 44, 28 + If(varAbsAddMode = "", 8 + 60, 0) + 8 + 44 + If(varAbsAddMode = "leftearly", 8 + 368, varAbsAddMode = "absence", 8 + If(varAbsAddClass = "Excused", 492, 430), 0)) + 16
                               LayoutAlignItems: =LayoutAlignItems.Stretch
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =8
@@ -3223,12 +3276,12 @@ Screens:
                               RadiusBottomRight: =6
                               RadiusTopLeft: =6
                               RadiusTopRight: =6
-                              Visible: =conAbsRoot.Width >= 1024 || !IsBlank(varAbsSelId)
+                              Visible: =CanClassify
                             Children:
                               - lblAbsDecideTitleV:
                                   Control: ModernText
                                   Properties:
-                                    AccessibleLabel: ="Mark as Excused"
+                                    AccessibleLabel: =Self.Text
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =ColorInk
                                     FontWeight: =FontWeight.Bold
@@ -3240,7 +3293,7 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =18
-                                    Text: ="Mark as Excused"
+                                    Text: =If(!IsBlank(varAbsSelId), "Mark as Excused", varAbsAddMode = "absence", "Add absence", varAbsAddMode = "leftearly", "Left early", "Mark as Excused")
                                     Wrap: =false
                               - lblAbsDecideEmptyV:
                                   Control: ModernText
@@ -3258,7 +3311,7 @@ Screens:
                                     Size: =13
                                     Text: ="Choose Excused… on an absence to pick its reason here. Unexcused on a row saves straight away."
                                     VerticalAlign: =VerticalAlign.Top
-                                    Visible: =IsBlank(varAbsSelId)
+                                    Visible: =IsBlank(varAbsSelId) && varAbsAddMode = ""
                               - lblAbsDecideWhoV:
                                   Control: ModernText
                                   Properties:
@@ -3388,3 +3441,705 @@ Screens:
                                           Size: =14
                                           Text: ="Cancel"
                                           Width: =100
+                              - conAbsAddBarV:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =CanClassify && IsBlank(varAbsSelId)
+                                  Children:
+                                    - btnAbsAddOpenV:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add absence" & If(varAbsAddMode = "absence", " (open)", "")
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =If(varAbsAddMode = "absence", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =If(varAbsAddMode = "absence", ColorWhite, ColorInk)
+                                          DisplayMode: =If(CanClassify && !varAbsSaving && !varAbsLoading && varAbsCampusId <> ZeroGuid, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =Set(varAbsSelId, Blank());
+                                            Set(varAbsReasonId, Blank());
+                                            Reset(rdoAbsReasonV);
+                                            Set(varAbsAddMode, "absence");
+                                            Set(varAbsAddClass, "");
+                                            Set(varAbsAddReasonId, Blank());
+                                            Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV);
+                                            Select(btnAbsAddLoadEngine)
+                                          Size: =14
+                                          Text: ="Add absence"
+                                          Width: =130
+                                    - btnAbsLeOpenV:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Left early" & If(varAbsAddMode = "leftearly", " (open)", "")
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =If(varAbsAddMode = "leftearly", ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =If(varAbsAddMode = "leftearly", ColorWhite, ColorInk)
+                                          DisplayMode: =If(CanClassify && !varAbsSaving && !varAbsLoading && varAbsCampusId <> ZeroGuid, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =Set(varAbsSelId, Blank());
+                                            Set(varAbsReasonId, Blank());
+                                            Reset(rdoAbsReasonV);
+                                            Set(varAbsAddMode, "leftearly");
+                                            Set(varAbsAddClass, "");
+                                            Set(varAbsAddReasonId, Blank());
+                                            Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV);
+                                            Select(btnAbsAddLoadEngine)
+                                          Size: =14
+                                          Text: ="Left early"
+                                          Width: =110
+                              - conAbsAddPanelV:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =If(varAbsAddMode = "leftearly", 368, varAbsAddClass = "Excused", 492, 430)
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Vertical
+                                    LayoutGap: =4
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    RadiusBottomLeft: =0
+                                    RadiusBottomRight: =0
+                                    RadiusTopLeft: =0
+                                    RadiusTopRight: =0
+                                    Visible: =CanClassify && IsBlank(varAbsSelId) && varAbsAddMode in ["absence", "leftearly"]
+                                  Children:
+                                    - lblAbsAddStuV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Student *"
+                                          Wrap: =false
+                                    - cboAbsAddStuV:
+                                        Control: ModernCombobox
+                                        Properties:
+                                          AccessibleLabel: ="Student"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultSelectedItems: =[]
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          InputTextPlaceholder: ="Type a name or student number"
+                                          ItemDisplayText: =ThisItem.Label
+                                          Items: =colAbsAddStu
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          SelectMultiple: =false
+                                    - lblAbsAddFromV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =If(varAbsAddMode = "leftearly", "Date *", "From date *")
+                                          Wrap: =false
+                                    - dpAbsAddFromV:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: =If(varAbsAddMode = "leftearly", "Date", "From date")
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =Today()
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =If(varAbsAddMode = "leftearly", Today(), DateAdd(Today(), 90, TimeUnit.Days))
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                                    - lblAbsAddToV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="To date (blank = same day)"
+                                          Visible: =varAbsAddMode = "absence"
+                                          Wrap: =false
+                                    - dpAbsAddToV:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: ="To date"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =Blank()
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =DateAdd(Today(), 90, TimeUnit.Days)
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                                          Visible: =varAbsAddMode = "absence"
+                                    - lblAbsAddClassV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Classification *"
+                                          Visible: =varAbsAddMode = "absence"
+                                          Wrap: =false
+                                    - rdoAbsAddClassV:
+                                        Control: ModernRadio
+                                        Properties:
+                                          AccessibleLabel: ="Classification"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Default: |-
+                                            ={Value: varAbsAddClass}
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          Items: =["Excused", "Unexcused"]
+                                          Layout: =OptionLayout.Horizontal
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsAddClass, Self.Selected.Value); If(Self.Selected.Value <> "Excused", Set(varAbsAddReasonId, Blank()))
+                                          Visible: =varAbsAddMode = "absence"
+                                    - lblAbsAddReasonV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Absence reason *"
+                                          Visible: =varAbsAddMode = "absence" && varAbsAddClass = "Excused"
+                                          Wrap: =false
+                                    - ddAbsAddReasonV:
+                                        Control: ModernDropdown
+                                        Properties:
+                                          AccessibleLabel: ="Absence reason"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =LookUp(colAbsReasons, ReasonId = varAbsAddReasonId)
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          ItemDisplayText: =ThisItem.ReasonName
+                                          Items: =colAbsReasons
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsAddReasonId, Self.Selected.ReasonId)
+                                          Visible: =varAbsAddMode = "absence" && varAbsAddClass = "Excused"
+                                    - lblAbsLeTimeV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Time left * (h:mm AM/PM)"
+                                          Visible: =varAbsAddMode = "leftearly"
+                                          Wrap: =false
+                                    - txtAbsLeTimeV:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Time left, h:mm AM/PM"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          MaxLength: =8
+                                          Placeholder: ="1:30 PM"
+                                          Visible: =varAbsAddMode = "leftearly"
+                                    - lblAbsAddNoteV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =If(varAbsAddMode = "leftearly", "Reason *", "Note (optional)")
+                                          Wrap: =false
+                                    - txtAbsAddNoteV:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: =If(varAbsAddMode = "leftearly", "Reason left early", "Note")
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          MaxLength: =If(varAbsAddMode = "leftearly", 500, 2000)
+                                          Placeholder: =If(varAbsAddMode = "leftearly", "e.g. sick, picked up by parent", "e.g. no call from the family")
+                                    - lblAbsAddCheckV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =If(StartsWith(Self.Text, "Ready"), ColorExcused, ColorUnexcused)
+                                          Height: =72
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: |-
+                                            =If(
+                                                varAbsAddMode = "leftearly",
+                                                With(
+                                                    {n: CountRows(cboAbsAddStuV.SelectedItems), d: dpAbsAddFromV.SelectedDate, tt: Trim(txtAbsLeTimeV.Text)},
+                                                    With(
+                                                        {tm: If(EndsWith(Upper(tt), "AM") || EndsWith(Upper(tt), "PM"), IfError(TimeValue(tt, "en-US"), Blank()), Blank())},
+                                                        If(
+                                                            varAbsAddErr <> "", "Could not load students: " & varAbsAddErr,
+                                                            n <> 1, "Pick the student.",
+                                                            IsBlank(d), "Choose the date.",
+                                                            d > Today(), "Left early cannot be in the future.",
+                                                            IsBlank(tm), "Type the time as h:mm AM/PM, for example 1:30 PM.",
+                                                            d = Today() && DateTime(Year(d), Month(d), Day(d), Hour(tm), Minute(tm), 0) > Now(), "That time has not happened yet today.",
+                                                            Trim(txtAbsAddNoteV.Text) = "", "Type the reason (required).",
+                                                            "Ready: Save left early marks " & Text(d, "ddd mmm d") & " present with Left early at " & Text(tm, "h:mm AM/PM") & ". A day marked absent is refused."
+                                                        )
+                                                    )
+                                                ),
+                                                With(
+                                                    {n: CountRows(cboAbsAddStuV.SelectedItems), d0: dpAbsAddFromV.SelectedDate, d1: Coalesce(dpAbsAddToV.SelectedDate, dpAbsAddFromV.SelectedDate)},
+                                                    If(
+                                                        varAbsAddErr <> "", "Could not load students: " & varAbsAddErr,
+                                                        n <> 1, "Pick the student.",
+                                                        IsBlank(d0), "Choose the From date.",
+                                                        d1 < d0, "The To date must be on or after the From date.",
+                                                        d1 > DateAdd(Today(), 90, TimeUnit.Days), "The To date can be at most 90 days ahead.",
+                                                        DateDiff(d0, d1, TimeUnit.Days) > 60, "Choose at most 61 days at a time.",
+                                                        !(varAbsAddClass in ["Excused", "Unexcused"]), "Choose Excused or Unexcused.",
+                                                        varAbsAddClass = "Excused" && IsBlank(LookUp(colAbsReasons, ReasonId = varAbsAddReasonId)), "Excused needs an absence reason.",
+                                                        "Ready: Save absence adds a 0 (" & varAbsAddClass & ") for each school day from " & Text(d0, "mmm d") & " to " & Text(d1, "mmm d") & ". Days already marked are skipped and listed."
+                                                    )
+                                                )
+                                            )
+                                          VerticalAlign: =VerticalAlign.Top
+                                    - conAbsAddActionsV:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          DropShadow: =DropShadow.None
+                                          FillPortions: =0
+                                          Height: =44
+                                          LayoutAlignItems: =LayoutAlignItems.Center
+                                          LayoutDirection: =LayoutDirection.Horizontal
+                                          LayoutGap: =8
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                        Children:
+                                          - btnAbsAddSaveV:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Save absence"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                BasePaletteColor: =ColorTeal
+                                                Color: =ColorWhite
+                                                DisplayMode: =If(CanClassify && varAbsAddMode = "absence" && !varAbsSaving && !varAbsLoading && StartsWith(lblAbsAddCheckV.Text, "Ready"), DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =With(
+                                                      {
+                                                          stu: First(cboAbsAddStuV.SelectedItems),
+                                                          d0: dpAbsAddFromV.SelectedDate,
+                                                          d1: Coalesce(dpAbsAddToV.SelectedDate, dpAbsAddFromV.SelectedDate),
+                                                          cls: varAbsAddClass,
+                                                          rsn: With({qr: varAbsAddReasonId}, LookUp('Absence Reasons', ThisRecord.'Absence Reason' = qr && Active = true)),
+                                                          note: Left(Trim(txtAbsAddNoteV.Text), 2000),
+                                                          c0: varAbsCampusId
+                                                      },
+                                                      If(
+                                                          !CanClassify || varAbsSaving || varAbsLoading || varAbsAddMode <> "absence",
+                                                          Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Only the Attendance Office and System Admin can add absences, and not while saving or loading."}); Clear(colAbsReceiptLines),
+                                                          CountRows(cboAbsAddStuV.SelectedItems) <> 1 || IsBlank(d0) || d1 < d0 || d1 > DateAdd(Today(), 90, TimeUnit.Days) || DateDiff(d0, d1, TimeUnit.Days) > 60 || !(cls in ["Excused", "Unexcused"]) || (cls = "Excused" && IsBlank(rsn)),
+                                                          Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. " & lblAbsAddCheckV.Text}); Clear(colAbsReceiptLines),
+                                                          Set(varAbsSaving, true);
+                                                          Clear(colAbsLog);
+                                                          IfError(
+                                                              Concurrent(
+                                                                  ClearCollect(colAbsLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month})),
+                                                                  ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d1 && 'End Date' >= d0)),
+                                                                  ClearCollect(colAbsAddExc, Filter('Calendar Exceptions', Date >= d0 && Date <= d1))
+                                                              ); true,
+                                                              Set(varAbsAddErr, FirstError.Message)
+                                                          );
+                                                          ForAll(
+                                                              Sequence(DateDiff(d0, d1, TimeUnit.Days) + 1, 0) As n,
+                                                              With(
+                                                                  {d: DateAdd(d0, n.Value, TimeUnit.Days)},
+                                                                  With(
+                                                                      {
+                                                                          seg: First(Sort(Filter(colAbsAddEnr, StudentId = stu.StudentId && StartDate <= d && (IsBlank(EndDate) || EndDate >= d)), StartDate, SortOrder.Descending)),
+                                                                          t: First(Filter(colAbsAddTerms, ThisRecord.'Start Date' <= d && ThisRecord.'End Date' >= d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0))),
+                                                                          x: LookUp(colAbsAddExc, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day'),
+                                                                          mk: !IsBlank(LookUp(colAbsAddExc, ThisRecord.Date = d && (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type = 'Type (Calendar Exceptions)'.'Make-up School Day'))
+                                                                      },
+                                                                      With(
+                                                                          {school: !IsBlank(t) && (mk || (Weekday(d, StartOfWeek.Monday) < 6 && IsBlank(x)))},
+                                                                          With(
+                                                                              {live: If(!school || IsBlank(seg), Blank(), With({qs: stu.StudentId, qv: seg.ServiceId, qd: d}, LookUp(Attendance, Student.Student = qs && Service.Service = qv && Date = qd)))},
+                                                                              With(
+                                                                                  {
+                                                                                      outcome: If(
+                                                                                          !school, "not a school day",
+                                                                                          IsBlank(seg), "not enrolled at this campus",
+                                                                                          !IsBlank(LookUp(colAbsLocks, CampusId = c0 && MonthStart = Date(Year(d), Month(d), 1))), "month locked",
+                                                                                          !IsBlank(live) && live.'Is Deleted' <> true && live.Present = true, "teacher marked present - use Needs a decision / ask the teacher",
+                                                                                          !IsBlank(live) && live.'Is Deleted' <> true, "already absent",
+                                                                                          "ok"
+                                                                                      )
+                                                                                  },
+                                                                                  With(
+                                                                                      {
+                                                                                          wr: If(
+                                                                                              outcome = "ok",
+                                                                                              IfError(
+                                                                                                  Patch(
+                                                                                                      Attendance,
+                                                                                                      Coalesce(live, Defaults(Attendance)),
+                                                                                                      {
+                                                                                                          'Record Key': Text(d, "yyyymmdd") & "|" & seg.StudentNumber & "|" & seg.ServiceCode,
+                                                                                                          Date: d,
+                                                                                                          Student: seg.EnrRec.Student,
+                                                                                                          Service: seg.EnrRec.Service,
+                                                                                                          Enrollment: seg.EnrRec,
+                                                                                                          Teacher: seg.EnrRec.Teacher,
+                                                                                                          Campus: seg.EnrRec.Campus,
+                                                                                                          'School Year': seg.EnrRec.'School Year',
+                                                                                                          Term: t,
+                                                                                                          'IEP Ratio': Switch(
+                                                                                                              seg.EnrRec.'IEP Ratio',
+                                                                                                              'IEP Ratio (Enrollments)'.'No Aide', 'IEP Ratio (Attendance)'.'No Aide',
+                                                                                                              'IEP Ratio (Enrollments)'.'1:1', 'IEP Ratio (Attendance)'.'1:1',
+                                                                                                              'IEP Ratio (Enrollments)'.'2:1', 'IEP Ratio (Attendance)'.'2:1',
+                                                                                                              'IEP Ratio (Enrollments)'.'3:1', 'IEP Ratio (Attendance)'.'3:1',
+                                                                                                              'IEP Ratio (Enrollments)'.'4:1', 'IEP Ratio (Attendance)'.'4:1'
+                                                                                                          ),
+                                                                                                          Present: false,
+                                                                                                          'Is Deleted': false,
+                                                                                                          Source: 'Source (Attendance)'.Office,
+                                                                                                          'Absence Classification': Switch(cls, "Excused", 'Absence Classification (Attendance)'.Excused, "Unexcused", 'Absence Classification (Attendance)'.Unexcused),
+                                                                                                          'Absence Reason': If(cls = "Excused", rsn, Blank()),
+                                                                                                          'Classified On': Now(),
+                                                                                                          'Classified By': CurrentUserRow,
+                                                                                                          Notes: note,
+                                                                                                          'Notice Received On': Blank(),
+                                                                                                          'Parent Reported Absent': false,
+                                                                                                          'Source Report ID': Blank(),
+                                                                                                          'Left Early': false,
+                                                                                                          'Left Early At': Blank(),
+                                                                                                          'Left Early Reason': Blank()
+                                                                                                      }
+                                                                                                  ),
+                                                                                                  Blank()
+                                                                                              )
+                                                                                          )
+                                                                                      },
+                                                                                      With(
+                                                                                          {au: If(!IsBlank(wr), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Office absence " & wr.'Record Key', 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_attendance", 'Entity ID': Text(wr.Attendance), Before: If(IsBlank(live), "", JSON({IsDeleted: true, Present: live.Present})), After: JSON({Present: wr.Present, Source: Text(wr.Source), Classification: Text(wr.'Absence Classification'), Reason: Coalesce(wr.'Absence Reason'.Name, ""), Notes: Coalesce(wr.Notes, "")}), Reason: "Manual absence added in Absences (no parent notice)"}), Blank()))},
+                                                                                          Collect(colAbsLog, {AttId: Coalesce(wr.Attendance, live.Attendance, ZeroGuid), StudentName: stu.StudentName, AbsDate: d, TeacherName: Coalesce(seg.TeacherName, ""), CampusName: "", OldClass: If(IsBlank(live), "No record", "Deleted record (reused)"), NewClass: If(IsBlank(wr), "", Text(wr.'Absence Classification') & If(IsBlank(wr.'Absence Reason'), "", " (" & wr.'Absence Reason'.Name & ")")), ReasonName: If(IsBlank(wr), "", Coalesce(wr.Notes, "")), ByName: If(IsBlank(wr), "", Coalesce(wr.'Classified By'.'Full Name', "")), OnText: If(IsBlank(wr), "", Text(wr.'Classified On', "mmm d, yyyy h:mm AM/PM")), Outcome: If(!IsBlank(wr), "created", outcome = "ok", "failed", outcome), AuditOk: !IsBlank(au)})
+                                                                                      )
+                                                                                  )
+                                                                              )
+                                                                          )
+                                                                      )
+                                                                  )
+                                                              )
+                                                          );
+                                                          With(
+                                                              {
+                                                                  cr: CountRows(Filter(colAbsLog, Outcome = "created")),
+                                                                  fl: CountRows(Filter(colAbsLog, Outcome = "failed")),
+                                                                  ns: CountRows(Filter(colAbsLog, Outcome = "not a school day")),
+                                                                  g: First(Filter(colAbsLog, Outcome = "created"))
+                                                              },
+                                                              With(
+                                                                  {sk: CountRows(colAbsLog) - cr - fl - ns},
+                                                                  Set(varAbsReceipt, {Kind: If(cr = 0, "Failed", "Added"), Title: "Add absence · " & stu.StudentName & " · " & Text(d0, "mmm d") & If(d1 = d0, "", " – " & Text(d1, "mmm d")) & ", " & Text(d1, "yyyy") & " · " & cr & " created, " & sk & " skipped, " & fl & " failed" & If(ns > 0, " · " & ns & " non-school day(s) ignored", "")});
+                                                                  ClearCollect(
+                                                                      colAbsReceiptLines,
+                                                                      {Label: "Operation", Value: "Add absence (Source Office, no parent notice)"},
+                                                                      {Label: "Student", Value: stu.StudentName & " · " & stu.StudentNumber},
+                                                                      {Label: "Dates", Value: Text(d0, "ddd mmm d, yyyy") & If(d1 = d0, "", " – " & Text(d1, "ddd mmm d, yyyy"))},
+                                                                      {Label: "Classification", Value: If(cr = 0, "Nothing written", g.NewClass)},
+                                                                      {Label: "Classified by", Value: If(cr = 0, "—", g.ByName & " · " & g.OnText)},
+                                                                      {Label: "Note", Value: If(cr = 0, "—", g.ReasonName = "", "None", g.ReasonName)},
+                                                                      {Label: "Created", Value: Text(cr)},
+                                                                      {Label: "Skipped", Value: Text(sk)},
+                                                                      {Label: "Failed", Value: Text(fl)},
+                                                                      ForAll(Filter(colAbsLog, Outcome <> "not a school day") As g2, {Label: Text(g2.AbsDate, "ddd mmm d"), Value: If(g2.Outcome = "created", "Created · " & g2.NewClass & " · teacher " & g2.TeacherName & If(g2.OldClass = "Deleted record (reused)", " · reused deleted row", "") & If(g2.AuditOk, " · audit Create written", " · audit NOT written"), g2.Outcome = "failed", "FAILED · not written", "Skipped · " & g2.Outcome)})
+                                                                  );
+                                                                  If(cr > 0, Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank()); Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV))
+                                                              )
+                                                          );
+                                                          Set(varAbsSaving, false);
+                                                          If(CountRows(Filter(colAbsLog, Outcome = "created")) > 0, Select(btnAbsLoadEngine))
+                                                      )
+                                                  )
+                                                Size: =14
+                                                Text: ="Save absence"
+                                                Visible: =varAbsAddMode = "absence"
+                                                Width: =150
+                                          - btnAbsLeSaveV:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Save left early"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                BasePaletteColor: =ColorTeal
+                                                Color: =ColorWhite
+                                                DisplayMode: =If(CanClassify && varAbsAddMode = "leftearly" && !varAbsSaving && !varAbsLoading && StartsWith(lblAbsAddCheckV.Text, "Ready"), DisplayMode.Edit, DisplayMode.Disabled)
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =With(
+                                                      {
+                                                          stu: First(cboAbsAddStuV.SelectedItems),
+                                                          d: dpAbsAddFromV.SelectedDate,
+                                                          tt: Trim(txtAbsLeTimeV.Text),
+                                                          why: Left(Trim(txtAbsAddNoteV.Text), 500),
+                                                          c0: varAbsCampusId
+                                                      },
+                                                      With(
+                                                          {tm: If(EndsWith(Upper(tt), "AM") || EndsWith(Upper(tt), "PM"), IfError(TimeValue(tt, "en-US"), Blank()), Blank())},
+                                                          With(
+                                                              {
+                                                                  at: If(IsBlank(tm) || IsBlank(d), Blank(), DateTime(Year(d), Month(d), Day(d), Hour(tm), Minute(tm), 0)),
+                                                                  seg: First(Sort(Filter(colAbsAddEnr, StudentId = stu.StudentId && StartDate <= d && (IsBlank(EndDate) || EndDate >= d)), StartDate, SortOrder.Descending)),
+                                                                  dt: Text(d, "ddd mmm d, yyyy")
+                                                              },
+                                                              If(
+                                                                  !CanClassify || varAbsSaving || varAbsLoading || varAbsAddMode <> "leftearly",
+                                                                  Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Only the Attendance Office and System Admin can record left early, and not while saving or loading."}); Clear(colAbsReceiptLines),
+                                                                  CountRows(cboAbsAddStuV.SelectedItems) <> 1 || IsBlank(d) || d > Today() || IsBlank(at) || at > Now() || why = "",
+                                                                  Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. " & lblAbsAddCheckV.Text}); Clear(colAbsReceiptLines),
+                                                                  IsBlank(seg),
+                                                                  Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " · " & dt & " · not enrolled at this campus on that day"}); Clear(colAbsReceiptLines),
+                                                                  Set(varAbsSaving, true);
+                                                                  IfError(
+                                                                      Concurrent(
+                                                                          ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d)),
+                                                                          ClearCollect(colAbsAddExc, Filter('Calendar Exceptions', Date = d))
+                                                                      ); true,
+                                                                      Set(varAbsAddErr, FirstError.Message)
+                                                                  );
+                                                                  With(
+                                                                      {
+                                                                          t: First(Filter(colAbsAddTerms, IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0)),
+                                                                          x: LookUp(colAbsAddExc, (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type <> 'Type (Calendar Exceptions)'.'Make-up School Day'),
+                                                                          mk: !IsBlank(LookUp(colAbsAddExc, (IsBlank(ThisRecord.Campus) || ThisRecord.Campus.Campus = c0) && ThisRecord.Type = 'Type (Calendar Exceptions)'.'Make-up School Day')),
+                                                                          lk: With({ms: Date(Year(d), Month(d), 1)}, LookUp('Month Locks', Campus.Campus = c0 && Month = ms && 'Status (aaca_status)' = 'Status (Month Locks)'.Locked)),
+                                                                          live: With({qs: stu.StudentId, qv: seg.ServiceId, qd: d}, LookUp(Attendance, Student.Student = qs && Service.Service = qv && Date = qd))
+                                                                      },
+                                                                      With(
+                                                                          {
+                                                                              school: !IsBlank(t) && (mk || (Weekday(d, StartOfWeek.Monday) < 6 && IsBlank(x))),
+                                                                              active: !IsBlank(live) && live.'Is Deleted' <> true
+                                                                          },
+                                                                          If(
+                                                                              !school,
+                                                                              Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " · " & dt & " · not a school day at this campus"}); Clear(colAbsReceiptLines),
+                                                                              !IsBlank(lk),
+                                                                              Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " · " & dt & " · the month is locked for this campus"}); Clear(colAbsReceiptLines),
+                                                                              active && live.Present <> true,
+                                                                              Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " · " & dt & " · the day is marked absent; left early is only for present days"}); Clear(colAbsReceiptLines),
+                                                                              With(
+                                                                                  {
+                                                                                      w: IfError(
+                                                                                          If(
+                                                                                              active,
+                                                                                              Patch(Attendance, live, {'Left Early': true, 'Left Early At': at, 'Left Early Reason': why}),
+                                                                                              Patch(
+                                                                                                  Attendance,
+                                                                                                  Coalesce(live, Defaults(Attendance)),
+                                                                                                  {
+                                                                                                      'Record Key': Text(d, "yyyymmdd") & "|" & seg.StudentNumber & "|" & seg.ServiceCode,
+                                                                                                      Date: d,
+                                                                                                      Student: seg.EnrRec.Student,
+                                                                                                      Service: seg.EnrRec.Service,
+                                                                                                      Enrollment: seg.EnrRec,
+                                                                                                      Teacher: seg.EnrRec.Teacher,
+                                                                                                      Campus: seg.EnrRec.Campus,
+                                                                                                      'School Year': seg.EnrRec.'School Year',
+                                                                                                      Term: t,
+                                                                                                      'IEP Ratio': Switch(
+                                                                                                          seg.EnrRec.'IEP Ratio',
+                                                                                                          'IEP Ratio (Enrollments)'.'No Aide', 'IEP Ratio (Attendance)'.'No Aide',
+                                                                                                          'IEP Ratio (Enrollments)'.'1:1', 'IEP Ratio (Attendance)'.'1:1',
+                                                                                                          'IEP Ratio (Enrollments)'.'2:1', 'IEP Ratio (Attendance)'.'2:1',
+                                                                                                          'IEP Ratio (Enrollments)'.'3:1', 'IEP Ratio (Attendance)'.'3:1',
+                                                                                                          'IEP Ratio (Enrollments)'.'4:1', 'IEP Ratio (Attendance)'.'4:1'
+                                                                                                      ),
+                                                                                                      Present: true,
+                                                                                                      'Is Deleted': false,
+                                                                                                      Source: 'Source (Attendance)'.Office,
+                                                                                                      'Absence Classification': Blank(),
+                                                                                                      'Absence Reason': Blank(),
+                                                                                                      'Classified By': Blank(),
+                                                                                                      'Classified On': Blank(),
+                                                                                                      'Parent Reported Absent': false,
+                                                                                                      'Source Report ID': Blank(),
+                                                                                                      'Notice Received On': Blank(),
+                                                                                                      'Left Early': true,
+                                                                                                      'Left Early At': at,
+                                                                                                      'Left Early Reason': why
+                                                                                                  }
+                                                                                              )
+                                                                                          ),
+                                                                                          Blank()
+                                                                                      )
+                                                                                  },
+                                                                                  If(
+                                                                                      IsBlank(w),
+                                                                                      Set(varAbsReceipt, {Kind: "Failed", Title: "Not saved · " & stu.StudentName & " · " & dt & " · the save failed; press Save left early to retry"}); Clear(colAbsReceiptLines),
+                                                                                      With(
+                                                                                          {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Left early " & w.'Record Key' & " " & Text(w.'Left Early At', "h:mm AM/PM"), 100), Action: If(active, 'Action (Audit Events)'.Update, 'Action (Audit Events)'.Create), Entity: "aaca_attendance", 'Entity ID': Text(w.Attendance), Before: If(active, JSON({Present: live.Present, LeftEarly: live.'Left Early' = true, Source: Text(live.Source)}), IsBlank(live), "", JSON({IsDeleted: true})), After: JSON({Present: w.Present, LeftEarly: w.'Left Early', LeftEarlyAt: Text(w.'Left Early At', "yyyy-mm-dd hh:mm"), Source: Text(w.Source)}), Reason: Left(why, 500)}), Blank())},
+                                                                                          Set(varAbsReceipt, {Kind: "Left early", Title: "Left early recorded · " & stu.StudentName & " · " & Text(w.Date, "ddd mmm d, yyyy") & " · " & Text(w.'Left Early At', "h:mm AM/PM")});
+                                                                                          ClearCollect(
+                                                                                              colAbsReceiptLines,
+                                                                                              {Label: "Student", Value: stu.StudentName & " · " & stu.StudentNumber},
+                                                                                              {Label: "Date", Value: Text(w.Date, "ddd mmm d, yyyy")},
+                                                                                              {Label: "Before", Value: If(active, "Present (marked by the " & If(live.Source = 'Source (Attendance)'.Office, "office", "teacher") & ")", IsBlank(live), "Not marked", "Deleted row (reused)")},
+                                                                                              {Label: "Present", Value: If(w.Present = true, "Yes (1)", "No")},
+                                                                                              {Label: "Left early", Value: If(w.'Left Early' = true, "Yes", "No")},
+                                                                                              {Label: "Left at", Value: Text(w.'Left Early At', "h:mm AM/PM")},
+                                                                                              {Label: "Reason", Value: w.'Left Early Reason'},
+                                                                                              {Label: "Source", Value: Text(w.Source)},
+                                                                                              {Label: "Teacher", Value: seg.TeacherName},
+                                                                                              {Label: "Record key", Value: w.'Record Key'},
+                                                                                              {Label: "Audit event", Value: If(IsBlank(au), "NOT written", If(active, "Update written", "Create written"))}
+                                                                                          );
+                                                                                          Set(varAbsAddMode, ""); Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(txtAbsLeTimeV); Reset(txtAbsAddNoteV)
+                                                                                      )
+                                                                                  )
+                                                                              )
+                                                                          )
+                                                                      )
+                                                                  );
+                                                                  Set(varAbsSaving, false)
+                                                              )
+                                                          )
+                                                      )
+                                                  )
+                                                Size: =14
+                                                Text: ="Save left early"
+                                                Visible: =varAbsAddMode = "leftearly"
+                                                Width: =150
+                                          - btnAbsAddCancelV:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Cancel without saving"
+                                                AlignInContainer: =AlignInContainer.Center
+                                                Appearance: =ButtonAppearance.Secondary
+                                                Color: =ColorInk
+                                                DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: |-
+                                                  =Set(varAbsReceipt, {Kind: "Cancelled", Title: If(varAbsAddMode = "leftearly", "Left early", "Add absence") & " cancelled · nothing was changed"});
+                                                  Clear(colAbsReceiptLines);
+                                                  Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank());
+                                                  Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV)
+                                                Size: =14
+                                                Text: ="Cancel"
+                                                Width: =100

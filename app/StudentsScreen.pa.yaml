@@ -29,7 +29,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, 48, 0)
+                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStuRoot.Width < 640, 100, 48), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -83,12 +83,13 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =44
+                        Height: =If(conStuRoot.Width < 640, 96, 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
+                        LayoutWrap: =true
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -140,6 +141,22 @@ Screens:
                               Size: =14
                               Text: ="Absences"
                               Width: =110
+                        - btnStuNavTransport:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Transportation"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(TransportScreen)
+                              Size: =14
+                              Text: ="Transportation"
+                              Visible: =CanClassify
+                              Width: =140
             - conStuDenied:
                 Control: GroupContainer
                 Variant: AutoLayout

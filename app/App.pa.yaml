@@ -45,6 +45,9 @@ App:
       CurrentSchoolYear = LookUp('School Years', 'Start Date' <= Today() && 'End Date' >= Today());
       // ---------- Parent-report approval (build 5) ----------
       ParentReportCutover = With({v: Trim(Coalesce(LookUp('App Settings', Key = "ParentReportCutoverDate").Value, ""))}, If(Len(v) = 10, IfError(Date(Value(Left(v, 4)), Value(Mid(v, 6, 2)), Value(Mid(v, 9, 2))), Date(2026, 1, 1)), Date(2026, 1, 1)));
+      // ---------- Transportation (build 9) ----------
+      TransportStatusOptions = ["Round trip", "Drop off only", "Pick up only", "No transportation"];
+      TransportPatternOptions = ["Round trip", "Drop off only", "Pick up only"];
     OnStart: |-
       =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1));
       Set(varMonthEnd, DateAdd(DateAdd(Date(Year(Today()), Month(Today()), 1), 1, TimeUnit.Months), -1, TimeUnit.Days));
@@ -133,6 +136,31 @@ App:
       Set(varAbsMeSelId, 0);
       Set(varAbsMeSelId, Blank());
       Set(varAbsMeMode, "");
-      Set(varAbsMeReceipt, {Kind: "", Title: "", Body: ""})
+      Set(varAbsMeReceipt, {Kind: "", Title: "", Body: ""});
+      Set(varAbsAddMode, "");
+      Set(varAbsAddClass, "");
+      Set(varAbsAddReasonId, ZeroGuid);
+      Set(varAbsAddReasonId, Blank());
+      Set(varAbsAddErr, "");
+      Set(varTrnView, "daily");
+      Set(varTrnCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(Sort(Campuses, Name, SortOrder.Ascending)).Campus, ZeroGuid)));
+      Set(varTrnDate, Today());
+      Set(varTrnIsSchoolDay, false);
+      Set(varTrnDayReason, "");
+      Set(varTrnLoading, false);
+      Set(varTrnSaving, false);
+      Set(varTrnLoadError, "");
+      Set(varTrnShowEnded, false);
+      Set(varTrnStuMode, "");
+      Set(varTrnSelStId, ZeroGuid);
+      Set(varTrnSelStId, Blank());
+      Set(varTrnReq, {Scope: ""});
+      Set(varTrnReceipt, {Kind: "", Title: ""});
+      ClearCollect(colTrnReceiptLines, {Label: "", Value: ""});
+      Clear(colTrnReceiptLines);
+      ClearCollect(colTrnWork, {StudentId: ZeroGuid, Status: ""});
+      Clear(colTrnWork);
+      ClearCollect(colTrnLog, {StudentName: "", Before: "", Status: "", ByName: "", OnText: "", LogKey: "", Outcome: "", AuditOk: false});
+      Clear(colTrnLog)
     StartScreen: =Screen1
     Theme: =PowerAppsTheme
