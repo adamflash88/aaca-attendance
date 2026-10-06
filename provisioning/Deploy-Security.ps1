@@ -103,6 +103,8 @@ $roles['AACA Finance'] = @{ Description = 'Billing: CodeMetro uploads, mappings,
 $m = @{}
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Read', 'AppendTo' 'Basic'
 Grant $m 'aaca_student', 'aaca_enrollment', 'aaca_attendance' 'Append' 'Basic'
+# Absence report intake flow gives each processed/error report record to the campus team.
+Grant $m 'aaca_reportdecision' 'Read', 'Append' 'Basic'
 Grant $m 'aaca_guardianlink', 'aaca_absencenotice', 'aaca_emergencycontact', 'aaca_studentmedication' 'Read', 'Append' 'Basic'
 Grant $m $reference 'Read', 'AppendTo' 'Global'
 $roles['AACA Campus Records'] = @{ Description = 'For campus default teams only: lets a campus team own its students, enrollments, attendance and family-portal records.'; Matrix = $m }
@@ -163,6 +165,11 @@ foreach ($c in $campuses) {
     if (-not $has) {
         Invoke-Dv -Method Post -Path "teams($($team.teamid))/teamroles_association/`$ref" -Body @{ '@odata.id' = "$script:DvApi/roles($($r.roleid))" } | Out-Null
         Write-Host "Campus team $($c.aaca_name): AACA Campus Records assigned" -ForegroundColor Green
+    }
+    # Flows (e.g. absence report intake) read this to give new campus records to the campus team.
+    $cr = Invoke-Dv -Path "$(Get-DvEntitySet 'aaca_campus')($($c.aaca_campusid))?`$select=aaca_ownerteamid" -AllowNotFound
+    if ($cr -and $cr.PSObject.Properties['aaca_ownerteamid'] -and $cr.aaca_ownerteamid -ne "$($team.teamid)") {
+        Invoke-Dv -Method Patch -Path "$(Get-DvEntitySet 'aaca_campus')($($c.aaca_campusid))" -Body @{ aaca_ownerteamid = "$($team.teamid)" } | Out-Null
     }
 }
 #endregion

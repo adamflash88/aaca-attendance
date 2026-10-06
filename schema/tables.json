@@ -35,6 +35,13 @@
           "type": "bool",
           "displayName": "Active",
           "default": true
+        },
+        {
+          "logicalName": "aaca_ownerteamid",
+          "type": "text",
+          "displayName": "Owner Team ID",
+          "maxLength": 50,
+          "description": "GUID of the campus business unit's default team (set by Deploy-Security.ps1); flows assign new campus records to it."
         }
       ],
       "keys": [
@@ -1157,6 +1164,39 @@
           "min": 0,
           "max": 2147483647,
           "description": "SharePoint Student Absence Log item ID of the parent report whose approval created or classified this absence."
+        },
+        {
+          "logicalName": "aaca_source",
+          "type": "choice",
+          "displayName": "Source",
+          "options": [
+            [
+              582100000,
+              "Teacher"
+            ],
+            [
+              582100001,
+              "Parent report"
+            ],
+            [
+              582100002,
+              "Office"
+            ]
+          ],
+          "description": "Who created the record: teacher mark, parent absence report (intake flow) or office entry."
+        },
+        {
+          "logicalName": "aaca_noticereceivedon",
+          "type": "datetime",
+          "displayName": "Notice Received On",
+          "description": "When the parent report arrived (SharePoint Created time). Used for the 24-hour billable-notice rule."
+        },
+        {
+          "logicalName": "aaca_parentreportedabsent",
+          "type": "bool",
+          "displayName": "Parent Reported Absent",
+          "default": false,
+          "description": "A parent reported this day absent but the teacher had already marked present: the office decides (Classify tab)."
         }
       ],
       "keys": [
@@ -1449,6 +1489,36 @@
           "type": "text",
           "displayName": "Student Key",
           "maxLength": 50
+        },
+        {
+          "logicalName": "aaca_processingstatus",
+          "type": "choice",
+          "displayName": "Processing Status",
+          "options": [
+            [
+              582100000,
+              "Processed"
+            ],
+            [
+              582100001,
+              "Error"
+            ]
+          ],
+          "description": "Intake flow result. Error rows appear in the Mapping Errors tab."
+        },
+        {
+          "logicalName": "aaca_errordetail",
+          "type": "text",
+          "displayName": "Error Detail",
+          "maxLength": 500
+        },
+        {
+          "logicalName": "aaca_daysconflict",
+          "type": "int",
+          "displayName": "Days Conflict",
+          "min": 0,
+          "max": 1000,
+          "description": "Days the teacher had already marked present (flagged, not overwritten)."
         }
       ],
       "keys": [

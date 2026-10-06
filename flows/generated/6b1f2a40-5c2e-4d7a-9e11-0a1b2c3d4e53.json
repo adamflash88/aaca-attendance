@@ -1,0 +1,116 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e53",
+ "name": "AACA - Absence Report Backfill",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_sharepointonline": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedsharepointonline_4204c"
+     },
+     "api": {
+      "name": "shared_sharepointonline"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "manual": {
+      "metadata": {
+       "operationMetadataId": "cfa8f659-6a10-485e-8680-c431c0049ba5"
+      },
+      "type": "Request",
+      "kind": "Button",
+      "inputs": {
+       "schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+       }
+      }
+     }
+    },
+    "actions": {
+     "All_reports": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "27704950-9026-4394-bf5f-bd8d3d1aa660"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_sharepointonline",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+        "operationId": "GetItems"
+       },
+       "parameters": {
+        "dataset": "https://autismacademy.sharepoint.com/sites/FinanceMain",
+        "table": "1058d183-30d4-4fe8-83f6-1c5120edf24f",
+        "$top": 5000
+       },
+       "authentication": {
+        "type": "Raw",
+        "value": "@json(decodeBase64(triggerOutputs().headers['X-MS-APIM-Tokens']))['$ConnectionKey']"
+       }
+      },
+      "runtimeConfiguration": {
+       "paginationPolicy": {
+        "minimumItemCount": 20000
+       }
+      }
+     },
+     "Each_report": {
+      "runAfter": {
+       "All_reports": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "eac6fb36-b65c-4277-9b45-e2b6e00a6b39"
+      },
+      "type": "Foreach",
+      "foreach": "@body('All_reports')?['value']",
+      "actions": {
+       "Process_one": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "203ad394-cb70-468a-b0cb-e2e23ddc008c"
+        },
+        "type": "Workflow",
+        "inputs": {
+         "host": {
+          "workflowReferenceName": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e51"
+         },
+         "body": {
+          "text": "@{items('Each_report')?['ID']}"
+         }
+        }
+       }
+      },
+      "runtimeConfiguration": {
+       "concurrency": {
+        "repetitions": 1
+       }
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}

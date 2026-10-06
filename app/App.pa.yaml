@@ -103,7 +103,7 @@ App:
       Set(varAbsTeacherId, ZeroGuid);
       Set(varAbsStatus, "Not classified");
       Set(varAbsFrom, ParentReportCutover);
-      Set(varAbsTo, Today());
+      Set(varAbsTo, DateAdd(Today(), 90, TimeUnit.Days));
       Set(varAbsLoading, false);
       Set(varAbsSaving, false);
       Set(varAbsLoadError, "");
@@ -124,37 +124,15 @@ App:
       ClearCollect(colAbsReceiptLines, {Label: "", Value: ""});
       Clear(colAbsReceiptLines);
       Set(varAbsView, "classify");
-      Set(varAbsNrLoading, false);
-      Set(varAbsNrSaving, false);
-      Set(varAbsNrLoaded, false);
-      Set(varAbsNrLoadError, "");
-      Set(varAbsNrErr, "");
-      Set(varAbsNrAllCampuses, false);
-      Set(varAbsNrSelId, 0);
-      Set(varAbsNrSelId, Blank());
-      Set(varAbsNrCalFor, 0);
-      Set(varAbsNrCalFor, Blank());
-      Set(varAbsNrPickId, ZeroGuid);
-      Set(varAbsNrPickId, Blank());
-      Set(varAbsNrReceipt, {Kind: "", Title: "", Body: "", ItemId: 0});
-      Set(varAbsApLoading, false);
-      Set(varAbsApLoaded, false);
-      Set(varAbsApSaving, false);
-      Set(varAbsApLoadError, "");
-      Set(varAbsApPlanErr, "");
-      Set(varAbsApSelId, 0);
-      Set(varAbsApSelId, Blank());
-      Set(varAbsApPlanFor, 0);
-      Set(varAbsApPlanFor, Blank());
-      Set(varAbsApClass, "");
-      Set(varAbsApReasonId, ZeroGuid);
-      Set(varAbsApReasonId, Blank());
-      Set(varAbsApDismissOpen, false);
-      Set(varAbsApReceipt, {Kind: "", Title: "", Body: "", ItemId: 0});
-      Set(varAbsApGridLink, {StudentId: ZeroGuid, TeacherId: ZeroGuid, CampusId: ZeroGuid, FirstDay: Today()});
-      ClearCollect(colAbsApPlan, {DayDate: Today(), EnrId: ZeroGuid, TermId: ZeroGuid, CampusId: ZeroGuid, ServiceId: ZeroGuid, TeacherId: ZeroGuid, TeacherName: "", Outcome: "", OutcomeText: ""});
-      Clear(colAbsApPlan);
-      ClearCollect(colAbsApLog, {DayDate: Today(), Outcome: "", Detail: "", AttId: ZeroGuid});
-      Clear(colAbsApLog)
+      Set(varAbsMeLoading, false);
+      Set(varAbsMeLoaded, false);
+      Set(varAbsMeSaving, false);
+      Set(varAbsMeLoadError, "");
+      Set(varAbsMeErr, "");
+      Set(varAbsMeCampusId, ZeroGuid);
+      Set(varAbsMeSelId, 0);
+      Set(varAbsMeSelId, Blank());
+      Set(varAbsMeMode, "");
+      Set(varAbsMeReceipt, {Kind: "", Title: "", Body: ""})
     StartScreen: =Screen1
     Theme: =PowerAppsTheme
