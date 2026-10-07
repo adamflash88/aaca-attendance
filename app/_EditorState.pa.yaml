@@ -4,3 +4,4 @@ EditorState:
     - StudentsScreen
     - AbsencesScreen
     - TransportScreen
+    - StaffScreen

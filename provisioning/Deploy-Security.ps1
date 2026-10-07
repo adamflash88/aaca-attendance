@@ -69,6 +69,9 @@ Grant $m 'aaca_attendance' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 Grant $m 'aaca_calendarexception', 'aaca_monthlock' 'Create', 'Write', 'Append' 'Local'
 Grant $m 'aaca_absencereason' 'Create', 'Write' 'Global'
 Grant $m 'aaca_reportdecision' 'Create', 'Read', 'Write', 'Append' 'Local'   # Write: Mapping Errors Dismiss updates an error row
+# Staff screen (build 10): add teachers, fix names/emails, retire. Staff rows are owned by the campus team, so Local =
+# their campus. Roles are never granted from the Staff row except Teacher (Sync-StaffAccess flow).
+Grant $m 'aaca_staff' 'Create', 'Write', 'Append' 'Local'
 # Transportation section: which students are transported and the daily confirmation.
 Grant $m 'aaca_studenttransport', 'aaca_transportlog' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 # Family portal: process their campus's absence notices (parents create them through the portal) and see who the

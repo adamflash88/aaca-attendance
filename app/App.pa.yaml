@@ -48,6 +48,9 @@ App:
       // ---------- Transportation (build 9) ----------
       TransportStatusOptions = ["Round trip", "Drop off only", "Pick up only", "No transportation"];
       TransportPatternOptions = ["Round trip", "Drop off only", "Pick up only"];
+      // ---------- Staff (build 10) ----------
+      StaffPending = IsBlank(CurrentStaff) && !IsBlank(LookUp(Staff, Email = Lower(User().Email) && Active = true));
+      StaffRoleOptions = ["Teacher", "Attendance Office", "Read-only", "System Admin"];
     OnStart: |-
       =Set(varMonthStart, Date(Year(Today()), Month(Today()), 1));
       Set(varMonthEnd, DateAdd(DateAdd(Date(Year(Today()), Month(Today()), 1), 1, TimeUnit.Months), -1, TimeUnit.Days));
@@ -67,7 +70,7 @@ App:
               CurrentStaff,
               First(
                   Sort(
-                      Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher),
+                      Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher && Active = true),
                       Name,
                       SortOrder.Ascending
                   )
@@ -161,6 +164,36 @@ App:
       ClearCollect(colTrnWork, {StudentId: ZeroGuid, Status: ""});
       Clear(colTrnWork);
       ClearCollect(colTrnLog, {StudentName: "", Before: "", Status: "", ByName: "", OnText: "", LogKey: "", Outcome: "", AuditOk: false});
-      Clear(colTrnLog)
+      Clear(colTrnLog);
+      Set(varStfCampusId, If(StudentCampusLock <> ZeroGuid, StudentCampusLock, !IsBlank(CurrentStaff.Campus), CurrentStaff.Campus.Campus, Coalesce(First(Sort(Campuses, Name, SortOrder.Ascending)).Campus, ZeroGuid)));
+      Set(varStfSelId, ZeroGuid);
+      Set(varStfSelId, Blank());
+      Set(varStfMode, "");
+      Set(varStfShowRetired, false);
+      Set(varStfLoading, false);
+      Set(varStfSaving, false);
+      Set(varStfLoadError, "");
+      Set(varStfXferDate, Today());
+      Set(varStfReceipt, {Kind: "", Title: ""});
+      ClearCollect(colStfCampusOpts, {CampusId: ZeroGuid, CampusName: ""});
+      Clear(colStfCampusOpts);
+      ClearCollect(colStfAll, {StaffId: ZeroGuid, StaffName: "", Email: "", RoleText: "", CampusId: ZeroGuid, CampusName: "", StartDate: Today(), EndDate: Today(), IsActive: false, Linked: false, StudentsNow: 0, SearchKey: ""});
+      Clear(colStfAll);
+      ClearCollect(colStfEmails, {StaffId: ZeroGuid, StaffName: "", EmailL: "", UserEmailL: ""});
+      Clear(colStfEmails);
+      ClearCollect(colStfEnr, {EnrId: ZeroGuid, TeacherId: ZeroGuid});
+      Clear(colStfEnr);
+      ClearCollect(colStfLocks, {MonthStart: Today()});
+      Clear(colStfLocks);
+      ClearCollect(colStfXferEnr, {EnrId: ZeroGuid, StudentId: ZeroGuid, StudentName: "", StudentNumber: "", StudentStatus: "", ServiceId: ZeroGuid, RatioText: "", StartDate: Today(), EndDate: Today(), YearEnd: Today()});
+      Clear(colStfXferEnr);
+      ClearCollect(colStfPlan, {EnrId: ZeroGuid, StudentId: ZeroGuid, StudentName: "", StudentNumber: "", RatioText: "", StartDate: Today(), Action: "", Reason: ""});
+      Clear(colStfPlan);
+      ClearCollect(colStfXferWork, {EnrId: ZeroGuid, StudentId: ZeroGuid, StudentName: "", StudentNumber: "", RatioText: "", StartDate: Today(), Action: "", Reason: ""});
+      Clear(colStfXferWork);
+      ClearCollect(colStfLog, {EnrId: ZeroGuid, StudentName: "", StudentNumber: "", Action: "", Outcome: "", Detail: "", NewEnrId: ZeroGuid, AuditOk: false});
+      Clear(colStfLog);
+      ClearCollect(colStfReceiptLines, {Label: "", Value: ""});
+      Clear(colStfReceiptLines)
     StartScreen: =Screen1
     Theme: =PowerAppsTheme

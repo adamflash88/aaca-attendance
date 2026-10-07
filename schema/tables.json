@@ -108,6 +108,24 @@
           "displayName": "Site Administrator",
           "default": false,
           "description": "Receives the weekly open-items summary for their campus."
+        },
+        {
+          "logicalName": "aaca_email",
+          "type": "text",
+          "displayName": "Email",
+          "maxLength": 100,
+          "description": "Work email. The access flow links the Staff row to the user account with this email."
+        },
+        {
+          "logicalName": "aaca_startdate",
+          "type": "date",
+          "displayName": "Start Date"
+        },
+        {
+          "logicalName": "aaca_enddate",
+          "type": "date",
+          "displayName": "End Date",
+          "description": "Set when the person is retired (Active = No)."
         }
       ]
     },

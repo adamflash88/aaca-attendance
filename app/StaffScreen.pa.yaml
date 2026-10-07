@@ -1,0 +1,1819 @@
+Screens:
+  StaffScreen:
+    Properties:
+      Fill: =ColorPaper
+      OnVisible: |-
+        =Set(varStfSaving, false);
+        Set(varStfLoading, false);
+        Set(varStfMode, "");
+        Set(varStfSelId, Blank());
+        Set(varStfReceipt, {Kind: "", Title: ""});
+        Clear(colStfReceiptLines);
+        Clear(colStfPlan);
+        If(StudentCampusLock <> ZeroGuid, Set(varStfCampusId, StudentCampusLock));
+        ClearCollect(colStfCampusOpts, ForAll(Sort(Campuses, Name, SortOrder.Ascending) As c, {CampusId: c.Campus, CampusName: c.Name}));
+        If(varStfCampusId = ZeroGuid, Set(varStfCampusId, Coalesce(First(colStfCampusOpts).CampusId, ZeroGuid)));
+        Select(btnStfLoadEngine)
+    Children:
+      - conStfRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorPaper
+            Height: =Parent.Height
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =8
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+          Children:
+            - conStfHeader:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorInk
+                  FillPortions: =0
+                  Height: =If(conStfRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStfRoot.Width < 640, 152, 48), 0) + If(CanManageStudents, 60, 0)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =If(CanManageStudents, 0, 12)
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - lblStfTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="AACA Attendance"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorWhite
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =0
+                        Size: =20
+                        Text: ="AACA Attendance"
+                        Wrap: =false
+                  - lblStfIdentity:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInkSoft
+                        Height: =If(conStfRoot.Width < 640, 36, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =0
+                        Size: =12
+                        Text: =Coalesce(CurrentUserRow.'Full Name', User().FullName) & " · " & RoleLabel & " · " & If(!StaffReady, "no campus", IsBlank(CurrentStaff.Campus), "All campuses", CurrentStaff.Campus.Name)
+                        VerticalAlign: =VerticalAlign.Top
+                  - conStfNav:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conStfRoot.Width < 640, 148, 44) + 8
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutWrap: =true
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanManageStudents
+                      Children:
+                        - btnStfNavAttendance:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Attendance"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(Screen1)
+                              Size: =14
+                              Text: ="Attendance"
+                              Width: =110
+                        - btnStfNavStudents:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Students"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StudentsScreen)
+                              Size: =14
+                              Text: ="Students"
+                              Width: =110
+                        - btnStfNavAbsences:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Absences"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(AbsencesScreen)
+                              Size: =14
+                              Text: ="Absences"
+                              Width: =110
+                        - btnStfNavTransport:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Transportation"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(TransportScreen)
+                              Size: =14
+                              Text: ="Transportation"
+                              Visible: =CanClassify
+                              Width: =140
+                        - btnStfNavStaff:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Staff (current screen)"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorTeal
+                              Color: =ColorWhite
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StaffScreen)
+                              Size: =14
+                              Text: ="Staff"
+                              Visible: =CanManageStudents
+                              Width: =80
+                  - conStfHdrBar:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorPaper
+                        FillPortions: =0
+                        Height: =60
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =16
+                        PaddingRight: =16
+                        PaddingTop: =8
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanManageStudents
+                      Children:
+                        - lblStfCampus:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: ="Campus"
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Campus"
+                              Width: =56
+                              Wrap: =false
+                        - ddStfCampus:
+                            Control: ModernDropdown
+                            Properties:
+                              AccessibleLabel: ="Campus"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =Appearance.Outline
+                              Color: =ColorInk
+                              Default: =LookUp(colStfCampusOpts, CampusId = varStfCampusId)
+                              DisplayMode: =If(StudentCampusLock = ZeroGuid && !varStfLoading && !varStfSaving, DisplayMode.Edit, DisplayMode.Disabled)
+                              Height: =36
+                              ItemDisplayText: =ThisItem.CampusName
+                              Items: =colStfCampusOpts
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnChange: |-
+                                =Set(varStfCampusId, Coalesce(Self.Selected.CampusId, ZeroGuid));
+                                Set(varStfMode, "");
+                                Set(varStfSelId, Blank());
+                                Clear(colStfPlan);
+                                Select(btnStfLoadEngine)
+                              Width: =220
+            - conStfDenied:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + If(conStfRoot.Width < 640, 48, 24) + 8 + If(conStfRoot.Width < 640, 112, 48) + 8 + 44 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =!CanManageStudents
+                Children:
+                  - lblStfDeniedTitle:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="Staff is not available for your role"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        FontWeight: =FontWeight.Semibold
+                        Height: =If(conStfRoot.Width < 640, 48, 24)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =16
+                        Text: ="Staff is not available for your role"
+                        VerticalAlign: =VerticalAlign.Top
+                  - lblStfDeniedBody:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =If(conStfRoot.Width < 640, 112, 48)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =14
+                        Text: =If(!StaffReady, "Your sign-in is not linked to an active Staff record. Ask your office manager to add you on the Staff screen.", "Only the Attendance Office and System Admin roles manage staff. Teachers and Read-only users record and view attendance on the Attendance screen.")
+                        VerticalAlign: =VerticalAlign.Top
+                  - btnStfDeniedBack:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Back to Attendance"
+                        AlignInContainer: =AlignInContainer.Start
+                        Appearance: =ButtonAppearance.Secondary
+                        Color: =ColorInk
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Navigate(Screen1)
+                        Size: =14
+                        Text: ="Back to Attendance"
+                        Width: =190
+            - conStfBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conStfReceipt.Visible, conStfReceipt.Height + 8, 0) + conStfView.Height
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =CanManageStudents
+                Children:
+                  - conStfReceipt:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        DropShadow: =DropShadow.None
+                        Fill: =Switch(varStfReceipt.Kind, "Failed", ColorErrorBg, "Blocked", ColorErrorBg, "Partial", ColorWarnBg, ColorInfoBg)
+                        FillPortions: =0
+                        Height: =8 + If(conStfRoot.Width < 640, 124, 64) + If(CountRows(colStfReceiptLines) > 0, 4 + galStfReceipt.Height, 0) + 8
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =8
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =8
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        Visible: =varStfReceipt.Kind <> ""
+                      Children:
+                        - conStfReceiptTop:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =If(conStfRoot.Width < 640, 124, 64)
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                            Children:
+                              - lblStfReceiptTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =varStfReceipt.Title
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =If(conStfRoot.Width < 640, 124, 64)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: =varStfReceipt.Title
+                                    VerticalAlign: =VerticalAlign.Top
+                              - btnStfReceiptClose:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Close result"
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =ButtonAppearance.Secondary
+                                    Color: =ColorInk
+                                    Height: =44
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varStfReceipt, {Kind: "", Title: ""}); Clear(colStfReceiptLines)
+                                    Size: =14
+                                    Text: ="Close"
+                                    Width: =88
+                        - galStfReceipt:
+                            Control: Gallery
+                            Variant: Vertical
+                            Properties:
+                              AccessibleLabel: ="Staff result details"
+                              FillPortions: =0
+                              Height: =Min(560, RoundUp(CountRows(colStfReceiptLines) / If(conStfRoot.Width < 1024, 1, 2), 0) * If(conStfRoot.Width < 640, 88, 56))
+                              Items: =colStfReceiptLines
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Selectable: =false
+                              TabIndex: =0
+                              TemplatePadding: =0
+                              TemplateSize: =If(conStfRoot.Width < 640, 88, 56)
+                              Visible: =CountRows(colStfReceiptLines) > 0
+                              WrapCount: =If(conStfRoot.Width < 1024, 1, 2)
+                            Children:
+                              - conStfRcptRow:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    Height: =Parent.TemplateHeight
+                                    LayoutAlignItems: =LayoutAlignItems.Stretch
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    PaddingBottom: =2
+                                    PaddingRight: =8
+                                    PaddingTop: =2
+                                    Width: =Parent.TemplateWidth - 16
+                                  Children:
+                                    - lblStfRcptLabel:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =ThisItem.Label
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =Parent.Height - 4
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.Label
+                                          VerticalAlign: =VerticalAlign.Top
+                                          Width: =If(conStfRoot.Width < 640, 110, 160)
+                                    - lblStfRcptValue:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =ThisItem.Label & " " & ThisItem.Value
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          Height: =Parent.Height - 4
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: =ThisItem.Value
+                                          VerticalAlign: =VerticalAlign.Top
+                  - conStfView:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =If(conStfRoot.Width >= 1024, Max(conStfListPanel.Height, conStfPanel.Height), If(conStfListPanel.Visible, conStfListPanel.Height, 0) + If(conStfListPanel.Visible && conStfPanel.Visible, 8, 0) + If(conStfPanel.Visible, conStfPanel.Height, 0))
+                        LayoutAlignItems: =If(conStfRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                        LayoutDirection: =If(conStfRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =CanManageStudents
+                      Children:
+                        - conStfListPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conStfRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conStfRoot.Width >= 1024, 2, 0)
+                              Height: =16 + 44 + 8 + If(conStfRoot.Width < 640, 88, 44) + If(lblStfListNote.Visible, 8 + 36, 0) + If(galStfList.Visible, 8 + galStfList.Height, 0) + 16
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =8
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =!(conStfRoot.Width < 1024 && varStfMode <> "")
+                            Children:
+                              - conStfListHead:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                  Children:
+                                    - lblStfListTitle:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          FillPortions: =1
+                                          FontWeight: =FontWeight.Bold
+                                          Height: =30
+                                          LayoutMinHeight: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =18
+                                          Text: ="Staff at " & LookUp(colStfCampusOpts, CampusId = varStfCampusId).CampusName & " (" & CountRows(Filter(colStfAll, (varStfShowRetired || IsActive) && (Trim(txtStfSearch.Text) = "" || Lower(Trim(txtStfSearch.Text)) in SearchKey))) & ")"
+                                          Wrap: =false
+                                    - btnStfAdd:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Add a teacher"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =ColorTeal
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanManageStudents && !varStfSaving && !varStfLoading && varStfCampusId <> ZeroGuid, DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varStfSelId, Blank()); Set(varStfMode, "add"); Select(btnStfFormResetEngine)
+                                          Size: =14
+                                          Text: ="Add teacher"
+                                          Width: =130
+                              - conStfListTools:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =If(conStfRoot.Width < 640, 88, 44)
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    LayoutWrap: =true
+                                  Children:
+                                    - txtStfSearch:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Search staff by name or email"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          MaxLength: =100
+                                          Placeholder: ="Search name or email"
+                                          Type: =TextInputType.Search
+                                          Width: =240
+                                    - tglStfRetired:
+                                        Control: ModernToggle
+                                        Properties:
+                                          AccessibleLabel: ="Show retired staff"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Color: =ColorInk
+                                          Default: =varStfShowRetired
+                                          Height: =44
+                                          Label: ="Show retired"
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnCheck: =Set(varStfShowRetired, true)
+                                          OnUncheck: =Set(varStfShowRetired, false)
+                                          Width: =150
+                              - lblStfListNote:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(varStfLoadError <> "", ColorUnexcused, ColorInk)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =If(
+                                          varStfLoading, "Loading...",
+                                          varStfLoadError <> "", "Could not load: " & varStfLoadError & ". Change campus or reopen the screen to try again.",
+                                          CountRows(Filter(colStfAll, (varStfShowRetired || IsActive) && (Trim(txtStfSearch.Text) = "" || Lower(Trim(txtStfSearch.Text)) in SearchKey))) = 0, If(Trim(txtStfSearch.Text) <> "", "No staff match the search.", "No staff at this campus" & If(varStfShowRetired, "", " (retired staff are hidden)") & "."),
+                                          ""
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =Self.Text <> ""
+                              - galStfList:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Staff list"
+                                    FillPortions: =0
+                                    Height: =Min(If(conStfRoot.Width < 640, 4, 7), CountRows(Filter(colStfAll, (varStfShowRetired || IsActive) && (Trim(txtStfSearch.Text) = "" || Lower(Trim(txtStfSearch.Text)) in SearchKey)))) * If(conStfRoot.Width < 640, 176, 88)
+                                    Items: =SortByColumns(Filter(colStfAll, (varStfShowRetired || IsActive) && (Trim(txtStfSearch.Text) = "" || Lower(Trim(txtStfSearch.Text)) in SearchKey)), "StaffName", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conStfRoot.Width < 640, 176, 88)
+                                    Visible: =CountRows(Filter(colStfAll, (varStfShowRetired || IsActive) && (Trim(txtStfSearch.Text) = "" || Lower(Trim(txtStfSearch.Text)) in SearchKey))) > 0
+                                  Children:
+                                    - conStfRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.StaffId = varStfSelId, ColorInfoBg, !ThisItem.IsActive, ColorNonSchool, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =If(conStfRoot.Width < 640, LayoutAlignItems.Stretch, LayoutAlignItems.Center)
+                                          LayoutDirection: =If(conStfRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                                          LayoutGap: =8
+                                          PaddingBottom: =8
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =8
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - conStfRowInfo:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =If(conStfRoot.Width < 640, 0, 1)
+                                                Height: =If(conStfRoot.Width < 640, 102, 66)
+                                                LayoutAlignItems: =LayoutAlignItems.Stretch
+                                                LayoutDirection: =LayoutDirection.Vertical
+                                                LayoutGap: =4
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =If(conStfRoot.Width < 640, 0, 260)
+                                              Children:
+                                                - lblStfRowName:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =If(ThisItem.IsActive, ColorInk, ColorMuted)
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =If(conStfRoot.Width < 640, 40, 22)
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =14
+                                                      Text: =ThisItem.StaffName & " · " & If(ThisItem.Email = "", "no work email", ThisItem.Email)
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                      Wrap: =conStfRoot.Width < 640
+                                                - lblStfRowMeta:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =If(ThisItem.IsActive, ColorInk, ColorMuted)
+                                                      Height: =If(conStfRoot.Width < 640, 36, 18)
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: |-
+                                                        =ThisItem.RoleText & " · Students now: " & ThisItem.StudentsNow & " · Account: " & If(ThisItem.Linked, "Linked", "Waiting for account")
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                      Wrap: =conStfRoot.Width < 640
+                                                - lblStfRowStatus:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =If(ThisItem.IsActive, ColorTeal, ColorMuted)
+                                                      FontWeight: =FontWeight.Semibold
+                                                      Height: =18
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: =If(ThisItem.IsActive, "Active", "Retired" & If(IsBlank(ThisItem.EndDate), "", " since " & Text(ThisItem.EndDate, "mmm d, yyyy")))
+                                                      Wrap: =false
+                                          - btnStfRowSelect:
+                                              Control: ModernButton
+                                              Properties:
+                                                AccessibleLabel: ="Select " & ThisItem.StaffName
+                                                AlignInContainer: =If(conStfRoot.Width < 640, AlignInContainer.Start, AlignInContainer.Center)
+                                                Appearance: =If(ThisItem.StaffId = varStfSelId, ButtonAppearance.Primary, ButtonAppearance.Secondary)
+                                                BasePaletteColor: =ColorTeal
+                                                Color: =If(ThisItem.StaffId = varStfSelId, ColorWhite, ColorInk)
+                                                DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                                Height: =44
+                                                Layout: =ButtonLayout.TextOnly
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                OnSelect: =Set(varStfSelId, ThisItem.StaffId); Set(varStfMode, ""); Clear(colStfPlan)
+                                                Size: =14
+                                                Text: =If(ThisItem.StaffId = varStfSelId, "Selected", "Select")
+                                                Width: =100
+                        - conStfPanel:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              AlignInContainer: =If(conStfRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              FillPortions: =If(conStfRoot.Width >= 1024, 1, 0)
+                              Height: |-
+                                =32 + Switch(
+                                    varStfMode,
+                                    "add", If(IsAdminRole, 512, 364),
+                                    "edit", If(IsAdminRole, 588, 440),
+                                    "transfer", 556 + If(galStfPlan.Visible, 4 + galStfPlan.Height, 0),
+                                    "retire", 272,
+                                    "reactivate", 210,
+                                    If(IsBlank(varStfSelId), 104, 244)
+                                )
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =4
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =16
+                              PaddingLeft: =16
+                              PaddingRight: =16
+                              PaddingTop: =16
+                              RadiusBottomLeft: =6
+                              RadiusBottomRight: =6
+                              RadiusTopLeft: =6
+                              RadiusTopRight: =6
+                              Visible: =conStfRoot.Width >= 1024 || varStfMode <> "" || !IsBlank(varStfSelId)
+                            Children:
+                              - lblStfPanelTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =28
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =18
+                                    Text: =Switch(varStfMode, "add", "Add teacher", "edit", "Edit staff member", "transfer", "Transfer class", "retire", "Retire", "reactivate", "Reactivate", "Staff details")
+                                    Wrap: =false
+                              - lblStfFacts:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =72
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With(
+                                          {p: LookUp(colStfAll, StaffId = varStfSelId)},
+                                          If(
+                                              IsBlank(p), "Select a person in the list to see their details and actions, or press Add teacher.",
+                                              p.StaffName & " · " & p.RoleText & Char(10) &
+                                              If(p.Email = "", "No work email yet", p.Email) & Char(10) &
+                                              p.CampusName & " · " & p.StudentsNow & If(p.StudentsNow = 1, " student", " students") & " now · " & If(p.Linked, "Account linked", "Waiting for account") & Char(10) &
+                                              If(p.IsActive, "Active", "Retired") & If(IsBlank(p.StartDate), "", " · started " & Text(p.StartDate, "mmm d, yyyy")) & If(IsBlank(p.EndDate), "", " · ended " & Text(p.EndDate, "mmm d, yyyy"))
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varStfMode <> "add"
+                              - conStfSelActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =96
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    LayoutWrap: =true
+                                    Visible: =varStfMode = "" && !IsBlank(varStfSelId)
+                                  Children:
+                                    - btnStfEdit:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Edit " & LookUp(colStfAll, StaffId = varStfSelId).StaffName
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: |-
+                                            =With({p: LookUp(colStfAll, StaffId = varStfSelId)}, If(!IsBlank(p) && (IsAdminRole || p.RoleText = "Teacher") && !varStfSaving && !varStfLoading, DisplayMode.Edit, DisplayMode.Disabled))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varStfMode, "edit"); Select(btnStfFormResetEngine)
+                                          Size: =14
+                                          Text: ="Edit"
+                                          Width: =80
+                                    - btnStfXfer:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Transfer the class of " & LookUp(colStfAll, StaffId = varStfSelId).StaffName
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: |-
+                                            =With({p: LookUp(colStfAll, StaffId = varStfSelId)}, If(p.IsActive && p.StudentsNow >= 1 && !varStfSaving && !varStfLoading, DisplayMode.Edit, DisplayMode.Disabled))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =Set(varStfMode, "transfer");
+                                            Set(varStfXferDate, Today());
+                                            Clear(colStfPlan);
+                                            Select(btnStfFormResetEngine);
+                                            Select(btnStfXferLoadEngine);
+                                            Select(btnStfPlanEngine)
+                                          Size: =14
+                                          Text: ="Transfer class"
+                                          Visible: =LookUp(colStfAll, StaffId = varStfSelId).RoleText = "Teacher"
+                                          Width: =140
+                                    - btnStfRetire:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Retire " & LookUp(colStfAll, StaffId = varStfSelId).StaffName
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: |-
+                                            =With({p: LookUp(colStfAll, StaffId = varStfSelId)}, If(p.IsActive && p.StudentsNow = 0 && (IsAdminRole || p.RoleText = "Teacher") && p.StaffId <> CurrentStaff.Staff && !varStfSaving && !varStfLoading, DisplayMode.Edit, DisplayMode.Disabled))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varStfMode, "retire"); Select(btnStfFormResetEngine)
+                                          Size: =14
+                                          Text: ="Retire"
+                                          Visible: =LookUp(colStfAll, StaffId = varStfSelId).IsActive
+                                          Width: =90
+                                    - btnStfReactivate:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Reactivate " & LookUp(colStfAll, StaffId = varStfSelId).StaffName
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          DisplayMode: |-
+                                            =With({p: LookUp(colStfAll, StaffId = varStfSelId)}, If(!IsBlank(p) && (IsAdminRole || p.RoleText = "Teacher") && !varStfSaving && !varStfLoading, DisplayMode.Edit, DisplayMode.Disabled))
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varStfMode, "reactivate")
+                                          Size: =14
+                                          Text: ="Reactivate"
+                                          Visible: =!LookUp(colStfAll, StaffId = varStfSelId).IsActive
+                                          Width: =120
+                              - lblStfActionHint:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With(
+                                          {p: LookUp(colStfAll, StaffId = varStfSelId)},
+                                          If(
+                                              IsBlank(p), "",
+                                              !IsAdminRole && p.RoleText <> "Teacher", "Office staff can change teacher records only. Ask a System Admin.",
+                                              p.IsActive && p.StudentsNow > 0, "Retire is not available. Transfer their class first (" & p.StudentsNow & If(p.StudentsNow = 1, " student", " students") & ").",
+                                              p.IsActive && p.StaffId = CurrentStaff.Staff, "You cannot retire yourself.",
+                                              p.IsActive && p.RoleText = "Teacher", "No students to transfer. Retire is available.",
+                                              ""
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varStfMode = "" && !IsBlank(varStfSelId)
+                              - lblStfName:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Name, required, Last, First"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Name * (Last, First)"
+                                    Visible: =varStfMode in ["add", "edit"]
+                                    Wrap: =false
+                              - txtStfName:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Name, Last, First"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).StaffName, "")
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =100
+                                    Placeholder: ="Last, First"
+                                    Visible: =varStfMode in ["add", "edit"]
+                              - lblStfEmail:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Work email, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Work email *"
+                                    Visible: =varStfMode in ["add", "edit"]
+                                    Wrap: =false
+                              - txtStfEmail:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Work email"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).Email, "")
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =100
+                                    Placeholder: ="name@autismacademy.org"
+                                    Visible: =varStfMode in ["add", "edit"]
+                              - lblStfFormCampus:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =If(IsAdminRole, "Campus *", "Campus: " & If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).CampusName, LookUp(colStfCampusOpts, CampusId = varStfCampusId).CampusName) & " (your campus)")
+                                    Visible: =varStfMode in ["add", "edit"]
+                                    Wrap: =false
+                              - ddStfFormCampus:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="Campus"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    Default: =LookUp(colStfCampusOpts, CampusId = If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).CampusId, varStfCampusId))
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    ItemDisplayText: =ThisItem.CampusName
+                                    Items: =colStfCampusOpts
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =IsAdminRole && varStfMode in ["add", "edit"]
+                              - lblStfRole:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =If(IsAdminRole, "App role *", "App role: " & If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).RoleText, "Teacher"))
+                                    Visible: =varStfMode in ["add", "edit"]
+                                    Wrap: =false
+                              - rdoStfRole:
+                                  Control: ModernRadio
+                                  Properties:
+                                    AccessibleLabel: ="App role"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Default: |-
+                                      ={Value: If(varStfMode = "edit", LookUp(colStfAll, StaffId = varStfSelId).RoleText, "Teacher")}
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =104
+                                    Items: =StaffRoleOptions
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =IsAdminRole && varStfMode in ["add", "edit"]
+                              - lblStfXferTeacher:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="New teacher, required"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="New teacher *"
+                                    Visible: =varStfMode = "transfer"
+                                    Wrap: =false
+                              - ddStfXferTeacher:
+                                  Control: ModernDropdown
+                                  Properties:
+                                    AccessibleLabel: ="New teacher"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    ItemDisplayText: =ThisItem.StaffName
+                                    Items: =SortByColumns(Filter(colStfAll, IsActive && RoleText = "Teacher" && StaffId <> varStfSelId), "StaffName", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =varStfMode = "transfer"
+                              - lblStfDate:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: =Switch(varStfMode, "add", "Start date *", "edit", "Start date", "transfer", "Effective date (first day with the new teacher) *", "retire", "End date (last day) *", "Date")
+                                    Visible: =varStfMode in ["add", "edit", "transfer", "retire"]
+                                    Wrap: =false
+                              - dpStfDate:
+                                  Control: ModernDatePicker
+                                  Properties:
+                                    AccessibleLabel: =lblStfDate.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DefaultDate: =Switch(varStfMode, "edit", LookUp(colStfAll, StaffId = varStfSelId).StartDate, Today())
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    EndDate: =Switch(varStfMode, "transfer", DateAdd(Today(), 90, TimeUnit.Days), DateAdd(Today(), 365, TimeUnit.Days))
+                                    Format: =DatePickerFormat.Short
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnChange: =If(varStfMode = "transfer", Set(varStfXferDate, Self.SelectedDate); Select(btnStfPlanEngine))
+                                    StartDate: =Switch(varStfMode, "transfer", DateAdd(Today(), -30, TimeUnit.Days), "retire", Coalesce(LookUp(colStfAll, StaffId = varStfSelId).StartDate, Date(2000, 1, 1)), Date(2000, 1, 1))
+                                    Visible: =varStfMode in ["add", "edit", "transfer", "retire"]
+                              - lblStfNote:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: ="Note for the audit log, optional"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorMuted
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =18
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Note for the audit log (optional)"
+                                    Visible: =varStfMode = "transfer"
+                                    Wrap: =false
+                              - txtStfNote:
+                                  Control: ModernTextInput
+                                  Properties:
+                                    AccessibleLabel: ="Note for the audit log"
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Appearance: =Appearance.Outline
+                                    Color: =ColorInk
+                                    DisplayMode: =If(varStfSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =64
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    MaxLength: =500
+                                    Type: =TextInputType.Multiline
+                                    Visible: =varStfMode = "transfer"
+                              - lblStfXferHelp:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    Height: =88
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: ="Each student's current enrollment ends the day before the effective date and a new one starts with the new teacher at the same IEP ratio. Attendance already recorded on or after that date stays with the old teacher."
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varStfMode = "transfer"
+                              - lblStfPlanSummary:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorInk
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =36
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: |-
+                                      =With(
+                                          {mv: CountRows(Filter(colStfPlan, Action = "move")), ra: CountRows(Filter(colStfPlan, Action = "reassign")), sk: CountRows(Filter(colStfPlan, Action = "skip"))},
+                                          If(
+                                              varStfLoading, "Loading the class...",
+                                              mv + ra + sk = 0, "No enrollments with this teacher are open on " & Text(varStfXferDate, "mmm d, yyyy") & ".",
+                                              "Preview · " & mv & " will move, " & ra & " future enrollment(s) reassigned, " & sk & " skipped"
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varStfMode = "transfer"
+                              - galStfPlan:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Students who will move"
+                                    FillPortions: =0
+                                    Height: =Min(6, CountRows(colStfPlan)) * 72
+                                    Items: =SortByColumns(colStfPlan, "StudentName", SortOrder.Ascending)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Selectable: =false
+                                    TabIndex: =0
+                                    TemplatePadding: =0
+                                    TemplateSize: =72
+                                    Visible: =varStfMode = "transfer" && CountRows(colStfPlan) > 0
+                                  Children:
+                                    - conStfPlanRow:
+                                        Control: GroupContainer
+                                        Variant: AutoLayout
+                                        Properties:
+                                          BorderColor: =ColorRule
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.None
+                                          Fill: =If(ThisItem.Action = "skip", ColorWarnBg, ColorWhite)
+                                          Height: =Parent.TemplateHeight
+                                          LayoutAlignItems: =LayoutAlignItems.Stretch
+                                          LayoutDirection: =LayoutDirection.Vertical
+                                          LayoutGap: =4
+                                          PaddingBottom: =4
+                                          PaddingLeft: =8
+                                          PaddingRight: =8
+                                          PaddingTop: =4
+                                          RadiusBottomLeft: =0
+                                          RadiusBottomRight: =0
+                                          RadiusTopLeft: =0
+                                          RadiusTopRight: =0
+                                          Width: =Parent.TemplateWidth - 16
+                                        Children:
+                                          - lblStfPlanName:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =18
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =13
+                                                Text: =ThisItem.StudentName & " · " & ThisItem.StudentNumber
+                                                Wrap: =false
+                                          - lblStfPlanMeta:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                Height: =36
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: |-
+                                                  ="IEP " & ThisItem.RatioText & " · since " & Text(ThisItem.StartDate, "mmm d, yyyy") & " · " & Switch(ThisItem.Action, "move", "Will move to the new teacher", "reassign", "Future enrollment reassigned: " & ThisItem.Reason, "Skipped: " & ThisItem.Reason)
+                                                VerticalAlign: =VerticalAlign.Top
+                              - lblStfCheck:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =If(StartsWith(Self.Text, "Ready"), ColorExcused, ColorUnexcused)
+                                    Height: =54
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =12
+                                    Text: |-
+                                      =With(
+                                          {
+                                              p: LookUp(colStfAll, StaffId = varStfSelId),
+                                              nm: Trim(txtStfName.Text),
+                                              em: Lower(Trim(txtStfEmail.Text)),
+                                              d: dpStfDate.SelectedDate,
+                                              nt: ddStfXferTeacher.Selected,
+                                              selfId: If(varStfMode = "edit", varStfSelId, ZeroGuid)
+                                          },
+                                          With(
+                                              {
+                                                  cmpId: If(IsAdminRole, ddStfFormCampus.Selected.CampusId, varStfMode = "edit", p.CampusId, varStfCampusId),
+                                                  role: If(IsAdminRole, rdoStfRole.Selected.Value, varStfMode = "edit", p.RoleText, "Teacher"),
+                                                  dupRow: If(em = "", Blank(), LookUp(colStfEmails, StaffId <> selfId && (EmailL = em || UserEmailL = em))),
+                                                  mv: CountRows(Filter(colStfPlan, Action in ["move", "reassign"])),
+                                                  sk: CountRows(Filter(colStfPlan, Action = "skip"))
+                                              },
+                                              If(
+                                                  !CanManageStudents, "Not authorised to manage staff.",
+                                                  varStfMode in ["add", "edit"],
+                                                  If(
+                                                      varStfMode = "edit" && IsBlank(p), "Select a person first.",
+                                                      varStfMode = "edit" && !IsAdminRole && p.RoleText <> "Teacher", "Office staff can change teacher records only.",
+                                                      nm = "", "Enter the name as Last, First.",
+                                                      em = "", "Enter the work email.",
+                                                      " " in em || CountRows(Split(em, "@")) <> 2 || !EndsWith(em, "@autismacademy.org") || Len(em) <= 18, "The work email must look like name@autismacademy.org.",
+                                                      !IsBlank(dupRow), "That email already belongs to " & dupRow.StaffName & ".",
+                                                      IsBlank(cmpId) || cmpId = ZeroGuid, "Choose a campus.",
+                                                      !(role in StaffRoleOptions.Value), "Choose an app role.",
+                                                      varStfMode = "add" && IsBlank(d), "Choose the start date.",
+                                                      varStfMode = "edit" && !IsBlank(d) && !IsBlank(p.EndDate) && d > p.EndDate, "The start date cannot be after the end date (" & Text(p.EndDate, "mmm d, yyyy") & ").",
+                                                      varStfMode = "edit" && p.StudentsNow > 0 && (cmpId <> p.CampusId || role <> p.RoleText), "Transfer their class first (" & p.StudentsNow & " students) before changing campus or role.",
+                                                      varStfMode = "edit" && nm = p.StaffName && em = Lower(p.Email) && d = p.StartDate && cmpId = p.CampusId && role = p.RoleText, "No changes to save.",
+                                                      varStfMode = "add", "Ready: adds " & nm & " (" & em & ") as " & role & " from " & Text(d, "mmm d, yyyy") & ".",
+                                                      "Ready: saves the changes to " & p.StaffName & "."
+                                                  ),
+                                                  varStfMode = "transfer",
+                                                  If(
+                                                      IsBlank(p) || !p.IsActive || p.RoleText <> "Teacher", "Transfer class is only for an active teacher.",
+                                                      IsBlank(nt), "Choose the new teacher.",
+                                                      nt.StaffId = p.StaffId, "Choose a different teacher.",
+                                                      IsBlank(d), "Choose the effective date.",
+                                                      d < DateAdd(Today(), -30, TimeUnit.Days) || d > DateAdd(Today(), 90, TimeUnit.Days), "The effective date must be between " & Text(DateAdd(Today(), -30, TimeUnit.Days), "mmm d") & " and " & Text(DateAdd(Today(), 90, TimeUnit.Days), "mmm d, yyyy") & ".",
+                                                      Date(Year(d), Month(d), 1) in colStfLocks.MonthStart, Text(d, "mmmm yyyy") & " is locked at this campus. Choose a date in an open month.",
+                                                      varStfLoading || d <> varStfXferDate, "Updating the preview...",
+                                                      mv = 0, "Nothing to move on " & Text(d, "mmm d, yyyy") & If(sk > 0, " (" & sk & " skipped).", "."),
+                                                      "Ready: moves " & mv & " enrollment(s) from " & p.StaffName & " to " & nt.StaffName & " on " & Text(d, "mmm d, yyyy") & "."
+                                                  ),
+                                                  varStfMode = "retire",
+                                                  If(
+                                                      IsBlank(p) || !p.IsActive, "Choose Retire on an active person.",
+                                                      !IsAdminRole && p.RoleText <> "Teacher", "Office staff can retire teachers only.",
+                                                      p.StaffId = CurrentStaff.Staff, "You cannot retire yourself.",
+                                                      p.StudentsNow > 0, "Transfer their class first (" & p.StudentsNow & " students).",
+                                                      IsBlank(d), "Choose the end date.",
+                                                      !IsBlank(p.StartDate) && d < p.StartDate, "The end date cannot be before the start date (" & Text(p.StartDate, "mmm d, yyyy") & ").",
+                                                      "Ready: retires " & p.StaffName & " with end date " & Text(d, "mmm d, yyyy") & ". They will no longer be offered as a teacher."
+                                                  ),
+                                                  varStfMode = "reactivate",
+                                                  If(
+                                                      IsBlank(p) || p.IsActive, "Choose Reactivate on a retired person.",
+                                                      !IsAdminRole && p.RoleText <> "Teacher", "Office staff can reactivate teachers only.",
+                                                      "Ready: reactivates " & p.StaffName & " and clears the end date."
+                                                  ),
+                                                  ""
+                                              )
+                                          )
+                                      )
+                                    VerticalAlign: =VerticalAlign.Top
+                                    Visible: =varStfMode <> ""
+                              - conStfActions:
+                                  Control: GroupContainer
+                                  Variant: AutoLayout
+                                  Properties:
+                                    DropShadow: =DropShadow.None
+                                    FillPortions: =0
+                                    Height: =44
+                                    LayoutAlignItems: =LayoutAlignItems.Center
+                                    LayoutDirection: =LayoutDirection.Horizontal
+                                    LayoutGap: =8
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    Visible: =varStfMode <> ""
+                                  Children:
+                                    - btnStfSave:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Center
+                                          BasePaletteColor: =If(varStfMode = "retire", ColorUnexcused, ColorTeal)
+                                          Color: =ColorWhite
+                                          DisplayMode: =If(CanManageStudents && !varStfSaving && !varStfLoading && StartsWith(lblStfCheck.Text, "Ready"), DisplayMode.Edit, DisplayMode.Disabled)
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: |-
+                                            =With(
+                                                {
+                                                    mode: varStfMode,
+                                                    p: LookUp(colStfAll, StaffId = varStfSelId),
+                                                    nm: Trim(txtStfName.Text),
+                                                    em: Lower(Trim(txtStfEmail.Text)),
+                                                    d: dpStfDate.SelectedDate
+                                                },
+                                                With(
+                                                    {
+                                                        cmpRec: With({q: If(IsAdminRole, ddStfFormCampus.Selected.CampusId, mode = "edit", p.CampusId, varStfCampusId)}, LookUp(Campuses, ThisRecord.Campus = q)),
+                                                        roleVal: With({r: If(IsAdminRole, rdoStfRole.Selected.Value, mode = "edit", p.RoleText, "Teacher")}, Switch(r, "Teacher", 'App Role (Staff)'.Teacher, "Attendance Office", 'App Role (Staff)'.'Attendance Office', "Read-only", 'App Role (Staff)'.'Read-only', "System Admin", 'App Role (Staff)'.'System Admin'))
+                                                    },
+                                                    If(
+                                                        !CanManageStudents || varStfSaving || !StartsWith(lblStfCheck.Text, "Ready"),
+                                                        Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved. " & lblStfCheck.Text}); Clear(colStfReceiptLines),
+                                                        mode = "transfer",
+                                                        ClearCollect(colStfXferWork, Filter(colStfPlan, Action in ["move", "reassign"]));
+                                                        Select(btnStfXferEngine),
+                                                        mode = "add",
+                                                        Set(varStfSaving, true);
+                                                        With(
+                                                            {dup: With({q: em}, LookUp(Staff, Email = q))},
+                                                            If(
+                                                                !IsBlank(dup),
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · " & em & " already belongs to " & dup.Name & "."}); Clear(colStfReceiptLines),
+                                                                With(
+                                                                    {wr: IfError(Patch(Staff, Defaults(Staff), {Name: nm, Email: em, Campus: cmpRec, 'Start Date': d, 'App Role': roleVal, Active: true, 'Finance Access': false, 'Site Administrator': false}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varStfReceipt, {Kind: "Failed", Title: "Not saved · " & nm & " · " & Coalesce(First(Errors(Staff)).Message, "the save failed") & ". Press Add teacher to retry."}); Clear(colStfReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Staff added " & wr.Name & " " & wr.Email, 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_staff", 'Entity ID': Text(wr.Staff), Before: "", After: JSON({Name: wr.Name, Email: wr.Email, CampusId: Text(wr.Campus.Campus), Campus: wr.Campus.Name, StartDate: Text(wr.'Start Date', "yyyy-mm-dd"), AppRole: Text(wr.'App Role'), Active: wr.Active, FinanceAccess: wr.'Finance Access', SiteAdministrator: wr.'Site Administrator'}), Reason: "Added on the Staff screen"}), Blank())},
+                                                                            Set(varStfSelId, wr.Staff);
+                                                                            Set(varStfReceipt, {Kind: "Added", Title: "Added. They can sign in once they are in the app's security group; their access is set up automatically within about 15 minutes of their first sign-in."});
+                                                                            ClearCollect(
+                                                                                colStfReceiptLines,
+                                                                                {Label: "Name", Value: wr.Name},
+                                                                                {Label: "Work email", Value: wr.Email},
+                                                                                {Label: "Campus", Value: wr.Campus.Name},
+                                                                                {Label: "App role", Value: Text(wr.'App Role')},
+                                                                                {Label: "Start date", Value: Text(wr.'Start Date', "mmm d, yyyy")},
+                                                                                {Label: "Status", Value: If(wr.Active, "Active", "Retired")},
+                                                                                {Label: "Finance / Site admin", Value: If(wr.'Finance Access', "Yes", "No") & " / " & If(wr.'Site Administrator', "Yes", "No")},
+                                                                                {Label: "Account", Value: If(IsBlank(wr.User), "Waiting for account (linked automatically)", "Linked")},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Create written")}
+                                                                            );
+                                                                            Set(varStfMode, "");
+                                                                            Select(btnStfLoadEngine)
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varStfSaving, false),
+                                                        mode = "edit",
+                                                        Set(varStfSaving, true);
+                                                        With(
+                                                            {
+                                                                live: With({q: varStfSelId}, LookUp(Staff, ThisRecord.Staff = q)),
+                                                                dup: With({q: em, s0: varStfSelId}, LookUp(Staff, Email = q && ThisRecord.Staff <> s0)),
+                                                                n: With({q: varStfSelId, t0: Today()}, CountRows(Filter(Enrollments, Teacher.Staff = q && (IsBlank('End Date') || 'End Date' >= t0))))
+                                                            },
+                                                            If(
+                                                                IsBlank(live),
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · this staff record was not found. Change campus or reopen the screen."}); Clear(colStfReceiptLines),
+                                                                !IsBlank(dup),
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · " & em & " already belongs to " & dup.Name & "."}); Clear(colStfReceiptLines),
+                                                                IsAdminRole && n > 0 && (cmpRec.Campus <> live.Campus.Campus || roleVal <> live.'App Role'),
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · Transfer their class first (" & n & " students) before changing campus or role."}); Clear(colStfReceiptLines),
+                                                                With(
+                                                                    {wr: IfError(Patch(Staff, live, {Name: nm, Email: em, 'Start Date': d, Campus: If(IsAdminRole, cmpRec, live.Campus), 'App Role': If(IsAdminRole, roleVal, live.'App Role')}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varStfReceipt, {Kind: "Failed", Title: "Not saved · " & live.Name & " · " & Coalesce(First(Errors(Staff)).Message, "the save failed") & ". Press Save changes to retry."}); Clear(colStfReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Staff updated " & wr.Name, 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_staff", 'Entity ID': Text(wr.Staff), Before: JSON({Name: live.Name, Email: Coalesce(live.Email, ""), CampusId: Text(live.Campus.Campus), Campus: live.Campus.Name, StartDate: If(IsBlank(live.'Start Date'), "", Text(live.'Start Date', "yyyy-mm-dd")), AppRole: Text(live.'App Role')}), After: JSON({Name: wr.Name, Email: wr.Email, CampusId: Text(wr.Campus.Campus), Campus: wr.Campus.Name, StartDate: If(IsBlank(wr.'Start Date'), "", Text(wr.'Start Date', "yyyy-mm-dd")), AppRole: Text(wr.'App Role')}), Reason: "Edited on the Staff screen"}), Blank())},
+                                                                            Set(varStfReceipt, {Kind: "Edited", Title: "Saved · " & wr.Name & " · " & wr.Email});
+                                                                            ClearCollect(
+                                                                                colStfReceiptLines,
+                                                                                {Label: "Name", Value: wr.Name},
+                                                                                {Label: "Work email", Value: wr.Email},
+                                                                                {Label: "Campus", Value: wr.Campus.Name & If(wr.Campus.Campus <> varStfCampusId, " (no longer listed under this campus)", "")},
+                                                                                {Label: "App role", Value: Text(wr.'App Role')},
+                                                                                {Label: "Start date", Value: If(IsBlank(wr.'Start Date'), "Not set", Text(wr.'Start Date', "mmm d, yyyy"))},
+                                                                                {Label: "Before", Value: live.Name & " · " & Coalesce(live.Email, "no email") & " · " & live.Campus.Name & " · " & Text(live.'App Role')},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Update written with before/after")}
+                                                                            );
+                                                                            Set(varStfMode, "");
+                                                                            Select(btnStfLoadEngine)
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varStfSaving, false),
+                                                        mode = "retire",
+                                                        Set(varStfSaving, true);
+                                                        With(
+                                                            {
+                                                                live: With({q: varStfSelId}, LookUp(Staff, ThisRecord.Staff = q)),
+                                                                n: With({q: varStfSelId, t0: Today()}, CountRows(Filter(Enrollments, Teacher.Staff = q && (IsBlank('End Date') || 'End Date' >= t0))))
+                                                            },
+                                                            If(
+                                                                IsBlank(live) || live.Active = false,
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · this person is already retired or was removed."}); Clear(colStfReceiptLines); Select(btnStfLoadEngine),
+                                                                n > 0,
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · Transfer their class first (" & n & " students)."}); Clear(colStfReceiptLines); Select(btnStfLoadEngine),
+                                                                With(
+                                                                    {wr: IfError(Patch(Staff, live, {Active: false, 'End Date': d}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varStfReceipt, {Kind: "Failed", Title: "Not saved · " & live.Name & " · " & Coalesce(First(Errors(Staff)).Message, "the save failed") & ". Press Retire to retry."}); Clear(colStfReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Staff retired " & wr.Name, 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_staff", 'Entity ID': Text(wr.Staff), Before: JSON({Active: live.Active, EndDate: If(IsBlank(live.'End Date'), "", Text(live.'End Date', "yyyy-mm-dd"))}), After: JSON({Active: wr.Active, EndDate: Text(wr.'End Date', "yyyy-mm-dd")}), Reason: "Retired on the Staff screen"}), Blank())},
+                                                                            Set(varStfReceipt, {Kind: "Retired", Title: "Retired · " & wr.Name & " · end date " & Text(wr.'End Date', "mmm d, yyyy")});
+                                                                            ClearCollect(
+                                                                                colStfReceiptLines,
+                                                                                {Label: "Name", Value: wr.Name},
+                                                                                {Label: "Status", Value: If(wr.Active, "Active", "Retired")},
+                                                                                {Label: "End date", Value: Text(wr.'End Date', "mmm d, yyyy")},
+                                                                                {Label: "Students now", Value: Text(n)},
+                                                                                {Label: "Teacher pickers", Value: "No longer offered"},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Update written")}
+                                                                            );
+                                                                            Set(varStfMode, "");
+                                                                            Select(btnStfLoadEngine)
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varStfSaving, false),
+                                                        mode = "reactivate",
+                                                        Set(varStfSaving, true);
+                                                        With(
+                                                            {live: With({q: varStfSelId}, LookUp(Staff, ThisRecord.Staff = q))},
+                                                            If(
+                                                                IsBlank(live) || live.Active = true,
+                                                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved · this person is already active or was removed."}); Clear(colStfReceiptLines); Select(btnStfLoadEngine),
+                                                                With(
+                                                                    {wr: IfError(Patch(Staff, live, {Active: true, 'End Date': Blank()}), Blank())},
+                                                                    If(
+                                                                        IsBlank(wr),
+                                                                        Set(varStfReceipt, {Kind: "Failed", Title: "Not saved · " & live.Name & " · " & Coalesce(First(Errors(Staff)).Message, "the save failed") & ". Press Reactivate to retry."}); Clear(colStfReceiptLines),
+                                                                        With(
+                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Staff reactivated " & wr.Name, 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_staff", 'Entity ID': Text(wr.Staff), Before: JSON({Active: live.Active, EndDate: If(IsBlank(live.'End Date'), "", Text(live.'End Date', "yyyy-mm-dd"))}), After: JSON({Active: wr.Active, EndDate: ""}), Reason: "Reactivated on the Staff screen"}), Blank())},
+                                                                            Set(varStfReceipt, {Kind: "Reactivated", Title: "Reactivated · " & wr.Name});
+                                                                            ClearCollect(
+                                                                                colStfReceiptLines,
+                                                                                {Label: "Name", Value: wr.Name},
+                                                                                {Label: "Status", Value: If(wr.Active, "Active", "Retired")},
+                                                                                {Label: "End date", Value: If(IsBlank(wr.'End Date'), "Cleared", Text(wr.'End Date', "mmm d, yyyy"))},
+                                                                                {Label: "Audit event", Value: If(IsBlank(au), "NOT written", "Update written")}
+                                                                            );
+                                                                            Set(varStfMode, "");
+                                                                            Select(btnStfLoadEngine)
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        );
+                                                        Set(varStfSaving, false)
+                                                    )
+                                                )
+                                            )
+                                          Size: =14
+                                          Text: =Switch(varStfMode, "add", "Add teacher", "edit", "Save changes", "transfer", "Transfer class (" & CountRows(Filter(colStfPlan, Action in ["move", "reassign"])) & ")", "retire", "Retire", "reactivate", "Reactivate", "Save")
+                                          Width: =190
+                                    - btnStfCancel:
+                                        Control: ModernButton
+                                        Properties:
+                                          AccessibleLabel: ="Cancel"
+                                          AlignInContainer: =AlignInContainer.Center
+                                          Appearance: =ButtonAppearance.Secondary
+                                          Color: =ColorInk
+                                          Height: =44
+                                          Layout: =ButtonLayout.TextOnly
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnSelect: =Set(varStfMode, ""); Clear(colStfPlan); Select(btnStfFormResetEngine)
+                                          Size: =14
+                                          Text: ="Cancel"
+                                          Width: =100
+            - btnStfLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varStfLoading, true);
+                    Set(varStfLoadError, "");
+                    If(
+                        !CanManageStudents || varStfCampusId = ZeroGuid,
+                        Clear(colStfAll); Clear(colStfEnr); Clear(colStfLocks),
+                        With(
+                            {c0: varStfCampusId, t0: Today()},
+                            IfError(
+                                Concurrent(
+                                    ClearCollect(colStfEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && (IsBlank('End Date') || 'End Date' >= t0)) As e, {EnrId: e.Enrollment, TeacherId: e.Teacher.Staff})),
+                                    ClearCollect(colStfEmails, ForAll(Staff As s, {StaffId: s.Staff, StaffName: s.Name, EmailL: Lower(Trim(Coalesce(s.Email, ""))), UserEmailL: Lower(Trim(Coalesce(s.User.'Primary Email', "")))})),
+                                    ClearCollect(colStfLocks, ForAll(Filter('Month Locks', Campus.Campus = c0 && 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {MonthStart: m.Month}))
+                                );
+                                ClearCollect(colStfAll, ForAll(Filter(Staff, Campus.Campus = c0) As s, {StaffId: s.Staff, StaffName: s.Name, Email: Coalesce(s.Email, ""), RoleText: Text(s.'App Role'), CampusId: s.Campus.Campus, CampusName: s.Campus.Name, StartDate: s.'Start Date', EndDate: s.'End Date', IsActive: s.Active <> false, Linked: !IsBlank(s.User), StudentsNow: CountRows(Filter(colStfEnr, TeacherId = s.Staff)), SearchKey: Lower(s.Name & " " & Coalesce(s.Email, ""))}));
+                                true,
+                                Set(varStfLoadError, FirstError.Message)
+                            )
+                        );
+                        If(!IsBlank(varStfSelId) && IsBlank(LookUp(colStfAll, StaffId = varStfSelId)), Set(varStfSelId, Blank()))
+                    );
+                    Set(varStfLoading, false)
+                  Text: ="load"
+                  Visible: =false
+            - btnStfFormResetEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: =Reset(txtStfName); Reset(txtStfEmail); Reset(ddStfFormCampus); Reset(rdoStfRole); Reset(ddStfXferTeacher); Reset(dpStfDate); Reset(txtStfNote)
+                  Text: ="reset"
+                  Visible: =false
+            - btnStfXferLoadEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varStfLoading, true);
+                    Set(varStfLoadError, "");
+                    If(
+                        IsBlank(varStfSelId),
+                        Clear(colStfXferEnr),
+                        With(
+                            {q: varStfSelId, w0: DateAdd(Today(), -31, TimeUnit.Days)},
+                            IfError(
+                                ClearCollect(colStfXferEnr, ForAll(Filter(Enrollments, Teacher.Staff = q && (IsBlank('End Date') || 'End Date' >= w0)) As e, {EnrId: e.Enrollment, StudentId: e.Student.Student, StudentName: Coalesce(e.Student.'Display Name', "Unnamed student"), StudentNumber: Coalesce(e.Student.'Student Number', ""), StudentStatus: Text(e.Student.'Status (aaca_status)'), ServiceId: e.Service.Service, RatioText: Text(e.'IEP Ratio'), StartDate: e.'Start Date', EndDate: e.'End Date', YearEnd: e.'School Year'.'End Date'})); true,
+                                Set(varStfLoadError, FirstError.Message)
+                            )
+                        )
+                    );
+                    Set(varStfLoading, false)
+                  Text: ="class load"
+                  Visible: =false
+            - btnStfPlanEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =With(
+                        {d: varStfXferDate},
+                        ClearCollect(
+                            colStfPlan,
+                            ForAll(
+                                Filter(colStfXferEnr, IsBlank(EndDate) || EndDate >= d) As e,
+                                {
+                                    EnrId: e.EnrId, StudentId: e.StudentId, StudentName: e.StudentName, StudentNumber: e.StudentNumber, RatioText: e.RatioText, StartDate: e.StartDate,
+                                    Action: If(IsBlank(d), "skip", e.StartDate >= d, "reassign", !IsBlank(e.EndDate), "skip", e.StudentStatus <> "Active", "skip", !IsBlank(e.YearEnd) && d > e.YearEnd, "skip", "move"),
+                                    Reason: If(
+                                        IsBlank(d), "no effective date",
+                                        e.StartDate > d, "planned enrollment starting " & Text(e.StartDate, "mmm d, yyyy") & " gets the new teacher",
+                                        e.StartDate = d, "starts on the effective date, so only the teacher changes",
+                                        !IsBlank(e.EndDate), "already ends " & Text(e.EndDate, "mmm d, yyyy") & " (a change is planned); use Change class on the Students screen",
+                                        e.StudentStatus <> "Active", "student is " & e.StudentStatus,
+                                        !IsBlank(e.YearEnd) && d > e.YearEnd, "the effective date is after the school year ends (" & Text(e.YearEnd, "mmm d, yyyy") & ")",
+                                        ""
+                                    )
+                                }
+                            )
+                        )
+                    )
+                  Text: ="plan"
+                  Visible: =false
+            - btnStfXferEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =With(
+                        {
+                            d: dpStfDate.SelectedDate,
+                            fromId: varStfSelId,
+                            p: LookUp(colStfAll, StaffId = varStfSelId),
+                            toId: ddStfXferTeacher.Selected.StaffId,
+                            note: Trim(txtStfNote.Text),
+                            n: CountRows(colStfXferWork)
+                        },
+                        With(
+                            {tch: With({q: toId}, LookUp(Staff, ThisRecord.Staff = q))},
+                            If(
+                                !CanManageStudents || varStfSaving || varStfMode <> "transfer" || n = 0 || IsBlank(d) || IsBlank(tch) || tch.Active = false || !StartsWith(lblStfCheck.Text, "Ready"),
+                                Set(varStfReceipt, {Kind: "Blocked", Title: "Not saved. " & lblStfCheck.Text}); Clear(colStfReceiptLines),
+                                Set(varStfSaving, true);
+                                Clear(colStfLog);
+                                ForAll(
+                                    colStfXferWork As w,
+                                    With(
+                                        {
+                                            old: With({qe: w.EnrId}, LookUp(Enrollments, ThisRecord.Enrollment = qe)),
+                                            stu: With({qs: w.StudentId}, LookUp(Students, ThisRecord.Student = qs))
+                                        },
+                                        If(
+                                            IsBlank(old) || IsBlank(stu) || old.Teacher.Staff <> fromId || (!IsBlank(old.'End Date') && old.'End Date' < d),
+                                            Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: w.Action, Outcome: "skipped", Detail: "changed by someone else since the preview", NewEnrId: ZeroGuid, AuditOk: false}),
+                                            w.Action = "reassign",
+                                            With(
+                                                {up: IfError(Patch(Enrollments, old, {Teacher: tch}), Blank())},
+                                                If(
+                                                    IsBlank(up),
+                                                    Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "reassign", Outcome: "failed", Detail: "teacher not changed: " & Coalesce(First(Errors(Enrollments)).Message, "unknown error"), NewEnrId: ZeroGuid, AuditOk: false}),
+                                                    With(
+                                                        {
+                                                            enrOwn: If(IsBlank(tch.User), false, !IsBlank(IfError(Patch(Enrollments, up, {Owner: tch.User}), Blank()))),
+                                                            stuOwn: If(old.'Start Date' <= Today() && !IsBlank(tch.User), !IsBlank(IfError(Patch(Students, stu, {Owner: tch.User}), Blank())), false),
+                                                            au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transfer " & stu.'Student Number' & " to " & tch.Name & " (enrollment from " & Text(old.'Start Date', "yyyy-mm-dd") & ")", 100), Action: 'Action (Audit Events)'.Transfer, Entity: "aaca_student", 'Entity ID': Text(stu.Student), Before: JSON({EnrollmentId: Text(old.Enrollment), TeacherId: Text(old.Teacher.Staff), Teacher: old.Teacher.Name, CampusId: Text(old.Campus.Campus), Campus: old.Campus.Name, StartDate: Text(old.'Start Date', "yyyy-mm-dd"), EndDate: If(IsBlank(old.'End Date'), "", Text(old.'End Date', "yyyy-mm-dd")), Status: Text(old.'Status (aaca_status)')}), After: JSON({EnrollmentId: Text(up.Enrollment), TeacherId: Text(tch.Staff), Teacher: tch.Name, CampusId: Text(up.Campus.Campus), Campus: up.Campus.Name, StartDate: Text(up.'Start Date', "yyyy-mm-dd"), Status: Text(up.'Status (aaca_status)'), Reassigned: true, BulkTransfer: true}), Reason: If(note = "", "Class transfer to " & tch.Name, note)}), Blank())
+                                                        },
+                                                        Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "reassign", Outcome: "reassigned", Detail: "enrollment from " & Text(up.'Start Date', "mmm d, yyyy") & " now with " & up.Teacher.Name & If(IsBlank(tch.User), " · owner unchanged (teacher has no linked user)", enrOwn, "", " · owner update FAILED"), NewEnrId: up.Enrollment, AuditOk: !IsBlank(au)})
+                                                    )
+                                                )
+                                            ),
+                                            w.Action = "move",
+                                            With(
+                                                {
+                                                    liveOverlap: With({qs: w.StudentId, qsv: old.Service.Service, qe: w.EnrId, qd: d}, CountRows(Filter(Enrollments, Student.Student = qs && Service.Service = qsv && ThisRecord.Enrollment <> qe && (IsBlank('End Date') || 'End Date' >= qd)))),
+                                                    attAfter: With({qs: w.StudentId, qd: d}, CountRows(Filter(Attendance, Student.Student = qs && Date >= qd && 'Is Deleted' <> true)))
+                                                },
+                                                If(
+                                                    !IsBlank(old.'End Date') || old.'Start Date' >= d,
+                                                    Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "move", Outcome: "skipped", Detail: "the enrollment changed since the preview", NewEnrId: ZeroGuid, AuditOk: false}),
+                                                    liveOverlap > 0,
+                                                    Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "move", Outcome: "skipped", Detail: "the new enrollment would overlap another enrollment for this student and service", NewEnrId: ZeroGuid, AuditOk: false}),
+                                                    With(
+                                                        {closed: IfError(Patch(Enrollments, old, {'End Date': DateAdd(d, -1, TimeUnit.Days), 'End Reason': 'End Reason (Enrollments)'.Transfer, 'Status (aaca_status)': If(d <= Today(), 'Status (Enrollments)'.Ended, old.'Status (aaca_status)')}), Blank())},
+                                                        If(
+                                                            IsBlank(closed),
+                                                            Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "move", Outcome: "failed", Detail: "nothing saved: " & Coalesce(First(Errors(Enrollments)).Message, "unknown error"), NewEnrId: ZeroGuid, AuditOk: false}),
+                                                            With(
+                                                                {ne: IfError(Patch(Enrollments, Defaults(Enrollments), {Name: stu.'Student Number' & " " & Text(d, "yyyy-mm-dd"), Student: stu, Campus: old.Campus, Teacher: tch, Service: old.Service, 'School Year': old.'School Year', Program: old.Program, 'IEP Ratio': old.'IEP Ratio', 'Start Date': d, 'Status (aaca_status)': If(d <= Today(), 'Status (Enrollments)'.Active, 'Status (Enrollments)'.Planned), 'Previous Enrollment': closed}), Blank())},
+                                                                If(
+                                                                    IsBlank(ne),
+                                                                    With(
+                                                                        {err: Coalesce(First(Errors(Enrollments)).Message, "unknown error")},
+                                                                        With(
+                                                                            {rb: IfError(Patch(Enrollments, closed, {'End Date': Blank(), 'End Reason': Blank(), 'Status (aaca_status)': old.'Status (aaca_status)'}), Blank())},
+                                                                            Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "move", Outcome: "failed", Detail: "new enrollment not created (" & err & "); " & If(IsBlank(rb), "the old enrollment is still ended on " & Text(closed.'End Date', "mmm d, yyyy") & " - ask a System Admin to reopen it", "the old enrollment was reopened, nothing changed"), NewEnrId: ZeroGuid, AuditOk: false})
+                                                                        )
+                                                                    ),
+                                                                    With(
+                                                                        {
+                                                                            stuOwn: If(d <= Today() && !IsBlank(tch.User), !IsBlank(IfError(Patch(Students, stu, {Owner: tch.User}), Blank())), false),
+                                                                            enrOwn: If(IsBlank(tch.User), false, !IsBlank(IfError(Patch(Enrollments, ne, {Owner: tch.User}), Blank()))),
+                                                                            audit: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Transfer " & stu.'Student Number' & " to " & tch.Name & " from " & Text(d, "yyyy-mm-dd"), 100), Action: 'Action (Audit Events)'.Transfer, Entity: "aaca_student", 'Entity ID': Text(stu.Student), Before: JSON({EnrollmentId: Text(old.Enrollment), TeacherId: Text(old.Teacher.Staff), Teacher: old.Teacher.Name, CampusId: Text(old.Campus.Campus), Campus: old.Campus.Name, StartDate: Text(old.'Start Date', "yyyy-mm-dd"), EndDate: "", Status: Text(old.'Status (aaca_status)')}), After: JSON({ClosedEnrollmentId: Text(closed.Enrollment), ClosedEndDate: Text(closed.'End Date', "yyyy-mm-dd"), ClosedStatus: Text(closed.'Status (aaca_status)'), NewEnrollmentId: Text(ne.Enrollment), TeacherId: Text(tch.Staff), Teacher: tch.Name, CampusId: Text(ne.Campus.Campus), Campus: ne.Campus.Name, StartDate: Text(ne.'Start Date', "yyyy-mm-dd"), Status: Text(ne.'Status (aaca_status)'), IepRatio: Text(ne.'IEP Ratio'), AttendanceDaysKeptWithOldClass: attAfter, BulkTransfer: true}), Reason: If(note = "", "Class transfer to " & tch.Name, note)}), Blank())
+                                                                        },
+                                                                        Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: "move", Outcome: "moved", Detail: "old ends " & Text(closed.'End Date', "mmm d, yyyy") & " (" & Text(closed.'Status (aaca_status)') & "); new from " & Text(ne.'Start Date', "mmm d, yyyy") & " with " & ne.Teacher.Name & " · IEP " & Text(ne.'IEP Ratio') & " · " & Text(ne.'Status (aaca_status)') & If(attAfter > 0, " · " & attAfter & " recorded day(s) stay with the old teacher", "") & If(IsBlank(tch.User), " · owner unchanged (teacher has no linked user)", enrOwn, "", " · owner update FAILED"), NewEnrId: ne.Enrollment, AuditOk: !IsBlank(audit)})
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                )
+                                            ),
+                                            Collect(colStfLog, {EnrId: w.EnrId, StudentName: w.StudentName, StudentNumber: w.StudentNumber, Action: w.Action, Outcome: "skipped", Detail: "not part of the transfer", NewEnrId: ZeroGuid, AuditOk: false})
+                                        )
+                                    )
+                                );
+                                With(
+                                    {
+                                        mv: CountRows(Filter(colStfLog, Outcome = "moved")),
+                                        ra: CountRows(Filter(colStfLog, Outcome = "reassigned")),
+                                        fl: CountRows(Filter(colStfLog, Outcome = "failed")),
+                                        sk: CountRows(Filter(colStfLog, Outcome = "skipped")) + CountRows(Filter(colStfPlan, Action = "skip"))
+                                    },
+                                    Set(varStfReceipt, {Kind: If(mv + ra = 0, "Failed", fl + sk > 0, "Partial", "Transferred"), Title: "Class transfer · " & p.StaffName & " to " & tch.Name & " · " & Text(d, "mmm d, yyyy") & " · " & mv & " moved, " & ra & " reassigned, " & fl & " failed" & If(sk > 0, ", " & sk & " skipped", "")});
+                                    ClearCollect(
+                                        colStfReceiptLines,
+                                        {Label: "Operation", Value: "Transfer class"},
+                                        {Label: "From teacher", Value: p.StaffName},
+                                        {Label: "To teacher", Value: tch.Name},
+                                        {Label: "Effective date", Value: Text(d, "mmm d, yyyy")},
+                                        {Label: "Moved", Value: Text(mv)},
+                                        {Label: "Reassigned", Value: Text(ra)},
+                                        {Label: "Failed", Value: Text(fl)},
+                                        {Label: "Skipped", Value: Text(sk)},
+                                        ForAll(colStfLog As g, {Label: g.StudentName & " · " & g.StudentNumber, Value: Switch(g.Outcome, "moved", "Moved", "reassigned", "Future enrollment reassigned", "failed", "FAILED", "Skipped") & " · " & g.Detail & If(g.Outcome in ["moved", "reassigned"], If(g.AuditOk, " · audit Transfer written", " · audit NOT written"), "")}),
+                                        ForAll(Filter(colStfPlan, Action = "skip") As k, {Label: k.StudentName & " · " & k.StudentNumber, Value: "Skipped · " & k.Reason})
+                                    )
+                                );
+                                Clear(colStfXferWork);
+                                Clear(colStfPlan);
+                                Set(varStfMode, "");
+                                Set(varStfSaving, false);
+                                Select(btnStfLoadEngine)
+                            )
+                        )
+                    )
+                  Text: ="transfer"
+                  Visible: =false

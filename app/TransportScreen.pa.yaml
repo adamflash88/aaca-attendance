@@ -43,7 +43,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 100, 48), 0) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
+                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 152, 48), 0) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -95,7 +95,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(conTrnRoot.Width < 640, 96, 44) + If(CanClassify, 8, 0)
+                        Height: =If(conTrnRoot.Width < 640, 148, 44) + If(CanClassify, 8, 0)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -171,6 +171,22 @@ Screens:
                               Text: ="Transportation"
                               Visible: =CanClassify
                               Width: =140
+                        - btnTrnNavStaff:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Staff"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StaffScreen)
+                              Size: =14
+                              Text: ="Staff"
+                              Visible: =CanManageStudents
+                              Width: =80
                   - conTrnHdrTabs:
                       Control: GroupContainer
                       Variant: AutoLayout

@@ -61,3 +61,7 @@ Set-Owners 'aaca_student' $stu { param($r) if ($latest.Contains($r.aaca_studenti
 
 $att = Get-DvAll "$(Get-DvEntitySet 'aaca_attendance')?`$select=aaca_attendanceid,_aaca_campus_value,_owningbusinessunit_value"
 Set-Owners 'aaca_attendance' $att { param($r) $campusTeam[$r._aaca_campus_value] }
+
+# Staff with a campus belong to that campus (office managers edit them at Local depth); blank campus = all campuses, left alone.
+$stf = Get-DvAll "$(Get-DvEntitySet 'aaca_staff')?`$select=aaca_staffid,_aaca_campus_value,_owningbusinessunit_value"
+Set-Owners 'aaca_staff' $stf { param($r) if ($r._aaca_campus_value) { $campusTeam[$r._aaca_campus_value] } }

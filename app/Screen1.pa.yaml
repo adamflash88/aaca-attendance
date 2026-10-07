@@ -18,8 +18,8 @@ Screens:
             {tid: varTeacher.Staff, cid: varCampus.Campus},
             If(
                 IsTeacherRole, Set(varTeacher, CurrentStaff),
-                IsBlank(tid) || IsBlank(LookUp(Staff, ThisRecord.Staff = tid && Campus.Campus = cid)),
-                Set(varTeacher, First(Sort(Filter(Staff, Campus.Campus = cid && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending)))
+                IsBlank(tid) || IsBlank(LookUp(Staff, ThisRecord.Staff = tid && Campus.Campus = cid && Active = true)),
+                Set(varTeacher, First(Sort(Filter(Staff, Campus.Campus = cid && 'App Role' = 'App Role (Staff)'.Teacher && Active = true), Name, SortOrder.Ascending)))
             )
         );
         Select(btnAttLoadEngine)
@@ -49,7 +49,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conAttRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAttRoot.Width < 640, 100, 48), 0)
+                  Height: =If(conAttRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAttRoot.Width < 640, 152, 48), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -102,7 +102,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(conAttRoot.Width < 640, 96, 44)
+                        Height: =If(conAttRoot.Width < 640, 148, 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -176,6 +176,22 @@ Screens:
                               Text: ="Transportation"
                               Visible: =CanClassify
                               Width: =140
+                        - btnAttNavStaff:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Staff"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StaffScreen)
+                              Size: =14
+                              Text: ="Staff"
+                              Visible: =CanManageStudents
+                              Width: =80
             - conAttNotSetUp:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -204,7 +220,7 @@ Screens:
                   - lblAttNotSetUpTitle:
                       Control: ModernText
                       Properties:
-                        AccessibleLabel: ="You're not set up yet"
+                        AccessibleLabel: =Self.Text
                         AlignInContainer: =AlignInContainer.Stretch
                         Color: =ColorInk
                         FontWeight: =FontWeight.Semibold
@@ -216,7 +232,7 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =16
-                        Text: ="You're not set up yet"
+                        Text: =If(StaffPending, "Your access is being set up", "You're not set up yet")
                         Wrap: =false
                   - lblAttNotSetUpBody:
                       Control: ModernText
@@ -232,7 +248,12 @@ Screens:
                         PaddingRight: =0
                         PaddingTop: =0
                         Size: =14
-                        Text: ="Your sign-in (" & User().Email & ") is not linked to an active Staff record. Ask a System Admin to add a Staff row linked to your Users record, then reopen the app."
+                        Text: |-
+                          =If(
+                              StaffPending,
+                              "Your Staff record was found. Access is set up automatically within about 15 minutes of your first sign-in. Close the app and open it again in a few minutes.",
+                              "Your sign-in (" & User().Email & ") is not linked to an active Staff record. Ask your office manager to add you on the Staff screen, then reopen the app."
+                          )
             - conAttToolbar:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -498,7 +519,7 @@ Screens:
                                     Items: =Sort(Campuses, Name, SortOrder.Ascending)
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
-                                    OnChange: =Set(varCampus, Self.Selected); Set(varTeacher, First(Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending))); Select(btnAttLoadEngine)
+                                    OnChange: =Set(varCampus, Self.Selected); Set(varTeacher, First(Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher && Active = true), Name, SortOrder.Ascending))); Select(btnAttLoadEngine)
                         - conAttTeacherField:
                             Control: GroupContainer
                             Variant: AutoLayout
@@ -536,7 +557,7 @@ Screens:
                                     DisplayMode: =If((CanPickTeacher || IsTeacherRole) && !varLoading, DisplayMode.Edit, DisplayMode.Disabled)
                                     Height: =36
                                     ItemDisplayText: =ThisItem.Name
-                                    Items: =Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending)
+                                    Items: =Sort(Filter(Staff, Campus.Campus = varCampus.Campus && 'App Role' = 'App Role (Staff)'.Teacher && Active = true), Name, SortOrder.Ascending)
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                     OnChange: =Set(varTeacher, Self.Selected); Select(btnAttLoadEngine)

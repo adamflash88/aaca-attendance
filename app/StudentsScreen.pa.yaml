@@ -29,7 +29,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStuRoot.Width < 640, 100, 48), 0)
+                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStuRoot.Width < 640, 152, 48), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -83,7 +83,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(conStuRoot.Width < 640, 96, 44)
+                        Height: =If(conStuRoot.Width < 640, 148, 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -157,6 +157,22 @@ Screens:
                               Text: ="Transportation"
                               Visible: =CanClassify
                               Width: =140
+                        - btnStuNavStaff:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Staff"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(StaffScreen)
+                              Size: =14
+                              Text: ="Staff"
+                              Visible: =CanManageStudents
+                              Width: =80
             - conStuDenied:
                 Control: GroupContainer
                 Variant: AutoLayout
@@ -1263,7 +1279,7 @@ Screens:
                                           Color: =ColorInk
                                           Height: =36
                                           ItemDisplayText: =ThisItem.Name
-                                          Items: =Sort(Filter(Staff, Campus.Campus = ddStuFormCampus.Selected.Campus && 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending)
+                                          Items: =Sort(Filter(Staff, Campus.Campus = ddStuFormCampus.Selected.Campus && 'App Role' = 'App Role (Staff)'.Teacher && Active = true), Name, SortOrder.Ascending)
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                               - conStuFormProgram:
@@ -2510,12 +2526,12 @@ Screens:
                                 ClearCollect(colStuRaw, ForAll(Students As s, {StudentId: s.Student, DisplayName: s.'Display Name', FirstName: s.'First Name', LastName: s.'Last Name', StudentNumber: s.'Student Number', Dob: s.'Date of Birth', GradeText: Text(s.Grade), ExternalId: s.'External Client ID', StatusText: Text(s.'Status (aaca_status)'), ArchivedOn: s.'Archived On'})),
                                 ClearCollect(colStuYears, ForAll('School Years' As y, {YearId: y.'School Year', YearName: y.Name, YStart: y.'Start Date', YEnd: y.'End Date', YStatus: Text(y.'Status (aaca_status)')})),
                                 ClearCollect(colStuCampusSrc, ForAll(Sort(Campuses, Name, SortOrder.Ascending) As c, {CampusId: c.Campus, CampusName: c.Name})),
-                                ClearCollect(colStuTeacherSrc, ForAll(Sort(Filter(Staff, 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending) As t, {TeacherId: t.Staff, TeacherName: t.Name, CampusId: t.Campus.Campus}))
+                                ClearCollect(colStuTeacherSrc, ForAll(Sort(Filter(Staff, 'App Role' = 'App Role (Staff)'.Teacher), Name, SortOrder.Ascending) As t, {TeacherId: t.Staff, TeacherName: t.Name, CampusId: t.Campus.Campus, IsActive: t.Active <> false}))
                             ),
                             Set(varStuLoadError, FirstError.Message)
                         );
                         ClearCollect(colStuCampusOpts, {CampusId: ZeroGuid, CampusName: "All campuses"}, colStuCampusSrc);
-                        ClearCollect(colStuTeacherOpts, {TeacherId: ZeroGuid, TeacherName: "All teachers", CampusId: ZeroGuid}, colStuTeacherSrc);
+                        ClearCollect(colStuTeacherOpts, {TeacherId: ZeroGuid, TeacherName: "All teachers", CampusId: ZeroGuid, IsActive: true}, colStuTeacherSrc);
                         ClearCollect(
                             colStuList,
                             ForAll(
