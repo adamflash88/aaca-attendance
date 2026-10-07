@@ -1,0 +1,183 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e81",
+ "name": "AACA - Ask NEXUS",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_microsoftcopilotstudio": {
+     "runtimeSource": "invoker",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedmicrosoftcopilotstudio_nexus"
+     },
+     "api": {
+      "name": "shared_microsoftcopilotstudio"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "manual": {
+      "metadata": {
+       "operationMetadataId": "d6e642d6-f0b0-460f-9d60-e5fe59096872"
+      },
+      "type": "Request",
+      "kind": "PowerAppV2",
+      "inputs": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "text": {
+          "title": "Question",
+          "type": "string",
+          "x-ms-dynamically-added": true,
+          "description": "The user's question",
+          "x-ms-content-hint": "TEXT"
+         },
+         "text_1": {
+          "title": "ConversationId",
+          "type": "string",
+          "x-ms-dynamically-added": true,
+          "description": "Blank to start a new conversation",
+          "x-ms-content-hint": "TEXT"
+         },
+         "text_2": {
+          "title": "Context",
+          "type": "string",
+          "x-ms-dynamically-added": true,
+          "description": "Which screen and role the question comes from",
+          "x-ms-content-hint": "TEXT"
+         }
+        },
+        "required": [
+         "text"
+        ]
+       }
+      }
+     }
+    },
+    "actions": {
+     "Ask_NEXUS": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "b49a534c-01ea-4554-9960-057a4f4a51b9"
+      },
+      "type": "OpenApiConnectionWebhook",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_microsoftcopilotstudio",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftcopilotstudio",
+        "operationId": "ExecuteCopilotAsyncV2"
+       },
+       "parameters": {
+        "Copilot": "cr15b_ResourceCenterCopilot",
+        "environmentId": "34bb0920-5056-eb04-b0b0-26ec19c6e711",
+        "body/message": "@{if(empty(triggerBody()?['text_2']), '', concat(triggerBody()?['text_2'], decodeUriComponent('%0A%0A')))}@{triggerBody()?['text']}",
+        "x-ms-conversation-id": "@{triggerBody()?['text_1']}"
+       },
+       "authentication": "@parameters('$authentication')"
+      },
+      "limit": {
+       "timeout": "PT100S"
+      }
+     },
+     "Answer": {
+      "runAfter": {
+       "Ask_NEXUS": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "5f6a2bf4-dd67-491d-a835-fe8a730c5c9d"
+      },
+      "type": "Response",
+      "kind": "PowerApp",
+      "inputs": {
+       "statusCode": 200,
+       "body": {
+        "answer": "@{body('Ask_NEXUS')?['lastResponse']}",
+        "conversationid": "@{body('Ask_NEXUS')?['conversationId']}",
+        "ok": "true"
+       },
+       "schema": {
+        "type": "object",
+        "properties": {
+         "answer": {
+          "title": "answer",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         },
+         "conversationid": {
+          "title": "conversationid",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         },
+         "ok": {
+          "title": "ok",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         }
+        }
+       }
+      }
+     },
+     "No_answer": {
+      "runAfter": {
+       "Ask_NEXUS": [
+        "Failed",
+        "TimedOut"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "2c3a1175-66c6-4641-8e47-85b0b2e6242d"
+      },
+      "type": "Response",
+      "kind": "PowerApp",
+      "inputs": {
+       "statusCode": 200,
+       "body": {
+        "answer": "NEXUS could not answer right now. Please try again in a moment.",
+        "conversationid": "@{triggerBody()?['text_1']}",
+        "ok": "false"
+       },
+       "schema": {
+        "type": "object",
+        "properties": {
+         "answer": {
+          "title": "answer",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         },
+         "conversationid": {
+          "title": "conversationid",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         },
+         "ok": {
+          "title": "ok",
+          "type": "string",
+          "x-ms-dynamically-added": true
+         }
+        }
+       }
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}

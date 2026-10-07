@@ -43,7 +43,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 152, 48), 0) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
+                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 152, 48), 48) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -95,7 +95,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(conTrnRoot.Width < 640, 148, 44) + If(CanClassify, 8, 0)
+                        Height: =If(CanManageStudents, If(conTrnRoot.Width < 640, 148, 44) + If(CanClassify, 8, 0), 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -108,7 +108,6 @@ Screens:
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
-                        Visible: =CanManageStudents
                       Children:
                         - btnTrnNavAttendance:
                             Control: ModernButton
@@ -124,6 +123,7 @@ Screens:
                               OnSelect: =Navigate(Screen1)
                               Size: =14
                               Text: ="Attendance"
+                              Visible: =CanManageStudents
                               Width: =110
                         - btnTrnNavStudents:
                             Control: ModernButton
@@ -139,6 +139,7 @@ Screens:
                               OnSelect: =Navigate(StudentsScreen)
                               Size: =14
                               Text: ="Students"
+                              Visible: =CanManageStudents
                               Width: =110
                         - btnTrnNavAbsences:
                             Control: ModernButton
@@ -154,6 +155,7 @@ Screens:
                               OnSelect: =Navigate(AbsencesScreen)
                               Size: =14
                               Text: ="Absences"
+                              Visible: =CanManageStudents
                               Width: =110
                         - btnTrnNavTransport:
                             Control: ModernButton
@@ -187,6 +189,37 @@ Screens:
                               Text: ="Staff"
                               Visible: =CanManageStudents
                               Width: =80
+                        - conTrnNavSpacer:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =44
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              Visible: =conTrnRoot.Width >= 640
+                        - imgTrnNavHelp:
+                            Control: Image
+                            Properties:
+                              AccessibleLabel: =If(varHelpOpen, "Close NEXUS help", "Open NEXUS help")
+                              AlignInContainer: =AlignInContainer.Center
+                              BorderColor: =ColorViolet
+                              BorderThickness: =If(varHelpOpen, 3, 0)
+                              FocusedBorderThickness: =3
+                              Height: =44
+                              HoverBorderColor: =ColorCyan
+                              Image: =NexusLogo
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Set(varHelpOpen, !varHelpOpen)
+                              RadiusBottomLeft: =10
+                              RadiusBottomRight: =10
+                              RadiusTopLeft: =10
+                              RadiusTopRight: =10
+                              TabIndex: =0
+                              Tooltip: =If(varHelpOpen, "Close NEXUS help", "Ask NEXUS for help")
+                              Width: =44
                   - conTrnHdrTabs:
                       Control: GroupContainer
                       Variant: AutoLayout
@@ -283,6 +316,211 @@ Screens:
                                 Select(btnTrnLoadEngine);
                                 Select(btnTrnBannerEngine)
                               Width: =220
+            - conTrnHelp:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorViolet
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =If(conTrnRoot.Width < 640, 460, 400)
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =12
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =12
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =varHelpOpen
+                Children:
+                  - conTrnHelpHead:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =32
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lblTrnHelpTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorViolet
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Bold
+                              Height: =28
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =16
+                              Text: ="NEXUS · AACA Attendance help"
+                              Wrap: =false
+                        - btnTrnHelpNew:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Start a new conversation with NEXUS"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              DisplayMode: =If(varHelpBusy, DisplayMode.Disabled, DisplayMode.Edit)
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Clear(colHelpMsgs); Set(varHelpConvId, "")
+                              Size: =13
+                              Text: ="New conversation"
+                              Width: =150
+                        - btnTrnHelpClose:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Close NEXUS help"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Set(varHelpOpen, false)
+                              Size: =13
+                              Text: ="Close"
+                              Width: =80
+                  - spnTrnHelpBusy:
+                      Control: Spinner
+                      Properties:
+                        AccessibleLabel: ="NEXUS is looking up your answer"
+                        AlignInContainer: =AlignInContainer.Stretch
+                        FontColor: =ColorInk
+                        FontSize: =13
+                        Height: =32
+                        Label: ="NEXUS is looking that up... answers usually take 10-30 seconds."
+                        LabelPosition: ='Spinner.LabelPosition'.After
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        SpinnerColor: =ColorViolet
+                        SpinnerSize: ='Spinner.SpinnerSize'.Small
+                        TrackColor: =ColorInfoBg
+                        Visible: =varHelpBusy
+                  - conTrnHelpChat:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorPaper
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LayoutOverflowY: =LayoutOverflow.Scroll
+                        PaddingBottom: =8
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                        PaddingTop: =8
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                      Children:
+                        - htmTrnHelpChat:
+                            Control: HtmlViewer
+                            Properties:
+                              AlignInContainer: =AlignInContainer.Stretch
+                              AutoHeight: =true
+                              Color: =ColorInk
+                              HtmlText: |-
+                                =If(CountRows(colHelpMsgs) = 0, "<div style='color:#4E5876;padding:4px'>Hi, I am <b style='color:#7C3AED'>NEXUS</b>. Ask me how to do something in the AACA Attendance app, or what a button, mark or color means. For example: <i>How do I classify an absence?</i> or <i>What does 1* mean?</i></div>", Concat(Sort(colHelpMsgs, N, SortOrder.Descending), "<div style='margin:4px 0 4px 48px;padding:8px 12px;background:#2563EB;color:#FFFFFF;border-radius:12px 12px 2px 12px'>" & Substitute(Substitute(Substitute(Substitute(Substitute(Q, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "**", ""), Char(10), "<br>") & "</div>" & If(A = "", "<div style='margin:4px 48px 14px 0;padding:8px 12px;color:#4E5876'><i>NEXUS is thinking...</i></div>", "<div style='margin:4px 48px 14px 0;padding:8px 12px;background:#FFFFFF;border:1px solid #D5DCEC;border-left:4px solid #7C3AED;color:#0F163A;border-radius:12px 12px 12px 2px'><b style='color:#7C3AED'>NEXUS</b><br>" & Substitute(Substitute(Substitute(Substitute(Substitute(A, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), "**", ""), Char(10), "<br>") & "</div>")))
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                  - conTrnHelpAsk:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - txtTrnHelpQ:
+                            Control: ModernTextInput
+                            Properties:
+                              AccessibleLabel: ="Your question for NEXUS"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =Appearance.Outline
+                              Color: =ColorInk
+                              FillPortions: =1
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              MaxLength: =500
+                              Placeholder: ="Ask how to do something in the app..."
+                        - btnTrnHelpAsk:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Send the question to NEXUS"
+                              AlignInContainer: =AlignInContainer.Center
+                              BasePaletteColor: =ColorViolet
+                              Color: =ColorWhite
+                              DisplayMode: =If(varHelpBusy || Trim(txtTrnHelpQ.Text) = "", DisplayMode.Disabled, DisplayMode.Edit)
+                              Height: =40
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: |-
+                                =With({q: Trim(txtTrnHelpQ.Text), n: CountRows(colHelpMsgs) + 1},
+                                    If(q <> "" && !varHelpBusy,
+                                        Set(varHelpBusy, true);
+                                        Collect(colHelpMsgs, {N: n, Q: q, A: ""});
+                                        Reset(txtTrnHelpQ);
+                                        With({r: IfError('AACA-AskNEXUS'.Run(q, {ConversationId: Coalesce(varHelpConvId, ""), Context: HelpContextPrefix & " The user is on the Transportation screen."}), {answer: "NEXUS could not answer right now. Please try again in a moment.", conversationid: Coalesce(varHelpConvId, ""), ok: "false"})},
+                                            Patch(colHelpMsgs, LookUp(colHelpMsgs, N = n), {A: Coalesce(r.answer, "NEXUS did not return an answer. Please try again.")});
+                                            If(r.ok = "true" && !IsBlank(r.conversationid), Set(varHelpConvId, r.conversationid))
+                                        );
+                                        Set(varHelpBusy, false)
+                                    )
+                                )
+                              Size: =14
+                              Text: =If(varHelpBusy, "Asking...", "Ask")
+                              Width: =100
+                  - lblTrnHelpNote:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorMuted
+                        Height: =If(conTrnRoot.Width < 640, 52, 20)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="NEXUS answers from the AACA Resource Center and the Attendance user guide. Answers usually take 10-30 seconds. Check important details with your office."
+                        VerticalAlign: =VerticalAlign.Top
             - conTrnDenied:
                 Control: GroupContainer
                 Variant: AutoLayout
