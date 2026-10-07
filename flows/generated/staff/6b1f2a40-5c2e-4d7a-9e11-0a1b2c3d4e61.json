@@ -1,0 +1,484 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e61",
+ "name": "AACA - Staff Access Sync",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_commondataserviceforapps": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedcommondataserviceforapps_2b783"
+     },
+     "api": {
+      "name": "shared_commondataserviceforapps"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "Every_15_minutes": {
+      "metadata": {
+       "operationMetadataId": "39547af4-3a42-4bb9-9c10-e9fc427e9756"
+      },
+      "type": "Recurrence",
+      "recurrence": {
+       "frequency": "Minute",
+       "interval": 15
+      }
+     }
+    },
+    "actions": {
+     "Unlinked_staff": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "10a63b90-ff36-4814-bc1c-f12d03c2e14d"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "ListRecords"
+       },
+       "parameters": {
+        "entityName": "aaca_staffs",
+        "$select": "aaca_staffid,aaca_name,aaca_email,aaca_approle,_aaca_campus_value",
+        "$filter": "_aaca_user_value eq null and aaca_email ne null and aaca_active eq true"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Each_staff": {
+      "runAfter": {
+       "Unlinked_staff": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "b0d02ed5-6510-4a52-a195-e5b579e8718a"
+      },
+      "type": "Foreach",
+      "foreach": "@body('Unlinked_staff')?['value']",
+      "actions": {
+       "Find_user": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "73c2870e-7fe5-40d8-bcdd-65ff375a8577"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "systemusers",
+          "$select": "systemuserid,_businessunitid_value",
+          "$filter": "isdisabled eq false and internalemailaddress eq '@{replace(items('Each_staff')?['aaca_email'], '''', '''''')}'",
+          "$top": 1
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "User_found": {
+        "runAfter": {
+         "Find_user": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "925ab9b4-0087-4b99-acf5-7f879dbb3e1e"
+        },
+        "type": "If",
+        "expression": {
+         "greater": [
+          "@length(body('Find_user')?['value'])",
+          0
+         ]
+        },
+        "actions": {
+         "Link_staff": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "04871041-572d-406b-b005-86fee799f5ea"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+            "operationId": "UpdateRecord"
+           },
+           "parameters": {
+            "entityName": "aaca_staffs",
+            "recordId": "@items('Each_staff')?['aaca_staffid']",
+            "item/aaca_user@odata.bind": "@{concat('/systemusers(', first(body('Find_user')?['value'])?['systemuserid'], ')')}"
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         },
+         "Existing_roles": {
+          "runAfter": {
+           "Link_staff": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "c35393a8-173a-40ad-a60f-aed4dacad89d"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+            "operationId": "ListRecords"
+           },
+           "parameters": {
+            "entityName": "systemuserrolescollection",
+            "$select": "roleid",
+            "$filter": "systemuserid eq @{first(body('Find_user')?['value'])?['systemuserid']}",
+            "$top": 1
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         },
+         "New_teacher": {
+          "runAfter": {
+           "Existing_roles": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "fdd47ad6-4a56-41f3-b61b-498bc2d3dc82"
+          },
+          "type": "If",
+          "expression": {
+           "and": [
+            {
+             "equals": [
+              "@length(body('Existing_roles')?['value'])",
+              0
+             ]
+            },
+            {
+             "equals": [
+              "@items('Each_staff')?['aaca_approle']",
+              582100000
+             ]
+            },
+            {
+             "not": {
+              "equals": [
+               "@items('Each_staff')?['_aaca_campus_value']",
+               "@null"
+              ]
+             }
+            }
+           ]
+          },
+          "actions": {
+           "Campus": {
+            "runAfter": {},
+            "metadata": {
+             "operationMetadataId": "358818c7-1d84-4018-a479-cc96d1fc7b17"
+            },
+            "type": "OpenApiConnection",
+            "inputs": {
+             "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "GetItem"
+             },
+             "parameters": {
+              "entityName": "aaca_campuses",
+              "recordId": "@items('Each_staff')?['_aaca_campus_value']",
+              "$select": "aaca_name"
+             },
+             "authentication": "@parameters('$authentication')"
+            }
+           },
+           "Find_bu": {
+            "runAfter": {
+             "Campus": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "b4b59c27-f43a-43a1-a83a-0f4a790761e6"
+            },
+            "type": "OpenApiConnection",
+            "inputs": {
+             "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+             },
+             "parameters": {
+              "entityName": "businessunits",
+              "$select": "businessunitid",
+              "$filter": "name eq '@{replace(body('Campus')?['aaca_name'], '''', '''''')}'",
+              "$top": 1
+             },
+             "authentication": "@parameters('$authentication')"
+            }
+           },
+           "Has_bu": {
+            "runAfter": {
+             "Find_bu": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "9f08684b-9a72-40ef-bfc1-e2d953f95745"
+            },
+            "type": "If",
+            "expression": {
+             "greater": [
+              "@length(body('Find_bu')?['value'])",
+              0
+             ]
+            },
+            "actions": {
+             "Move_user": {
+              "runAfter": {},
+              "metadata": {
+               "operationMetadataId": "0a99d023-72af-4200-aa29-0b67badb07a8"
+              },
+              "type": "If",
+              "expression": {
+               "not": {
+                "equals": [
+                 "@first(body('Find_user')?['value'])?['_businessunitid_value']",
+                 "@first(body('Find_bu')?['value'])?['businessunitid']"
+                ]
+               }
+              },
+              "actions": {
+               "Set_business_unit": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "045ea2f8-4e77-468c-b892-b8f4517e982b"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateRecord"
+                 },
+                 "parameters": {
+                  "entityName": "systemusers",
+                  "recordId": "@first(body('Find_user')?['value'])?['systemuserid']",
+                  "item/businessunitid@odata.bind": "@{concat('/businessunits(', first(body('Find_bu')?['value'])?['businessunitid'], ')')}"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               }
+              },
+              "else": {
+               "actions": {}
+              }
+             },
+             "Find_roles": {
+              "runAfter": {
+               "Move_user": [
+                "Succeeded"
+               ]
+              },
+              "metadata": {
+               "operationMetadataId": "0ad368dd-7203-4469-bab6-0a0c297edc67"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+               "host": {
+                "connectionName": "shared_commondataserviceforapps",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                "operationId": "ListRecords"
+               },
+               "parameters": {
+                "entityName": "roles",
+                "$select": "roleid,name",
+                "$filter": "_businessunitid_value eq @{first(body('Find_bu')?['value'])?['businessunitid']} and (name eq 'AACA Teacher' or name eq 'Basic User')"
+               },
+               "authentication": "@parameters('$authentication')"
+              }
+             },
+             "Each_role": {
+              "runAfter": {
+               "Find_roles": [
+                "Succeeded"
+               ]
+              },
+              "metadata": {
+               "operationMetadataId": "e7a0163d-5685-4d58-be18-ee75aada4818"
+              },
+              "type": "Foreach",
+              "foreach": "@body('Find_roles')?['value']",
+              "actions": {
+               "Assign_role": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "67224d23-69a4-4ffd-808b-932d15f3002d"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "AssociateEntities"
+                 },
+                 "parameters": {
+                  "entityName": "systemusers",
+                  "recordId": "@first(body('Find_user')?['value'])?['systemuserid']",
+                  "associationEntityRelationship": "systemuserroles_association",
+                  "item/@odata.id": "@{concat(first(split(body('Find_roles')?['@odata.context'], '$metadata')), 'roles(', items('Each_role')?['roleid'], ')')}"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               }
+              },
+              "runtimeConfiguration": {
+               "concurrency": {
+                "repetitions": 1
+               }
+              }
+             },
+             "Find_profile": {
+              "runAfter": {
+               "Each_role": [
+                "Succeeded"
+               ]
+              },
+              "metadata": {
+               "operationMetadataId": "caca4f57-f8af-493b-acf2-a4f4c1d2f227"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+               "host": {
+                "connectionName": "shared_commondataserviceforapps",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                "operationId": "ListRecords"
+               },
+               "parameters": {
+                "entityName": "fieldsecurityprofiles",
+                "$select": "fieldsecurityprofileid",
+                "$filter": "name eq 'AACA Absence Viewers'",
+                "$top": 1
+               },
+               "authentication": "@parameters('$authentication')"
+              }
+             },
+             "Add_profile": {
+              "runAfter": {
+               "Find_profile": [
+                "Succeeded"
+               ]
+              },
+              "metadata": {
+               "operationMetadataId": "3390ac59-dcd0-4b55-9a70-d55734d1d3bb"
+              },
+              "type": "If",
+              "expression": {
+               "greater": [
+                "@length(body('Find_profile')?['value'])",
+                0
+               ]
+              },
+              "actions": {
+               "Assign_profile": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "47b0cc1e-2872-4a3c-a0d5-d2c714e9bb4c"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "AssociateEntities"
+                 },
+                 "parameters": {
+                  "entityName": "systemusers",
+                  "recordId": "@first(body('Find_user')?['value'])?['systemuserid']",
+                  "associationEntityRelationship": "systemuserprofiles_association",
+                  "item/@odata.id": "@{concat(first(split(body('Find_roles')?['@odata.context'], '$metadata')), 'fieldsecurityprofiles(', first(body('Find_profile')?['value'])?['fieldsecurityprofileid'], ')')}"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               }
+              },
+              "else": {
+               "actions": {}
+              }
+             },
+             "Audit_access": {
+              "runAfter": {
+               "Add_profile": [
+                "Succeeded"
+               ]
+              },
+              "metadata": {
+               "operationMetadataId": "590f8e1b-572a-478b-a852-4808e8e8944f"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+               "host": {
+                "connectionName": "shared_commondataserviceforapps",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                "operationId": "CreateRecord"
+               },
+               "parameters": {
+                "entityName": "aaca_auditevents",
+                "item/aaca_name": "Access set up: @{items('Each_staff')?['aaca_name']} (Teacher, @{body('Campus')?['aaca_name']})",
+                "item/aaca_action": 582100001,
+                "item/aaca_entity": "systemuser",
+                "item/aaca_entityid": "@first(body('Find_user')?['value'])?['systemuserid']",
+                "item/aaca_after": "{\"StaffId\":\"@{items('Each_staff')?['aaca_staffid']}\",\"Roles\":\"AACA Teacher, Basic User\",\"Profile\":\"AACA Absence Viewers\",\"BusinessUnit\":\"@{body('Campus')?['aaca_name']}\"}",
+                "item/aaca_reason": "Staff Access Sync flow (new teacher)"
+               },
+               "authentication": "@parameters('$authentication')"
+              }
+             }
+            },
+            "else": {
+             "actions": {}
+            }
+           }
+          },
+          "else": {
+           "actions": {}
+          }
+         }
+        },
+        "else": {
+         "actions": {}
+        }
+       }
+      },
+      "runtimeConfiguration": {
+       "concurrency": {
+        "repetitions": 1
+       }
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}

@@ -1,0 +1,444 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e71",
+ "name": "AACA - Teacher Attendance Reminder",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_commondataserviceforapps": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedcommondataserviceforapps_2b783"
+     },
+     "api": {
+      "name": "shared_commondataserviceforapps"
+     }
+    },
+    "shared_teams": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedteams_reminders"
+     },
+     "api": {
+      "name": "shared_teams"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "Schedule": {
+      "metadata": {
+       "operationMetadataId": "227baa1e-703c-4949-9aa5-6853cb39bea5"
+      },
+      "type": "Recurrence",
+      "recurrence": {
+       "frequency": "Week",
+       "interval": 1,
+       "timeZone": "Pacific Standard Time",
+       "schedule": {
+        "weekDays": [
+         "Monday",
+         "Tuesday",
+         "Wednesday",
+         "Thursday",
+         "Friday"
+        ],
+        "hours": [
+         "10"
+        ],
+        "minutes": [
+         0
+        ]
+       }
+      }
+     }
+    },
+    "actions": {
+     "Today": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "0512370f-a091-4eb5-8ea0-056895c4fcc6"
+      },
+      "type": "Compose",
+      "inputs": "@convertFromUtc(utcNow(), 'Pacific Standard Time', 'yyyy-MM-dd')"
+     },
+     "Campuses": {
+      "runAfter": {
+       "Today": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "aaec0240-9455-4838-8a58-5298d43e531b"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "ListRecords"
+       },
+       "parameters": {
+        "entityName": "aaca_campuses",
+        "$select": "aaca_campusid,aaca_name",
+        "$filter": "aaca_active eq true"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Each_campus": {
+      "runAfter": {
+       "Campuses": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "8b42e3bf-f910-42cc-980f-8cf88860ed20"
+      },
+      "type": "Foreach",
+      "foreach": "@body('Campuses')?['value']",
+      "actions": {
+       "Term": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "82724d2d-184a-45cc-b867-6dd9ef42019d"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_terms",
+          "$select": "aaca_termid",
+          "$filter": "_aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} and aaca_startdate le @{outputs('Today')} and aaca_enddate ge @{outputs('Today')}"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Exceptions": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "27339e0f-91c1-4258-8738-42c09d1200df"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_calendarexceptions",
+          "$select": "aaca_type",
+          "$filter": "aaca_date eq @{outputs('Today')} and (_aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} or _aaca_campus_value eq null)"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Makeup": {
+        "runAfter": {
+         "Exceptions": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "9f4c3fc3-7fa7-4050-b233-160253368090"
+        },
+        "type": "Query",
+        "inputs": {
+         "from": "@body('Exceptions')?['value']",
+         "where": "@equals(item()?['aaca_type'], 582100004)"
+        }
+       },
+       "School_day": {
+        "runAfter": {
+         "Term": [
+          "Succeeded"
+         ],
+         "Makeup": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "aa75497f-2817-4c33-852d-ee335274268e"
+        },
+        "type": "Compose",
+        "inputs": "@and(not(empty(body('Term')?['value'])), or(not(empty(body('Makeup'))), and(not(or(equals(dayOfWeek(outputs('Today')), 0), equals(dayOfWeek(outputs('Today')), 6))), equals(length(body('Makeup')), length(body('Exceptions')?['value'])))))"
+       },
+       "If_school_day": {
+        "runAfter": {
+         "School_day": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "7a7931fc-85ab-42f0-ad27-b28ffae42c24"
+        },
+        "type": "If",
+        "expression": {
+         "and": [
+          {
+           "equals": [
+            "@outputs('School_day')",
+            true
+           ]
+          }
+         ]
+        },
+        "actions": {
+         "Enrolled": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "5d9cef7b-ffd2-459d-a356-13a3f014ad07"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+            "operationId": "ListRecords"
+           },
+           "parameters": {
+            "entityName": "aaca_enrollments",
+            "$select": "_aaca_student_value,_aaca_teacher_value",
+            "$filter": "_aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} and aaca_startdate le @{outputs('Today')} and (aaca_enddate eq null or aaca_enddate ge @{outputs('Today')})",
+            "$expand": "aaca_student($select=aaca_displayname),aaca_teacher($select=aaca_name)"
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         },
+         "Marked": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "db48d5d5-77fa-4936-abd7-eee4702610f6"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_commondataserviceforapps",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+            "operationId": "ListRecords"
+           },
+           "parameters": {
+            "entityName": "aaca_attendances",
+            "$select": "_aaca_student_value",
+            "$filter": "_aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} and aaca_date eq @{outputs('Today')} and aaca_isdeleted eq false"
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         },
+         "Marked_ids": {
+          "runAfter": {
+           "Marked": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "c7f60c7d-09b4-4a00-8576-e252a71309ea"
+          },
+          "type": "Select",
+          "inputs": {
+           "from": "@body('Marked')?['value']",
+           "select": "@item()?['_aaca_student_value']"
+          }
+         },
+         "Unmarked": {
+          "runAfter": {
+           "Enrolled": [
+            "Succeeded"
+           ],
+           "Marked_ids": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "03c759bf-5e9a-48b8-a74f-fa77e0c91a3c"
+          },
+          "type": "Query",
+          "inputs": {
+           "from": "@body('Enrolled')?['value']",
+           "where": "@not(contains(body('Marked_ids'), item()?['_aaca_student_value']))"
+          }
+         },
+         "Teacher_ids": {
+          "runAfter": {
+           "Unmarked": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "90a6e524-9ae8-49b3-8104-9c7c9f7d9b52"
+          },
+          "type": "Select",
+          "inputs": {
+           "from": "@body('Unmarked')",
+           "select": "@item()?['_aaca_teacher_value']"
+          }
+         },
+         "Each_teacher": {
+          "runAfter": {
+           "Teacher_ids": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "e1080618-78d5-4441-9279-3e8d98ff6c1c"
+          },
+          "type": "Foreach",
+          "foreach": "@union(body('Teacher_ids'), body('Teacher_ids'))",
+          "actions": {
+           "Teacher": {
+            "runAfter": {},
+            "metadata": {
+             "operationMetadataId": "e4d0cb8c-79b3-4682-812a-07c7b5c5e402"
+            },
+            "type": "OpenApiConnection",
+            "inputs": {
+             "host": {
+              "connectionName": "shared_commondataserviceforapps",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords"
+             },
+             "parameters": {
+              "entityName": "aaca_staffs",
+              "$select": "aaca_name,aaca_email,aaca_active",
+              "$filter": "aaca_staffid eq @{items('Each_teacher')} and aaca_active eq true",
+              "$expand": "aaca_user($select=internalemailaddress)"
+             },
+             "authentication": "@parameters('$authentication')"
+            }
+           },
+           "Teacher_email": {
+            "runAfter": {
+             "Teacher": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "31f121f6-6f0f-4673-91f5-3deee66ed73d"
+            },
+            "type": "Select",
+            "inputs": {
+             "from": "@body('Teacher')?['value']",
+             "select": "@coalesce(item()?['aaca_email'], item()?['aaca_user']?['internalemailaddress'])"
+            }
+           },
+           "Their_students": {
+            "runAfter": {},
+            "metadata": {
+             "operationMetadataId": "5d928101-05b1-4130-b9a1-68c4939aeff5"
+            },
+            "type": "Query",
+            "inputs": {
+             "from": "@body('Unmarked')",
+             "where": "@equals(item()?['_aaca_teacher_value'], items('Each_teacher'))"
+            }
+           },
+           "Their_names": {
+            "runAfter": {
+             "Their_students": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "78d2564f-2eae-4fb5-a177-d32234d9bcd0"
+            },
+            "type": "Select",
+            "inputs": {
+             "from": "@body('Their_students')",
+             "select": "@item()?['aaca_student']?['aaca_displayname']"
+            }
+           },
+           "Has_email": {
+            "runAfter": {
+             "Teacher_email": [
+              "Succeeded"
+             ],
+             "Their_names": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "41897b33-978d-493c-ad41-666391a50cc5"
+            },
+            "type": "If",
+            "expression": {
+             "and": [
+              {
+               "not": {
+                "equals": [
+                 "@empty(first(body('Teacher_email')))",
+                 true
+                ]
+               }
+              }
+             ]
+            },
+            "actions": {
+             "Send_teacher": {
+              "runAfter": {},
+              "metadata": {
+               "operationMetadataId": "9c9c8eb4-ea00-43e5-a3ea-183e6b5aafb7"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+               "host": {
+                "connectionName": "shared_teams",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                "operationId": "PostMessageToConversation"
+               },
+               "parameters": {
+                "poster": "Flow bot",
+                "location": "Chat with Flow bot",
+                "body/recipient": "@{first(body('Teacher_email'))}",
+                "body/messageBody": "<p>Good morning. Attendance for today (@{formatDateTime(outputs('Today'), 'dddd, MMMM d')}) is not marked yet for @{length(body('Their_students'))} student(s):</p><p><b>@{join(body('Their_names'), ', ')}</b></p><p>Please open the AACA Attendance app and mark them present. Absences reported by parents are already filled in.</p>"
+               },
+               "authentication": "@parameters('$authentication')"
+              }
+             }
+            },
+            "else": {
+             "actions": {}
+            }
+           }
+          },
+          "runtimeConfiguration": {
+           "concurrency": {
+            "repetitions": 1
+           }
+          }
+         }
+        },
+        "else": {
+         "actions": {}
+        }
+       }
+      },
+      "runtimeConfiguration": {
+       "concurrency": {
+        "repetitions": 1
+       }
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}
