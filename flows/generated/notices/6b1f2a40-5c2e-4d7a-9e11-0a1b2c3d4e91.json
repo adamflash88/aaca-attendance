@@ -30,7 +30,7 @@
     "triggers": {
      "manual": {
       "metadata": {
-       "operationMetadataId": "c99ebe25-22de-4887-8799-8422a66b45ff"
+       "operationMetadataId": "86c7e049-e35e-4afe-ade1-20f3deb5e75e"
       },
       "type": "Request",
       "kind": "Http",
@@ -80,7 +80,7 @@
      "Campus": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "1aa2a730-8318-4b7c-b789-e1100a0a1c09"
+       "operationMetadataId": "83322dff-4032-420f-8668-1cfd2e307ab0"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -105,14 +105,14 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "6c66a579-6842-4ba6-b46e-53c49a628eaf"
+       "operationMetadataId": "eadb45d4-b931-4c87-b016-f0155afd1a90"
       },
       "type": "Scope",
       "actions": {
        "Absence_date": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "75509bd5-c326-4cfd-81aa-7c61d02dbacd"
+         "operationMetadataId": "0960e5ac-a3b8-4ac4-8f7f-e50ab49178a2"
         },
         "type": "Compose",
         "inputs": "@formatDateTime(triggerBody()?['data']?['DOA'], 'yyyy-MM-dd')"
@@ -124,7 +124,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "85da2ae1-23e9-4328-a4f9-ec4dac2ad34c"
+         "operationMetadataId": "2829210b-8b2b-453a-9a39-7dc8b35ca81f"
         },
         "type": "Compose",
         "inputs": "@if(empty(trim(coalesce(triggerBody()?['data']?['RETURN'], ''))), addDays(outputs('Absence_date'), 1, 'yyyy-MM-dd'), formatDateTime(triggerBody()?['data']?['RETURN'], 'yyyy-MM-dd'))"
@@ -136,7 +136,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "ef97aee4-cdbd-450b-ad0a-51fa8e5624f7"
+         "operationMetadataId": "2d930d3d-aa04-4fbb-a087-b34842be334c"
         },
         "type": "Compose",
         "inputs": "@and(not(empty(trim(coalesce(triggerBody()?['data']?['FN'], '')))), not(empty(trim(coalesce(triggerBody()?['data']?['LN'], '')))), not(empty(body('Campus')?['value'])), greater(outputs('Return_date'), outputs('Absence_date')), lessOrEquals(div(sub(ticks(outputs('Return_date')), ticks(outputs('Absence_date'))), 864000000000), 60))"
@@ -151,7 +151,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "5426623c-b403-4111-8340-5129bf436899"
+       "operationMetadataId": "acc9d446-de75-4beb-be0e-93f07f12f3de"
       },
       "type": "Response",
       "kind": "Http",
@@ -173,7 +173,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "0e5c4ec2-35d4-42e2-ae7a-9039789d9c1b"
+       "operationMetadataId": "e1489304-d76a-46ff-ab77-4a7e27ecd558"
       },
       "type": "If",
       "expression": {
@@ -190,7 +190,7 @@
        "Enrollments_on_day": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "a59c49c2-557f-456a-807f-9f28d7aa8e6d"
+         "operationMetadataId": "b8acba66-37fe-449a-90a1-5ede33f445bf"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -215,7 +215,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "3bfebee0-5578-4065-a72f-3c3cd45e03c6"
+         "operationMetadataId": "55ad0b2c-c6e5-4a29-a3b3-b254d7c854d5"
         },
         "type": "Query",
         "inputs": {
@@ -230,7 +230,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "5fcc1af4-39ac-457f-96bf-879202b93b04"
+         "operationMetadataId": "486e07c4-3950-4417-aeea-af30e9521d11"
         },
         "type": "Select",
         "inputs": {
@@ -245,7 +245,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "e59c590e-8b2b-4a96-8c79-8a604d79c1ff"
+         "operationMetadataId": "02732110-7b3f-4c89-8f69-cf2c524b601a"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -286,7 +286,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "94b23694-a6f2-43c0-a233-d80d86419796"
+         "operationMetadataId": "cc7b73ae-a97a-4083-9c3e-3103f5c48c15"
         },
         "type": "Response",
         "kind": "Http",
@@ -309,7 +309,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "e2499ccf-1f97-4c16-b49c-bd138ac2a75d"
+         "operationMetadataId": "72e4f2a6-331b-459d-8ced-fb9aa6786f3a"
         },
         "type": "Response",
         "kind": "Http",
@@ -330,7 +330,7 @@
         "Invalid": {
          "runAfter": {},
          "metadata": {
-          "operationMetadataId": "ace3127f-d5e5-4bc3-a5d0-8d812010fb6b"
+          "operationMetadataId": "252b8db5-8195-437f-8c0a-c83d7aa7586e"
          },
          "type": "Response",
          "kind": "Http",

@@ -49,7 +49,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conAttRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAttRoot.Width < 640, 152, 48), 48)
+                  Height: =If(conAttRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAttRoot.Width < 640, 152, conAttRoot.Width < 800, 100, 48), 48)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -102,7 +102,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(CanManageStudents, If(conAttRoot.Width < 640, 148, 44), 44)
+                        Height: =If(CanManageStudents, If(conAttRoot.Width < 640, 148, conAttRoot.Width < 800, 96, 44), 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -194,6 +194,22 @@ Screens:
                               Text: ="Staff"
                               Visible: =CanManageStudents
                               Width: =80
+                        - btnAttNavCalendar:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Calendar"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(CalendarScreen)
+                              Size: =14
+                              Text: ="Calendar"
+                              Visible: =IsAdminRole
+                              Width: =100
                         - conAttNavSpacer:
                             Control: GroupContainer
                             Variant: AutoLayout
@@ -1300,6 +1316,7 @@ Screens:
                                           Items: =colMonthDays
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
+                                          LoadingSpinner: =LoadingSpinner.None
                                           Selectable: =false
                                           ShowScrollbar: =false
                                           TabIndex: =0
@@ -1411,6 +1428,7 @@ Screens:
                                     Items: =colMonthStudents
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
+                                    LoadingSpinner: =LoadingSpinner.None
                                     Selectable: =false
                                     TabIndex: =0
                                     TemplatePadding: =0
@@ -1488,6 +1506,7 @@ Screens:
                                                   )
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
+                                                LoadingSpinner: =LoadingSpinner.None
                                                 Selectable: =false
                                                 ShowScrollbar: =false
                                                 TabIndex: =0
@@ -1598,6 +1617,7 @@ Screens:
                                           Items: =colMonthDays
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
+                                          LoadingSpinner: =LoadingSpinner.None
                                           Selectable: =false
                                           ShowScrollbar: =false
                                           TemplatePadding: =0
@@ -1806,6 +1826,7 @@ Screens:
                           )
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
+                        LoadingSpinner: =LoadingSpinner.None
                         Selectable: =false
                         TabIndex: =0
                         TemplatePadding: =4
@@ -2177,6 +2198,7 @@ Screens:
                         Items: =Sort(colAttQtr, Name, SortOrder.Ascending)
                         LayoutMinHeight: =0
                         LayoutMinWidth: =0
+                        LoadingSpinner: =LoadingSpinner.None
                         Selectable: =false
                         TabIndex: =0
                         TemplatePadding: =0
@@ -2659,7 +2681,7 @@ Screens:
                                     )
                                 ),
                                 ClearCollect(colMonthExceptions, Filter('Calendar Exceptions', Date >= varMonthStart && Date <= varMonthEnd)),
-                                ClearCollect(colMonthTerms, Filter(Terms, 'Start Date' <= varMonthEnd && 'End Date' >= varMonthStart)),
+                                ClearCollect(colMonthTerms, Filter(Terms, 'Start Date' <= varMonthEnd && 'End Date' >= varMonthStart && 'Term (aaca_term)' <> 'Term (Terms)'.Testing)),
                                 Set(varMonthLock, LookUp('Month Locks', Campus.Campus = varCampus.Campus && Month = varMonthStart && 'Status (aaca_status)' = 'Status (Month Locks)'.Locked))
                             ),
                             Set(varLoadError, FirstError.Message)

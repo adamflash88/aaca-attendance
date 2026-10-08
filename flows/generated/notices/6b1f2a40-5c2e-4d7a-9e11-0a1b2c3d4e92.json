@@ -39,7 +39,7 @@
     "triggers": {
      "When_a_notice_is_added": {
       "metadata": {
-       "operationMetadataId": "8e9a99a9-71ed-4e42-b742-aba56b85c6c6"
+       "operationMetadataId": "d08859d3-5d4b-4095-b54b-0cccee62a8fc"
       },
       "type": "OpenApiConnectionWebhook",
       "inputs": {
@@ -62,7 +62,7 @@
      "Campus": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "5195a6a3-3c4d-414a-ab25-11b5c62f0018"
+       "operationMetadataId": "d86df90d-512d-42c1-abaa-a60096b26de8"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -82,7 +82,7 @@
      "Matched_student": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "3da857a2-cde6-4ab8-af80-fc740e8a5d41"
+       "operationMetadataId": "7f9d6f2a-b9cb-4a52-b3ee-cceb9946cd95"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -103,7 +103,7 @@
      "Settings": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "92dcae15-5a8c-4491-a2bc-626e04495589"
+       "operationMetadataId": "94a60655-bebe-4b92-b705-6ee763f068d4"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -127,7 +127,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "a5488de1-6cf0-4fda-baaf-d16d6901e3b8"
+       "operationMetadataId": "6b95fb1c-6a58-45c7-95ad-8c5759547555"
       },
       "type": "Query",
       "inputs": {
@@ -142,7 +142,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "315f5f76-37db-4b81-9409-8906c09d4eed"
+       "operationMetadataId": "cd4ac0ed-7cae-46f8-b2fc-a1147718608f"
       },
       "type": "Query",
       "inputs": {
@@ -157,7 +157,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "14b915ea-5d3a-4570-84e3-9d4cafb78be6"
+       "operationMetadataId": "4ee8cfb0-dfe0-4f0e-b9ab-d4c395746e4e"
       },
       "type": "Query",
       "inputs": {
@@ -184,7 +184,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "42f3a07c-110c-444b-a565-1184c0afe3d3"
+       "operationMetadataId": "404b5032-635c-4334-b96c-74e231aed2f0"
       },
       "type": "Switch",
       "expression": "@if(not(empty(coalesce(body('Campus')?['aaca_absencechatid'], ''))), 'chat', if(not(empty(coalesce(first(body('Setting_AbsenceAlertFallbackEmail'))?['aaca_value'], ''))), 'fallback', 'none'))",
@@ -195,7 +195,7 @@
          "Post_to_campus_chat": {
           "runAfter": {},
           "metadata": {
-           "operationMetadataId": "f862c3a3-be64-41ef-a9d5-2dddc3b3960a"
+           "operationMetadataId": "395a4e47-bda2-4900-8253-da255886fce6"
           },
           "type": "OpenApiConnection",
           "inputs": {
@@ -221,7 +221,7 @@
          "Post_to_fallback": {
           "runAfter": {},
           "metadata": {
-           "operationMetadataId": "0226d5dc-e104-40b5-b827-cfe1b752787e"
+           "operationMetadataId": "4b899625-79e9-4814-8224-144921c2382a"
           },
           "type": "OpenApiConnection",
           "inputs": {

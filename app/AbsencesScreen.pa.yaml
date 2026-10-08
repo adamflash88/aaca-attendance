@@ -50,7 +50,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conAbsRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAbsRoot.Width < 640, 152, 48), 48) + If(CanClassify, 60, 0)
+                  Height: =If(conAbsRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conAbsRoot.Width < 640, 152, conAbsRoot.Width < 800, 100, 48), 48) + If(CanClassify, 60, 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -102,7 +102,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(CanManageStudents, If(conAbsRoot.Width < 640, 148, 44) + If(CanClassify, 8, 0), 44)
+                        Height: =If(CanManageStudents, If(conAbsRoot.Width < 640, 148, conAbsRoot.Width < 800, 96, 44) + If(CanClassify, 8, 0), 44)
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
                         LayoutMinHeight: =0
@@ -192,6 +192,22 @@ Screens:
                               Text: ="Staff"
                               Visible: =CanManageStudents
                               Width: =80
+                        - btnAbsNavCalendar:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Calendar"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(CalendarScreen)
+                              Size: =14
+                              Text: ="Calendar"
+                              Visible: =IsAdminRole
+                              Width: =100
                         - conAbsNavSpacer:
                             Control: GroupContainer
                             Variant: AutoLayout
@@ -4223,7 +4239,7 @@ Screens:
                                                           IfError(
                                                               Concurrent(
                                                                   ClearCollect(colAbsLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month})),
-                                                                  ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d1 && 'End Date' >= d0)),
+                                                                  ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d1 && 'End Date' >= d0 && 'Term (aaca_term)' <> 'Term (Terms)'.Testing)),
                                                                   ClearCollect(colAbsAddExc, Filter('Calendar Exceptions', Date >= d0 && Date <= d1))
                                                               ); true,
                                                               Set(varAbsAddErr, FirstError.Message)
@@ -4444,7 +4460,7 @@ Screens:
                                                                   Set(varAbsSaving, true);
                                                                   IfError(
                                                                       Concurrent(
-                                                                          ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d)),
+                                                                          ClearCollect(colAbsAddTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d && 'Term (aaca_term)' <> 'Term (Terms)'.Testing)),
                                                                           ClearCollect(colAbsAddExc, Filter('Calendar Exceptions', Date = d))
                                                                       ); true,
                                                                       Set(varAbsAddErr, FirstError.Message)

@@ -1,0 +1,312 @@
+Screens:
+  CalendarPrintScreen:
+    Properties:
+      Fill: =ColorWhite
+    Children:
+      - conCalPRoot:
+          Control: GroupContainer
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =ColorWhite
+            Height: =If(Parent.Width >= 1024, 816 + If(CalendarPrintScreen.Printing, 0, conCalPToolbar.Height + 6), Parent.Height)
+            LayoutAlignItems: =LayoutAlignItems.Stretch
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =6
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =12
+            PaddingLeft: =12
+            PaddingRight: =12
+            PaddingTop: =12
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =If(Parent.Width >= 1024, 1056, Parent.Width)
+          Children:
+            - conCalPToolbar:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conCalPRoot.Width < 640, 96, 44)
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  LayoutWrap: =true
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =Not(CalendarPrintScreen.Printing)
+                Children:
+                  - btnCalPBack:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Back to the Calendar screen"
+                        AlignInContainer: =AlignInContainer.Center
+                        Appearance: =ButtonAppearance.Secondary
+                        Color: =ColorInk
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Back()
+                        Size: =14
+                        Text: ="Back"
+                        Width: =90
+                  - btnCalPPrint:
+                      Control: ModernButton
+                      Properties:
+                        AccessibleLabel: ="Print or save as PDF"
+                        AlignInContainer: =AlignInContainer.Center
+                        BasePaletteColor: =ColorTeal
+                        Color: =ColorWhite
+                        DisplayMode: =If(CountRows(colCalCells) > 0, DisplayMode.Edit, DisplayMode.Disabled)
+                        Height: =44
+                        Layout: =ButtonLayout.TextOnly
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        OnSelect: =Print()
+                        Size: =14
+                        Text: ="Print"
+                        Width: =100
+                  - lblCalPHint:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Center
+                        Color: =ColorMuted
+                        FillPortions: =1
+                        Height: =36
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =220
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: ="Print in landscape and enable Background graphics to include calendar colors."
+            - lblCalPTitle:
+                Control: ModernText
+                Properties:
+                  AccessibleLabel: =Self.Text
+                  Align: =Align.Center
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =ColorInk
+                  FontWeight: =FontWeight.Bold
+                  Height: =If(conCalPRoot.Width >= 1024, 36, 30)
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =If(conCalPRoot.Width >= 1024, 24, 20)
+                  Text: =LookUp(colCalYearOpts, YearId = varCalYearId).YearName & " AACA " & LookUp(colCalCampusOpts, CampusId = varCalCampusId).CampusName
+                  Wrap: =false
+            - lblCalPEmpty:
+                Control: ModernText
+                Properties:
+                  AccessibleLabel: =Self.Text
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =ColorInk
+                  Height: =If(conCalPRoot.Width < 640, 44, 36)
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =13
+                  Text: ="Nothing to print yet. Open this page with View calendar on the Calendar screen."
+                  VerticalAlign: =VerticalAlign.Top
+                  Visible: =CountRows(colCalCells) = 0
+            - galCalPLegend:
+                Control: Gallery
+                Variant: Vertical
+                Properties:
+                  AccessibleLabel: ="Calendar legend"
+                  FillPortions: =0
+                  Height: =RoundUp(CountRows(CalLegend) / If(conCalPRoot.Width >= 1024, 8, conCalPRoot.Width >= 640, 4, 2), 0) * If(conCalPRoot.Width >= 1024, 26, 22)
+                  Items: =CalLegend
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  LoadingSpinner: =LoadingSpinner.None
+                  Selectable: =false
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  TemplateSize: =If(conCalPRoot.Width >= 1024, 26, 22)
+                  WrapCount: =If(conCalPRoot.Width >= 1024, 8, conCalPRoot.Width >= 640, 4, 2)
+                Children:
+                  - lblCalPLegendItem:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: ="Legend " & ThisItem.Txt
+                        Align: =Align.Center
+                        BorderColor: =If(ThisItem.Kind = "makeup", CalRsy, ColorRule)
+                        BorderThickness: =If(ThisItem.Kind = "makeup", 2, 1)
+                        Color: =Switch(ThisItem.Kind, "rsy", ColorWhite, "esy", ColorWhite, "noschool", ColorWhite, "sdd", ColorWhite, "weather", ColorWhite, "weekend", ColorMuted, ColorInk)
+                        Fill: =Switch(ThisItem.Kind, "rsy", CalRsy, "esy", CalEsy, "noschool", CalNoSchool, "sdd", CalSdd, "test", CalTesting, "weather", CalWeather, "nonterm", CalNonTerm, ColorWhite)
+                        Height: =Parent.TemplateHeight - 3
+                        PaddingBottom: =1
+                        PaddingLeft: =1
+                        PaddingRight: =1
+                        PaddingTop: =1
+                        Size: =If(conCalPRoot.Width >= 1024, 11, conCalPRoot.Width < 640, 11, 9)
+                        Text: =ThisItem.Txt
+                        Width: =Parent.TemplateWidth - 4
+                        Wrap: =false
+                        X: =2
+                        Y: =1
+            - conCalPBody:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =If(conCalPRoot.Width >= 1024, Max(300, 718), galCalPMonths.Height + 8 + galCalPImp.Height)
+                  LayoutAlignItems: =If(conCalPRoot.Width >= 1024, LayoutAlignItems.Start, LayoutAlignItems.Stretch)
+                  LayoutDirection: =If(conCalPRoot.Width >= 1024, LayoutDirection.Horizontal, LayoutDirection.Vertical)
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                Children:
+                  - galCalPMonths:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        AccessibleLabel: ="Calendar months"
+                        AlignInContainer: =If(conCalPRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        FillPortions: =If(conCalPRoot.Width >= 1024, 1, 0)
+                        Height: =If(conCalPRoot.Width >= 1024, 3 * RoundDown(Max(300, 718) / 3, 0), RoundUp(CountRows(colCalMonths) / If(conCalPRoot.Width >= 640, 3, 1), 0) * If(conCalPRoot.Width < 640, 240, 156))
+                        Items: =colCalMonths
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LoadingSpinner: =LoadingSpinner.None
+                        Selectable: =false
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =If(conCalPRoot.Width >= 1024, RoundDown(Max(300, 718) / 3, 0), conCalPRoot.Width < 640, 240, 156)
+                        WrapCount: =If(conCalPRoot.Width >= 1024, 4, conCalPRoot.Width >= 640, 3, 1)
+                      Children:
+                        - conCalPMonth:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =ColorWhite
+                              Height: =Parent.TemplateHeight - 6
+                              LayoutAlignItems: =LayoutAlignItems.Stretch
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              PaddingBottom: =2
+                              PaddingLeft: =2
+                              PaddingRight: =2
+                              PaddingTop: =2
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.TemplateWidth - 6
+                            Children:
+                              - lblCalPMonthTitle:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    Align: =Align.Center
+                                    AlignInContainer: =AlignInContainer.Stretch
+                                    Color: =ColorWhite
+                                    Fill: =CalMonthBand
+                                    FontWeight: =FontWeight.Bold
+                                    Height: =If(conCalPRoot.Width >= 1024, Max(18, RoundDown(galCalPMonths.TemplateHeight * 0.11, 0)), 18)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =If(conCalPRoot.Width >= 1024, Max(10, Min(16, RoundDown(Self.Height * 0.55, 0))), conCalPRoot.Width < 640, 12, 10)
+                                    Text: =ThisItem.Title
+                                    Wrap: =false
+                              - galCalPDays:
+                                  Control: Gallery
+                                  Variant: Vertical
+                                  Properties:
+                                    AccessibleLabel: ="Days of " & ThisItem.Title
+                                    FillPortions: =0
+                                    Height: =7 * If(conCalPRoot.Width >= 1024, RoundDown((galCalPMonths.TemplateHeight - 6 - 4 - 2 - lblCalPMonthTitle.Height) / 7, 0), conCalPRoot.Width < 640, 30, 18)
+                                    Items: =Filter(colCalCells, MonthKey = ThisItem.MonthKey)
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    LoadingSpinner: =LoadingSpinner.None
+                                    Selectable: =false
+                                    ShowScrollbar: =false
+                                    TemplatePadding: =0
+                                    TemplateSize: =If(conCalPRoot.Width >= 1024, RoundDown((galCalPMonths.TemplateHeight - 6 - 4 - 2 - lblCalPMonthTitle.Height) / 7, 0), conCalPRoot.Width < 640, 30, 18)
+                                    WrapCount: =7
+                                  Children:
+                                    - lblCalPDay:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =If(ThisItem.InMonth, ThisItem.Tip, ThisItem.Txt)
+                                          Align: =Align.Center
+                                          BorderColor: =If(ThisItem.Kind = "makeup", CalRsy, ColorRule)
+                                          BorderThickness: =If(ThisItem.IsHdr || !ThisItem.InMonth, 0, ThisItem.Kind = "makeup", 2, 1)
+                                          Color: =Switch(ThisItem.Kind, "rsy", ColorWhite, "esy", ColorWhite, "noschool", ColorWhite, "sdd", ColorWhite, "weather", ColorWhite, "weekend", ColorMuted, ColorInk)
+                                          Fill: =Switch(ThisItem.Kind, "rsy", CalRsy, "esy", CalEsy, "noschool", CalNoSchool, "sdd", CalSdd, "test", CalTesting, "weather", CalWeather, "nonterm", CalNonTerm, ColorWhite)
+                                          FontWeight: =If(ThisItem.IsHdr, FontWeight.Bold, FontWeight.Normal)
+                                          Height: =Parent.TemplateHeight
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =If(conCalPRoot.Width >= 1024, Max(9, Min(18, RoundDown(Min(Parent.TemplateHeight, Parent.TemplateWidth) * 0.45, 0))), conCalPRoot.Width < 640, 12, 9)
+                                          Text: =ThisItem.Txt
+                                          Width: =Parent.TemplateWidth
+                                          Wrap: =false
+                  - galCalPImp:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        AccessibleLabel: ="Important dates, staff development days, quarters and testing"
+                        AlignInContainer: =If(conCalPRoot.Width >= 1024, AlignInContainer.Start, AlignInContainer.Stretch)
+                        BorderColor: =ColorRule
+                        BorderThickness: =1
+                        FillPortions: =0
+                        Height: =CountRows(colCalImportant) * If(conCalPRoot.Width >= 1024, Max(14, Min(24, RoundDown(Max(300, 718) / Max(1, CountRows(colCalImportant)), 0))), conCalPRoot.Width < 640, 22, 15)
+                        Items: =SortByColumns(colCalImportant, "Sec", SortOrder.Ascending, "SortD", SortOrder.Ascending)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        LoadingSpinner: =LoadingSpinner.None
+                        Selectable: =false
+                        ShowScrollbar: =false
+                        TemplatePadding: =0
+                        TemplateSize: =If(conCalPRoot.Width >= 1024, Max(14, Min(24, RoundDown(Max(300, 718) / Max(1, CountRows(colCalImportant)), 0))), conCalPRoot.Width < 640, 22, 15)
+                        Width: =If(conCalPRoot.Width >= 1024, 260, 300)
+                      Children:
+                        - lblCalPImpLine:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =ThisItem.Line
+                              Color: =If(ThisItem.IsHead, ColorWhite, ColorInk)
+                              Fill: =If(ThisItem.IsHead, CalMonthBand, ColorWhite)
+                              FontWeight: =If(ThisItem.IsHead, FontWeight.Bold, FontWeight.Normal)
+                              Height: =Parent.TemplateHeight
+                              PaddingBottom: =0
+                              PaddingLeft: =6
+                              PaddingRight: =4
+                              PaddingTop: =0
+                              Size: =If(conCalPRoot.Width >= 1024, Max(9, Min(13, RoundDown(Parent.TemplateHeight * If(ThisItem.IsHead, 0.62, 0.55), 0))), If(ThisItem.IsHead, If(conCalPRoot.Width < 640, 13, 10), If(conCalPRoot.Width < 640, 12, 9)))
+                              Text: =ThisItem.Line
+                              Width: =Parent.TemplateWidth
+                              Wrap: =false

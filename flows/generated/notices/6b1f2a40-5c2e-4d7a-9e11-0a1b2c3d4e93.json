@@ -30,7 +30,7 @@
     "triggers": {
      "When_a_matched_notice_is_ready": {
       "metadata": {
-       "operationMetadataId": "52108783-e460-4066-878e-2fd546b61eb4"
+       "operationMetadataId": "c204d1ba-0b44-4faf-ab36-e902e93ef3d9"
       },
       "type": "OpenApiConnectionWebhook",
       "inputs": {
@@ -54,7 +54,7 @@
      "Init_created": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "2fc67d08-6162-453f-8bd7-fdf9982eb094"
+       "operationMetadataId": "9389b922-e051-404d-b30e-00ef81203007"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -74,7 +74,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "8f228fa2-46d1-4b50-a7f7-f8ded50c24a7"
+       "operationMetadataId": "d39e90a9-2341-4efe-91e9-4c3ba353e3dc"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -94,7 +94,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "40153463-7ba0-479d-9de8-a80511359c5b"
+       "operationMetadataId": "8ba7cea4-27f9-4e81-aab0-720d651db8d7"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -114,14 +114,14 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "7201d037-5ab6-49f8-a8ce-938cca28543a"
+       "operationMetadataId": "5b5d1541-44e4-4ba9-b965-d3f0a88b4188"
       },
       "type": "Scope",
       "actions": {
        "Start": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "84af2c64-65eb-4ebd-966f-0203bf367a44"
+         "operationMetadataId": "e841efc9-4a24-4aad-9b05-9dde62dea003"
         },
         "type": "Compose",
         "inputs": "@formatDateTime(triggerOutputs()?['body']?['aaca_absencestart'], 'yyyy-MM-dd')"
@@ -133,7 +133,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "50e3815f-d361-4584-9fa7-ddaa85d44359"
+         "operationMetadataId": "1597ecbf-e6c3-4a45-8b44-ab131a4fc3b6"
         },
         "type": "Compose",
         "inputs": "@if(or(empty(triggerOutputs()?['body']?['aaca_returndate']), lessOrEquals(formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'yyyy-MM-dd'), outputs('Start'))), addDays(outputs('Start'), 1, 'yyyy-MM-dd'), formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'yyyy-MM-dd'))"
@@ -145,7 +145,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "039b107c-ad43-447e-a8e3-a46ad0b0f9d3"
+         "operationMetadataId": "d3199f27-7a54-4c53-9512-42cdad894007"
         },
         "type": "Compose",
         "inputs": "@addDays(outputs('EndExclusive'), -1, 'yyyy-MM-dd')"
@@ -157,7 +157,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "5358513a-092d-46ba-baa6-8e61ab66d9b7"
+         "operationMetadataId": "add6ad19-ac7c-4cb7-8a6e-7e41d783a8b6"
         },
         "type": "Compose",
         "inputs": "@min(60, div(sub(ticks(outputs('EndExclusive')), ticks(outputs('Start'))), 864000000000))"
@@ -165,7 +165,7 @@
        "Student": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "18a71c8b-c1e3-4b72-9ccb-e26fe9559669"
+         "operationMetadataId": "27c78bed-4d21-432a-a870-41eb0b483a90"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -189,7 +189,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "afd7acf8-5dda-449c-8d30-71d417febcef"
+         "operationMetadataId": "6f5e379c-69b4-4710-9b48-9773a69bfedc"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -214,7 +214,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "d41b4069-3f67-42f7-917c-252ffcc1f6a3"
+         "operationMetadataId": "29185324-02e5-4645-a822-3fecc0634f80"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -226,7 +226,7 @@
          "parameters": {
           "entityName": "aaca_terms",
           "$select": "aaca_termid,aaca_startdate,aaca_enddate,_aaca_campus_value",
-          "$filter": "aaca_startdate le @{outputs('LastDay')} and aaca_enddate ge @{outputs('Start')}"
+          "$filter": "aaca_term ne 582100005 and aaca_startdate le @{outputs('LastDay')} and aaca_enddate ge @{outputs('Start')}"
          },
          "authentication": "@parameters('$authentication')"
         }
@@ -238,7 +238,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "b26f61a1-07a7-4b89-9898-97da932f0286"
+         "operationMetadataId": "e58fd6ca-9c1c-4738-a59f-e94836784dcd"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -258,7 +258,7 @@
        "SPED": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "76ce3a9d-3ce3-4278-bd88-33288c048dce"
+         "operationMetadataId": "ca4aec22-fb07-4ba1-ab82-8c9e541cb8cf"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -283,7 +283,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "2ed14e7e-a10e-4ad3-b3c9-8a36f1212ef5"
+         "operationMetadataId": "8a0f4484-b792-438f-81f5-397887ce3943"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -322,7 +322,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "97f91871-5fb8-4736-858e-420e78f06b5d"
+         "operationMetadataId": "35117cf3-6fe4-45d3-9a9f-6dd717701020"
         },
         "type": "Foreach",
         "foreach": "@range(0, outputs('DayCount'))",
@@ -330,7 +330,7 @@
          "Day": {
           "runAfter": {},
           "metadata": {
-           "operationMetadataId": "66e48368-337f-494d-921e-385718786857"
+           "operationMetadataId": "915d9af9-d077-4804-8eef-e89b1e0b9b49"
           },
           "type": "Compose",
           "inputs": "@addDays(outputs('Start'), item(), 'yyyy-MM-dd')"
@@ -342,7 +342,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "7b1f665e-eae6-4975-aec7-a89961db3b2e"
+           "operationMetadataId": "d266591a-03ed-418f-baaf-5d7fbf9fea17"
           },
           "type": "Query",
           "inputs": {
@@ -357,7 +357,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "1bdd0541-b362-486c-b413-08bf8d19dc29"
+           "operationMetadataId": "f25f126b-94a0-405d-aca3-46ceb51dacbe"
           },
           "type": "Compose",
           "inputs": "@first(body('Enrollment_on_day'))"
@@ -369,7 +369,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "e664d341-b7c5-40cb-923f-50a1d7d0b958"
+           "operationMetadataId": "7ff487a4-ada7-4eda-b881-e4ceea621eb8"
           },
           "type": "Query",
           "inputs": {
@@ -384,7 +384,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "4d2a80fc-ff98-425b-8198-3824412e0d44"
+           "operationMetadataId": "8c8190ff-7cdd-4eb7-b0ed-3a5e04118c06"
           },
           "type": "Query",
           "inputs": {
@@ -399,7 +399,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "be26857c-a0ed-4c83-9816-91e897a9a6f2"
+           "operationMetadataId": "21342288-a06b-4466-9c8b-9c836f7bf5dc"
           },
           "type": "Query",
           "inputs": {
@@ -420,7 +420,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "776f0d4a-e2bf-4018-887f-f4bed07bff94"
+           "operationMetadataId": "d52b9668-97e4-44f6-9862-d38f4369568e"
           },
           "type": "Compose",
           "inputs": "@and(not(equals(outputs('Enrollment'), null)), not(empty(body('Term_on_day'))), or(not(empty(body('Makeup_on_day'))), and(not(or(equals(dayOfWeek(outputs('Day')), 0), equals(dayOfWeek(outputs('Day')), 6))), empty(body('Closed_on_day')))))"
@@ -432,7 +432,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "cfd03aee-f8e6-4a31-b592-e0e833cca925"
+           "operationMetadataId": "205c0410-5657-4c23-a375-a50fb026d39a"
           },
           "type": "If",
           "expression": {
@@ -449,7 +449,7 @@
            "Existing_on_day": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "48110077-d480-4c37-83d3-7adcf317e08e"
+             "operationMetadataId": "d6f3d195-af50-42dc-951e-e3fa592d052c"
             },
             "type": "Query",
             "inputs": {
@@ -464,7 +464,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "9ab2ffc9-061d-4db0-acf1-af8db38a0bde"
+             "operationMetadataId": "eb60ccbe-7c9c-4fec-823f-470f9f8f3acc"
             },
             "type": "Switch",
             "expression": "@if(empty(body('Existing_on_day')), 'new', if(equals(first(body('Existing_on_day'))?['aaca_isdeleted'], true), 'deleted', if(equals(first(body('Existing_on_day'))?['aaca_present'], true), 'present', 'absent')))",
@@ -475,7 +475,7 @@
                "Create_absence": {
                 "runAfter": {},
                 "metadata": {
-                 "operationMetadataId": "8dd8ea21-1b11-4138-972e-5cb64a716379"
+                 "operationMetadataId": "b6d2927c-6d9a-4f1d-b6d0-df0da5e40230"
                 },
                 "type": "OpenApiConnection",
                 "inputs": {
@@ -514,7 +514,7 @@
                  ]
                 },
                 "metadata": {
-                 "operationMetadataId": "953947cc-ffda-401c-a9b3-b5dd17f179da"
+                 "operationMetadataId": "44fb96d7-68c7-4d8d-af7b-b62c681fde41"
                 },
                 "type": "IncrementVariable",
                 "inputs": {
@@ -530,7 +530,7 @@
                "Revive_as_absence": {
                 "runAfter": {},
                 "metadata": {
-                 "operationMetadataId": "591da1cc-992b-4b57-91e5-9a25084ba267"
+                 "operationMetadataId": "c3174154-adaa-475e-abbe-86a5faec5035"
                 },
                 "type": "OpenApiConnection",
                 "inputs": {
@@ -559,7 +559,7 @@
                  ]
                 },
                 "metadata": {
-                 "operationMetadataId": "c2407e4d-d738-46b2-b3fe-6a779c37f52b"
+                 "operationMetadataId": "e5248b47-9118-4cbe-986b-20d94e5bd5e6"
                 },
                 "type": "IncrementVariable",
                 "inputs": {
@@ -575,7 +575,7 @@
                "Flag_conflict": {
                 "runAfter": {},
                 "metadata": {
-                 "operationMetadataId": "874bd090-06d2-41e2-8624-1029681bb50d"
+                 "operationMetadataId": "f8e011b8-31ff-4c29-823f-2f1e4db5451c"
                 },
                 "type": "OpenApiConnection",
                 "inputs": {
@@ -601,7 +601,7 @@
                  ]
                 },
                 "metadata": {
-                 "operationMetadataId": "cc820c17-0ebb-45fe-90a7-6bb81e53589a"
+                 "operationMetadataId": "27a43f53-8d6d-480b-9390-12b8c05fc3ce"
                 },
                 "type": "IncrementVariable",
                 "inputs": {
@@ -617,7 +617,7 @@
               "Count_already_absent": {
                "runAfter": {},
                "metadata": {
-                "operationMetadataId": "2b4e1416-d3a7-47b2-bbd4-dd0d6064fb0d"
+                "operationMetadataId": "2f28ebf4-b080-4999-97f8-d4f77cee2c26"
                },
                "type": "IncrementVariable",
                "inputs": {
@@ -634,7 +634,7 @@
             "Count_not_school_day": {
              "runAfter": {},
              "metadata": {
-              "operationMetadataId": "d37dff6a-70e5-40b4-a04a-80d5187bad4d"
+              "operationMetadataId": "2ce66bfe-f4f5-47c8-82bb-5540d63cf78d"
              },
              "type": "IncrementVariable",
              "inputs": {
@@ -661,7 +661,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "f8a7c693-1559-4e1c-b06d-294264a10fbd"
+       "operationMetadataId": "a4b43b77-a545-43b6-a2a7-c0e386cebf71"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -691,7 +691,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "9eea259d-f501-4526-9ef2-a9aee580df29"
+       "operationMetadataId": "61e9f418-bb70-468c-94de-8b6f13a3793b"
       },
       "type": "OpenApiConnection",
       "inputs": {

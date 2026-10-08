@@ -128,7 +128,7 @@ def school_day_checks(day_expr, prefix, after):
     """Actions that decide whether day_expr is a school day at the current campus -> outputs('<prefix>School_day')."""
     return {
         f"{prefix}Term": dv_list("aaca_terms", "aaca_termid",
-                                 f"_aaca_campus_value eq @{{{CID}}} and aaca_startdate le @{{{day_expr}}} and aaca_enddate ge @{{{day_expr}}}", after),
+                                 f"aaca_term ne 582100005 and _aaca_campus_value eq @{{{CID}}} and aaca_startdate le @{{{day_expr}}} and aaca_enddate ge @{{{day_expr}}}", after),
         f"{prefix}Exceptions": dv_list("aaca_calendarexceptions", "aaca_type",
                                        f"aaca_date eq @{{{day_expr}}} and (_aaca_campus_value eq @{{{CID}}} or _aaca_campus_value eq null)", after),
         f"{prefix}Makeup": query(f"@body('{prefix}Exceptions')?['value']", f"@equals(item()?['aaca_type'], {MAKEUP})", ok(f"{prefix}Exceptions")),
@@ -285,7 +285,7 @@ weekly_campus = {
     "Reset_days": setvar("SchoolDays", 0),
     "Reset_unmarked": setvar("UnmarkedDays", 0, ok("Reset_days")),
     "Reset_transport": setvar("TransportOpen", 0, ok("Reset_unmarked")),
-    "Week_terms": dv_list("aaca_terms", "aaca_startdate,aaca_enddate", f"_aaca_campus_value eq @{{{CID}}} and aaca_startdate {WEEK_RANGE}", ok("Reset_transport")),
+    "Week_terms": dv_list("aaca_terms", "aaca_startdate,aaca_enddate", f"aaca_term ne 582100005 and _aaca_campus_value eq @{{{CID}}} and aaca_startdate {WEEK_RANGE}", ok("Reset_transport")),
     "Week_exceptions": dv_list("aaca_calendarexceptions", "aaca_date,aaca_type",
                                f"aaca_date ge @{{{MONDAY}}} and aaca_date le @{{{TODAY}}} and (_aaca_campus_value eq @{{{CID}}} or _aaca_campus_value eq null)", ok("Reset_transport")),
     "Week_enrolled": dv_list("aaca_enrollments", "_aaca_student_value,aaca_startdate,aaca_enddate",

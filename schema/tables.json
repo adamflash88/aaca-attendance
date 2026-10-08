@@ -862,7 +862,7 @@
       "logicalName": "aaca_term",
       "displayName": "Term",
       "pluralName": "Terms",
-      "description": "Quarter or summer program date range. Blank campus = applies to all campuses.",
+      "description": "Quarter, summer program (ESY) or testing period date range. Quarters are back-to-back (no school-day gaps). Testing is informational. Blank campus = applies to all campuses.",
       "primaryName": {
         "logicalName": "aaca_name",
         "displayName": "Name",
@@ -894,6 +894,10 @@
             [
               582100004,
               "ESY"
+            ],
+            [
+              582100005,
+              "Testing"
             ]
           ]
         },
@@ -915,7 +919,7 @@
       "logicalName": "aaca_calendarexception",
       "displayName": "Calendar Exception",
       "pluralName": "Calendar Exceptions",
-      "description": "A non-school weekday or a make-up school day. Blank campus = all campuses.",
+      "description": "A non-school weekday (holiday, break, closed, work only, inclement weather) or a make-up school day. Name = the label shown on the calendar. Blank campus = all campuses.",
       "primaryName": {
         "logicalName": "aaca_name",
         "displayName": "Description",
@@ -953,6 +957,10 @@
             [
               582100004,
               "Make-up School Day"
+            ],
+            [
+              582100005,
+              "Inclement Weather"
             ]
           ]
         }

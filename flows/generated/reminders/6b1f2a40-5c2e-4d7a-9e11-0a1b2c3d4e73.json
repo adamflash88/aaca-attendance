@@ -48,7 +48,7 @@
     "triggers": {
      "Schedule": {
       "metadata": {
-       "operationMetadataId": "b399f89d-03e3-4812-b305-76c50c4428a7"
+       "operationMetadataId": "db28e0d8-ea2e-4710-b3da-a2224bd18b22"
       },
       "type": "Recurrence",
       "recurrence": {
@@ -73,7 +73,7 @@
      "Today": {
       "runAfter": {},
       "metadata": {
-       "operationMetadataId": "0512370f-a091-4eb5-8ea0-056895c4fcc6"
+       "operationMetadataId": "99157754-6771-467b-9960-e6d301a7baa9"
       },
       "type": "Compose",
       "inputs": "@convertFromUtc(utcNow(), 'Pacific Standard Time', 'yyyy-MM-dd')"
@@ -85,7 +85,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "aaec0240-9455-4838-8a58-5298d43e531b"
+       "operationMetadataId": "f90aaac3-01fe-405d-9779-39f17309d07d"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -109,7 +109,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "3cf83f3a-0c12-4ea8-8778-b7c5f9538b51"
+       "operationMetadataId": "63c4d95c-b9fa-4f0a-8a48-87ed58f8aa47"
       },
       "type": "OpenApiConnection",
       "inputs": {
@@ -134,7 +134,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "05337653-c398-419f-a06c-404fc4f6a9ae"
+       "operationMetadataId": "676a6168-d8e5-4ba6-92e6-de55bb0613f2"
       },
       "type": "Compose",
       "inputs": "@addDays(outputs('Today'), sub(1, dayOfWeek(outputs('Today'))), 'yyyy-MM-dd')"
@@ -146,7 +146,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "419e58a2-5abc-4e59-9657-def43dd5ce65"
+       "operationMetadataId": "0a25b30a-d8ad-48ba-8598-9ea737e36803"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -166,7 +166,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "ec42d80b-d2ca-4366-adaa-48c1612e2c13"
+       "operationMetadataId": "7e7f3b91-1703-415b-b837-da191be13e77"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -186,7 +186,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "4f5bbf95-cfb1-4d17-ac9e-2dfc9a28489e"
+       "operationMetadataId": "e6850997-b994-4c5a-aecd-02a6a3535b9f"
       },
       "type": "InitializeVariable",
       "inputs": {
@@ -209,7 +209,7 @@
        ]
       },
       "metadata": {
-       "operationMetadataId": "5ad3aa7b-b42c-4583-9458-435c4d6d3639"
+       "operationMetadataId": "a9cf4852-b70a-4fbc-ac36-e06708fcbe7a"
       },
       "type": "Foreach",
       "foreach": "@body('Campuses')?['value']",
@@ -217,7 +217,7 @@
        "Reset_days": {
         "runAfter": {},
         "metadata": {
-         "operationMetadataId": "9ed6bf01-f607-49c6-a962-e10acfa0b2b9"
+         "operationMetadataId": "5de16bb1-9c6b-4700-90b1-72e70a8c88db"
         },
         "type": "SetVariable",
         "inputs": {
@@ -232,7 +232,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "46e69fa0-ece8-4892-acba-55c080abc936"
+         "operationMetadataId": "f784a90f-13d9-4611-b9f7-4eea7b5c72dd"
         },
         "type": "SetVariable",
         "inputs": {
@@ -247,7 +247,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "590e14ec-efde-434e-b306-3fd8e392dac6"
+         "operationMetadataId": "f1ff914e-9116-4d9c-8c57-d67fa03a2fb5"
         },
         "type": "SetVariable",
         "inputs": {
@@ -262,7 +262,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "539773fe-d48b-4406-a3ff-d4623c384cbf"
+         "operationMetadataId": "f2c0aaa1-c1d6-464a-b911-44cf8fad5e51"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -274,7 +274,7 @@
          "parameters": {
           "entityName": "aaca_terms",
           "$select": "aaca_startdate,aaca_enddate",
-          "$filter": "_aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} and aaca_startdate le @{outputs('Today')} and aaca_enddate ge @{outputs('Monday')}"
+          "$filter": "aaca_term ne 582100005 and _aaca_campus_value eq @{items('Each_campus')?['aaca_campusid']} and aaca_startdate le @{outputs('Today')} and aaca_enddate ge @{outputs('Monday')}"
          },
          "authentication": "@parameters('$authentication')"
         }
@@ -286,7 +286,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "770d1f10-bf47-4645-8405-8b4e849976ec"
+         "operationMetadataId": "9c5b2fed-7c18-48cd-ab48-3283ad30d673"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -310,7 +310,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "1fec00b0-bcff-49d2-92ad-23848ae80c9b"
+         "operationMetadataId": "b3678442-33dd-452e-bb21-849f627d513d"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -334,7 +334,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "4f889a3c-6f2e-4f13-979e-aeee6004dcbf"
+         "operationMetadataId": "b481f4e3-d8f6-40a5-a430-e0a81eae5493"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -358,7 +358,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "f6dadfa2-a97f-476e-a3a9-88f7d757aa34"
+         "operationMetadataId": "acc87960-e9f4-4484-908c-0c47bf0f1e93"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -382,7 +382,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "8fd50ca4-ec4d-41a9-81f1-633aef5abe1a"
+         "operationMetadataId": "5abe5a74-e6c0-4143-8697-b95d7e1b6c21"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -406,7 +406,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "51339d66-efea-4db7-83a9-588e5da3f830"
+         "operationMetadataId": "e44b2809-a503-4701-8911-e10d218bbc76"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -430,7 +430,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "5be382a6-52de-4b1f-b18a-506b0aab7938"
+         "operationMetadataId": "961d404b-0ab4-4a1b-94c8-f9f72f18c7b2"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -454,7 +454,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "f5f3e98b-d0e5-4578-b0f7-95df86315a08"
+         "operationMetadataId": "932de787-7115-49c1-af5d-be0b6489683b"
         },
         "type": "Query",
         "inputs": {
@@ -469,7 +469,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "62914cea-8aa9-44d9-8b89-438afdaf2d93"
+         "operationMetadataId": "ccf5a18e-0d0a-4c83-b813-64f654d8bd8a"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -494,7 +494,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "84c4c9f9-4b97-4fdb-b01c-dd8f30b9cdc2"
+         "operationMetadataId": "f4490ab2-724b-49cb-967b-4939089c5ab6"
         },
         "type": "OpenApiConnection",
         "inputs": {
@@ -534,7 +534,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "eb9d873c-1b42-4ddf-b66b-8263ebff8958"
+         "operationMetadataId": "193b8ec9-2c10-4606-b049-05008fddb99a"
         },
         "type": "Foreach",
         "foreach": "@range(0, add(dayOfWeek(outputs('Today')), 0))",
@@ -542,7 +542,7 @@
          "Day": {
           "runAfter": {},
           "metadata": {
-           "operationMetadataId": "710c2e98-48a7-465e-9058-cbb40403f692"
+           "operationMetadataId": "2b074769-0932-4e19-a34e-dc7a6f046930"
           },
           "type": "Compose",
           "inputs": "@addDays(outputs('Monday'), item(), 'yyyy-MM-dd')"
@@ -554,7 +554,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "fe597a22-fff7-4dee-9ae9-d5ddb7127a33"
+           "operationMetadataId": "dd503b2e-137c-4d74-8702-b14ee18adaf8"
           },
           "type": "Query",
           "inputs": {
@@ -569,7 +569,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "2fd4bb8b-06a7-4fb5-9672-3b9ba637a4ff"
+           "operationMetadataId": "dc6fe7dd-31ae-4f0e-9ea0-b529ee13f29a"
           },
           "type": "Query",
           "inputs": {
@@ -584,7 +584,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "ff2bde2e-1d60-48a8-8829-0770552e24ce"
+           "operationMetadataId": "3f13358c-51cf-4cf6-883a-dbff801d697e"
           },
           "type": "Query",
           "inputs": {
@@ -605,7 +605,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "5a71057f-f94c-47ff-8012-a2e1456d752d"
+           "operationMetadataId": "75c8b321-7826-427e-acba-719fb5d41c6e"
           },
           "type": "Compose",
           "inputs": "@and(not(empty(body('Day_term'))), or(not(empty(body('Day_makeup'))), and(not(or(equals(dayOfWeek(outputs('Day')), 0), equals(dayOfWeek(outputs('Day')), 6))), empty(body('Day_closed')))))"
@@ -617,7 +617,7 @@
            ]
           },
           "metadata": {
-           "operationMetadataId": "7e85226a-6416-4710-9fee-45298744663f"
+           "operationMetadataId": "529ebc5b-6634-41aa-aad7-5a86670cebb0"
           },
           "type": "If",
           "expression": {
@@ -634,7 +634,7 @@
            "Count_day": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "d9379b03-56d3-4519-a567-33469228d532"
+             "operationMetadataId": "70391cac-9692-431c-bba7-4bdefd847411"
             },
             "type": "IncrementVariable",
             "inputs": {
@@ -645,7 +645,7 @@
            "Day_enrolled": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "721354b9-7e43-41ea-b3b3-593986018510"
+             "operationMetadataId": "7ddce17c-ee7f-4da0-b985-956c3228b06c"
             },
             "type": "Query",
             "inputs": {
@@ -660,7 +660,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "59b54638-c706-4e0f-be2d-393a5086e2c2"
+             "operationMetadataId": "f2088a51-d6a8-4e2d-a3d3-96dc88227c8d"
             },
             "type": "Select",
             "inputs": {
@@ -671,7 +671,7 @@
            "Day_marked": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "e35319d4-9930-4af4-89c1-0dfe571e08ae"
+             "operationMetadataId": "97417f90-1ba2-4362-a4e7-7c1bedac6434"
             },
             "type": "Query",
             "inputs": {
@@ -686,7 +686,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "78d901a5-04ee-4e52-af03-3e1068914653"
+             "operationMetadataId": "3651248e-0f2c-4331-8c38-7e6c5ff044cd"
             },
             "type": "Select",
             "inputs": {
@@ -704,7 +704,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "d37334a2-721e-43f5-9699-66b82bd1bd1d"
+             "operationMetadataId": "40c46779-10ab-44d4-b20b-d879746cbebb"
             },
             "type": "Query",
             "inputs": {
@@ -719,7 +719,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "4b84aa30-e5d2-4e57-b699-983efe140dd2"
+             "operationMetadataId": "77c701ce-d56f-4f82-93cc-92096e0da932"
             },
             "type": "IncrementVariable",
             "inputs": {
@@ -734,7 +734,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "8cc01be2-fb1c-489a-93d5-2f5514fcb371"
+             "operationMetadataId": "e260cf86-5953-4bc8-a297-0a7e20ca2758"
             },
             "type": "Query",
             "inputs": {
@@ -745,7 +745,7 @@
            "Day_logged": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "b7b448dc-ffd6-42c0-93be-8c44a231f26c"
+             "operationMetadataId": "6cadbe9e-9616-42c9-bc5d-554b5bcbedf4"
             },
             "type": "Query",
             "inputs": {
@@ -760,7 +760,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "7fbaaf07-a827-43b8-91b6-a72becaf053b"
+             "operationMetadataId": "50991bc0-fa09-45b3-9596-b9bf284bf047"
             },
             "type": "Select",
             "inputs": {
@@ -778,7 +778,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "b2f9233d-c5a1-4ae7-b88f-d4f52dfa138a"
+             "operationMetadataId": "3d8be54c-8d6c-421e-b104-50737c47e392"
             },
             "type": "Query",
             "inputs": {
@@ -796,7 +796,7 @@
              ]
             },
             "metadata": {
-             "operationMetadataId": "6c0ae506-9bb2-476e-be37-bee4a2e7c5b3"
+             "operationMetadataId": "4acbc382-5672-4ee9-8258-e2d4b5ca5e1d"
             },
             "type": "IncrementVariable",
             "inputs": {
@@ -832,7 +832,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "bef89e28-8d18-42fa-9e9e-b3939a273ea0"
+         "operationMetadataId": "8d543720-18e1-4941-afcb-d3249eee9ce7"
         },
         "type": "Compose",
         "inputs": "<p>Weekly summary for <b>@{items('Each_campus')?['aaca_name']}</b>, week of @{formatDateTime(outputs('Monday'), 'MMMM d')} (@{variables('SchoolDays')} school day(s)):</p><ul><li>Student-days with attendance not marked: <b>@{variables('UnmarkedDays')}</b></li><li>Student-days with transportation not confirmed: <b>@{variables('TransportOpen')}</b></li><li>Absences still to classify (all dates): <b>@{length(body('To_classify')?['value'])}</b></li><li>Parent reported absent but marked present (Needs a decision): <b>@{length(body('Conflicts')?['value'])}</b></li><li>Parent reports in Mapping Errors: <b>@{length(body('Campus_errors'))}</b></li></ul><p>Details are in the AACA Attendance app (Absences and Transportation).</p>"
@@ -844,7 +844,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "176241ae-0982-45b3-b573-efb0c9505e9c"
+         "operationMetadataId": "78a60540-8f44-4bc3-9211-9ce350379077"
         },
         "type": "Select",
         "inputs": {
@@ -862,7 +862,7 @@
          ]
         },
         "metadata": {
-         "operationMetadataId": "f2385d83-f8dc-40c7-9c31-d381f381f3e1"
+         "operationMetadataId": "5ae5b71b-e324-447d-badc-31a27b1ed87d"
         },
         "type": "Foreach",
         "foreach": "@body('Admin_emails')",
@@ -870,7 +870,7 @@
          "Send_admin": {
           "runAfter": {},
           "metadata": {
-           "operationMetadataId": "bc4ca762-d9d9-49f7-b945-056b53aed6ef"
+           "operationMetadataId": "b3351182-7590-4ab4-8b9a-71aab6e38022"
           },
           "type": "If",
           "expression": {
@@ -889,7 +889,7 @@
            "Post_admin": {
             "runAfter": {},
             "metadata": {
-             "operationMetadataId": "e5071130-7ecf-4138-9d0e-71fce882ceec"
+             "operationMetadataId": "ea631f48-64d7-45d2-81fe-57efbec4aa85"
             },
             "type": "OpenApiConnection",
             "inputs": {

@@ -340,7 +340,7 @@ work = {
                            f"_aaca_student_value eq @{{{B}?['_aaca_student_value']}} and aaca_startdate le @{{{LAST}}} and (aaca_enddate eq null or aaca_enddate ge @{{{START}}})",
                            ok("DayCount"), "aaca_campus($select=aaca_ownerteamid)"),
     "Terms": dv_list("aaca_terms", "aaca_termid,aaca_startdate,aaca_enddate,_aaca_campus_value",
-                     f"aaca_startdate le @{{{LAST}}} and aaca_enddate ge @{{{START}}}", ok("DayCount")),
+                     f"aaca_term ne 582100005 and aaca_startdate le @{{{LAST}}} and aaca_enddate ge @{{{START}}}", ok("DayCount")),   # Testing periods never stand in for a quarter
     "Exceptions": dv_list("aaca_calendarexceptions", "aaca_date,aaca_type,_aaca_campus_value",
                           f"aaca_date ge @{{{START}}} and aaca_date le @{{{LAST}}}", ok("DayCount")),
     "SPED": dv_list("aaca_services", "aaca_serviceid", "aaca_servicecode eq 'SPED'", top=1),

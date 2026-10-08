@@ -5,3 +5,5 @@ EditorState:
     - AbsencesScreen
     - TransportScreen
     - StaffScreen
+    - CalendarScreen
+    - CalendarPrintScreen

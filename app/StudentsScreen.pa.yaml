@@ -29,7 +29,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStuRoot.Width < 640, 152, 48), 48)
+                  Height: =If(conStuRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conStuRoot.Width < 640, 152, conStuRoot.Width < 800, 100, 48), 48)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -83,7 +83,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(CanManageStudents, If(conStuRoot.Width < 640, 148, 44), 44)
+                        Height: =If(CanManageStudents, If(conStuRoot.Width < 640, 148, conStuRoot.Width < 800, 96, 44), 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -175,6 +175,22 @@ Screens:
                               Text: ="Staff"
                               Visible: =CanManageStudents
                               Width: =80
+                        - btnStuNavCalendar:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Calendar"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(CalendarScreen)
+                              Size: =14
+                              Text: ="Calendar"
+                              Visible: =IsAdminRole
+                              Width: =100
                         - conStuNavSpacer:
                             Control: GroupContainer
                             Variant: AutoLayout

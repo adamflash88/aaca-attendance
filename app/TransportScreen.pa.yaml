@@ -43,7 +43,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =ColorInk
                   FillPortions: =0
-                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 152, 48), 48) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
+                  Height: =If(conTrnRoot.Width < 640, 92, 76) + If(CanManageStudents, If(conTrnRoot.Width < 640, 152, conTrnRoot.Width < 800, 100, 48), 48) + If(CanClassify, If(conTrnRoot.Width < 640, 112, 60), 0)
                   LayoutAlignItems: =LayoutAlignItems.Stretch
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
@@ -95,7 +95,7 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =If(CanManageStudents, If(conTrnRoot.Width < 640, 148, 44) + If(CanClassify, 8, 0), 44)
+                        Height: =If(CanManageStudents, If(conTrnRoot.Width < 640, 148, conTrnRoot.Width < 800, 96, 44) + If(CanClassify, 8, 0), 44)
                         LayoutAlignItems: =LayoutAlignItems.Center
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =8
@@ -189,6 +189,22 @@ Screens:
                               Text: ="Staff"
                               Visible: =CanManageStudents
                               Width: =80
+                        - btnTrnNavCalendar:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Go to Calendar"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Navigate(CalendarScreen)
+                              Size: =14
+                              Text: ="Calendar"
+                              Visible: =IsAdminRole
+                              Width: =100
                         - conTrnNavSpacer:
                             Control: GroupContainer
                             Variant: AutoLayout
@@ -1994,7 +2010,7 @@ Screens:
                             {c0: varTrnCampusId, d: varTrnDate},
                             IfError(
                                 Concurrent(
-                                    ClearCollect(colTrnDayTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d)),
+                                    ClearCollect(colTrnDayTerms, Filter(Terms, 'Start Date' <= d && 'End Date' >= d && 'Term (aaca_term)' <> 'Term (Terms)'.Testing)),
                                     ClearCollect(colTrnDayExc, Filter('Calendar Exceptions', Date = d)),
                                     ClearCollect(colTrnDayEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && 'Start Date' <= d && (IsBlank('End Date') || 'End Date' >= d)) As e, {EStudentId: e.Student.Student})),
                                     ClearCollect(colTrnDayAtt, ForAll(Filter(Attendance, Campus.Campus = c0 && Date = d && 'Is Deleted' = false) As r, {AStudentId: r.Student.Student, APresent: r.Present = true, ALeft: r.'Left Early' = true, AAt: r.'Left Early At'})),
@@ -2062,7 +2078,7 @@ Screens:
                             {c0: varTrnCampusId, w0: DateAdd(Today(), -27, TimeUnit.Days), w1: Today()},
                             IfError(
                                 Concurrent(
-                                    ClearCollect(colTrnWinTerms, Filter(Terms, 'Start Date' <= w1 && 'End Date' >= w0)),
+                                    ClearCollect(colTrnWinTerms, Filter(Terms, 'Start Date' <= w1 && 'End Date' >= w0 && 'Term (aaca_term)' <> 'Term (Terms)'.Testing)),
                                     ClearCollect(colTrnWinExc, Filter('Calendar Exceptions', Date >= w0 && Date <= w1)),
                                     ClearCollect(colTrnWinEnr, ForAll(Filter(Enrollments, Campus.Campus = c0 && 'Start Date' <= w1 && (IsBlank('End Date') || 'End Date' >= w0)) As e, {EStudentId: e.Student.Student, EStart: e.'Start Date', EEnd: e.'End Date'})),
                                     ClearCollect(colTrnWinLogs, ForAll(Filter('Daily Transport', Campus.Campus = c0 && Date >= w0 && Date <= w1) As g, {LStudentId: g.Student.Student, LDate: g.Date}))
