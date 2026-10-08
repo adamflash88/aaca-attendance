@@ -709,7 +709,7 @@ Screens:
                               RadiusBottomRight: =6
                               RadiusTopLeft: =6
                               RadiusTopRight: =6
-                              Visible: =!(conAbsRoot.Width < 1024 && !IsBlank(varAbsMeSelId))
+                              Visible: =!(conAbsRoot.Width < 1024 && !IsBlank(varAbsNtSelId))
                             Children:
                               - conAbsMeListHead:
                                   Control: GroupContainer
@@ -829,10 +829,10 @@ Screens:
                                     Size: =13
                                     Text: |-
                                       =If(
-                                          varAbsMeLoadError <> "", "Could not load mapping errors: " & varAbsMeLoadError & ". Use Reload to try again.",
-                                          varAbsMeLoading, "Loading mapping errors…",
-                                          CountRows(colAbsMe) = 0, "No mapping errors. Website reports since " & Text(ParentReportCutover, "m/d/yyyy") & " all have a Student ID or a decision.",
-                                          CountRows(Filter(colAbsMe, Kind = "A")) & " with no Student ID · " & CountRows(Filter(colAbsMe, Kind = "B")) & " could not be processed · " & If(StudentCampusLock <> ZeroGuid, "your campus", varAbsMeCampusId = ZeroGuid, "all campuses", LookUp(colAbsCampusOpts, CampusId = varAbsMeCampusId).CampusName) & If(CountRows(colAbsMeSrc) >= 2000, " · list may be incomplete (2,000-item limit)", "")
+                                          varAbsMeLoadError <> "", "Could not load absence notices: " & varAbsMeLoadError & ". Use Reload to try again.",
+                                          varAbsMeLoading, "Loading absence notices...",
+                                          CountRows(colAbsMe) = 0, "No mapping errors. Every new absence notice for " & If(StudentCampusLock <> ZeroGuid, "your campus", varAbsMeCampusId = ZeroGuid, "all campuses", LookUp(colAbsCampusOpts, CampusId = varAbsMeCampusId).CampusName) & " is matched and processed.",
+                                          CountRows(Filter(colAbsMe, Kind = "A")) & " could not be matched · " & CountRows(Filter(colAbsMe, Kind = "B")) & " could not be processed · " & If(StudentCampusLock <> ZeroGuid, "your campus", varAbsMeCampusId = ZeroGuid, "all campuses", LookUp(colAbsCampusOpts, CampusId = varAbsMeCampusId).CampusName)
                                       )
                                     VerticalAlign: =VerticalAlign.Top
                               - lblAbsMeAHead:
@@ -850,22 +850,22 @@ Screens:
                                     PaddingRight: =0
                                     PaddingTop: =0
                                     Size: =16
-                                    Text: ="No Student ID (" & CountRows(Filter(colAbsMe, Kind = "A")) & ")" & If(CountRows(Filter(colAbsMe, Kind = "A")) = 0, " · none", "")
+                                    Text: ="Could not match (" & CountRows(Filter(colAbsMe, Kind = "A")) & ")" & If(CountRows(Filter(colAbsMe, Kind = "A")) = 0, " · none", "")
                                     Wrap: =false
                               - galAbsMeA:
                                   Control: Gallery
                                   Variant: Vertical
                                   Properties:
-                                    AccessibleLabel: ="Reports with no Student ID"
+                                    AccessibleLabel: ="Notices that could not be matched to a student"
                                     FillPortions: =0
-                                    Height: =Min(3, CountRows(Filter(colAbsMe, Kind = "A"))) * If(conAbsRoot.Width < 640, 158, 140)
+                                    Height: =Min(3, CountRows(Filter(colAbsMe, Kind = "A"))) * If(conAbsRoot.Width < 640, 212, 176)
                                     Items: =SortByColumns(Filter(colAbsMe, Kind = "A"), "Created", SortOrder.Descending)
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                     Selectable: =false
                                     TabIndex: =0
                                     TemplatePadding: =0
-                                    TemplateSize: =If(conAbsRoot.Width < 640, 158, 140)
+                                    TemplateSize: =If(conAbsRoot.Width < 640, 212, 176)
                                     Visible: =CountRows(Filter(colAbsMe, Kind = "A")) > 0
                                   Children:
                                     - conAbsMeARow:
@@ -875,7 +875,7 @@ Screens:
                                           BorderColor: =ColorRule
                                           BorderThickness: =1
                                           DropShadow: =DropShadow.None
-                                          Fill: =If(ThisItem.ItemId = varAbsMeSelId, ColorInfoBg, ColorWhite)
+                                          Fill: =If(ThisItem.NoticeId = varAbsNtSelId, ColorInfoBg, ColorWhite)
                                           Height: =Parent.TemplateHeight
                                           LayoutAlignItems: =LayoutAlignItems.Stretch
                                           LayoutDirection: =LayoutDirection.Vertical
@@ -923,13 +923,12 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =14
-                                                      Text: ="#" & ThisItem.ItemId & " · " & If(Trim(ThisItem.LastName & ThisItem.FirstName) = "", "(no name typed)", ThisItem.LastName & ", " & ThisItem.FirstName) & " (as typed)"
+                                                      Text: =ThisItem.Ref & " · " & If(Trim(ThisItem.LastName & ThisItem.FirstName) = "", "(no name typed)", ThisItem.LastName & ", " & ThisItem.FirstName) & " (as typed)"
                                                       VerticalAlign: =VerticalAlign.Top
                                                 - btnAbsMeAOpen:
                                                     Control: ModernButton
                                                     Properties:
-                                                      AccessibleLabel: |-
-                                                        ="Open report #" & ThisItem.ItemId
+                                                      AccessibleLabel: ="Open notice " & ThisItem.Ref
                                                       AlignInContainer: =AlignInContainer.Center
                                                       Appearance: =ButtonAppearance.Secondary
                                                       Color: =ColorInk
@@ -939,9 +938,11 @@ Screens:
                                                       LayoutMinHeight: =0
                                                       LayoutMinWidth: =0
                                                       OnSelect: |-
-                                                        =Set(varAbsMeSelId, ThisItem.ItemId);
-                                                        Set(varAbsMeMode, If(ThisItem.Kind = "A", "map", ""));
+                                                        =Set(varAbsNtSelId, ThisItem.NoticeId);
+                                                        Set(varAbsMeMode, If(ThisItem.Kind = "A", "map", "dates"));
+                                                        Set(varAbsNtAllStu, false);
                                                         Reset(cboAbsMeStudent);
+                                                        Reset(chkAbsNtAllStu);
                                                         Reset(txtAbsMeAbsDate);
                                                         Reset(txtAbsMeRetDate);
                                                         Reset(txtAbsMeDismissNote)
@@ -954,7 +955,7 @@ Screens:
                                                 AccessibleLabel: =Self.Text
                                                 AlignInContainer: =AlignInContainer.Stretch
                                                 Color: =ColorInk
-                                                Height: =If(conAbsRoot.Width < 640, 90, 72)
+                                                Height: =If(conAbsRoot.Width < 640, 144, 108)
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
                                                 PaddingBottom: =0
@@ -962,7 +963,7 @@ Screens:
                                                 PaddingRight: =0
                                                 PaddingTop: =0
                                                 Size: =12
-                                                Text: =If(ThisItem.SchoolSite = "", "No school site", ThisItem.SchoolSite) & " · absent " & If(ThisItem.AbsText = "", "—", ThisItem.AbsText) & If(ThisItem.RetText = "", "", " · back " & ThisItem.RetText) & " · Reason " & If(ThisItem.Reason = "", "—", If(Len(ThisItem.Reason) > 80, Left(ThisItem.Reason, 80) & "…", ThisItem.Reason)) & " · submitted by " & If(ThisItem.SubmittedBy = "", "—", ThisItem.SubmittedBy) & " · notified " & If(ThisItem.Notified = "", "—", ThisItem.Notified)
+                                                Text: ="Campus " & If(ThisItem.TypedCampus = "", "(not typed)", ThisItem.TypedCampus) & If(ThisItem.CampusName = "" || ThisItem.CampusName = ThisItem.TypedCampus, "", " (" & ThisItem.CampusName & ")") & " · absent " & If(IsBlank(ThisItem.FirstDay), "-", Text(ThisItem.FirstDay, "m/d/yyyy")) & " · back " & If(IsBlank(ThisItem.ReturnDate), "-", Text(ThisItem.ReturnDate, "m/d/yyyy")) & " · " & ThisItem.MatchText & If(ThisItem.MatchDetail = "", "", " (" & If(Len(ThisItem.MatchDetail) > 80, Left(ThisItem.MatchDetail, 80) & "...", ThisItem.MatchDetail) & ")") & " · Reason " & If(ThisItem.ReasonText = "", "-", If(Len(ThisItem.ReasonText) > 80, Left(ThisItem.ReasonText, 80) & "...", ThisItem.ReasonText)) & " · Parent " & If(ThisItem.ParentName = "", "-", ThisItem.ParentName) & If(ThisItem.Relationship = "", "", " (" & ThisItem.Relationship & ")") & " · notified " & If(IsBlank(ThisItem.NoticeAt), "-", Text(ThisItem.NoticeAt, "mm/dd/yyyy h:mm AM/PM"))
                                                 VerticalAlign: =VerticalAlign.Top
                               - lblAbsMeBHead:
                                   Control: ModernText
@@ -985,16 +986,16 @@ Screens:
                                   Control: Gallery
                                   Variant: Vertical
                                   Properties:
-                                    AccessibleLabel: ="Reports the intake flow could not process"
+                                    AccessibleLabel: ="Notices the processing flow could not process"
                                     FillPortions: =0
-                                    Height: =Min(3, CountRows(Filter(colAbsMe, Kind = "B"))) * If(conAbsRoot.Width < 640, 158, 140)
-                                    Items: =SortByColumns(Filter(colAbsMe, Kind = "B"), "DecCreated", SortOrder.Descending)
+                                    Height: =Min(3, CountRows(Filter(colAbsMe, Kind = "B"))) * If(conAbsRoot.Width < 640, 212, 176)
+                                    Items: =SortByColumns(Filter(colAbsMe, Kind = "B"), "Created", SortOrder.Descending)
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                     Selectable: =false
                                     TabIndex: =0
                                     TemplatePadding: =0
-                                    TemplateSize: =If(conAbsRoot.Width < 640, 158, 140)
+                                    TemplateSize: =If(conAbsRoot.Width < 640, 212, 176)
                                     Visible: =CountRows(Filter(colAbsMe, Kind = "B")) > 0
                                   Children:
                                     - conAbsMeBRow:
@@ -1004,7 +1005,7 @@ Screens:
                                           BorderColor: =ColorRule
                                           BorderThickness: =1
                                           DropShadow: =DropShadow.None
-                                          Fill: =If(ThisItem.ItemId = varAbsMeSelId, ColorInfoBg, ColorWhite)
+                                          Fill: =If(ThisItem.NoticeId = varAbsNtSelId, ColorInfoBg, ColorWhite)
                                           Height: =Parent.TemplateHeight
                                           LayoutAlignItems: =LayoutAlignItems.Stretch
                                           LayoutDirection: =LayoutDirection.Vertical
@@ -1052,13 +1053,12 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =14
-                                                      Text: ="#" & ThisItem.ItemId & " · Student key " & If(ThisItem.StudentKey = "", "—", ThisItem.StudentKey) & If(ThisItem.Status = "", "", " · " & ThisItem.Status)
+                                                      Text: =ThisItem.Ref & " · " & If(Trim(ThisItem.LastName & ThisItem.FirstName) = "", "(no name typed)", ThisItem.LastName & ", " & ThisItem.FirstName) & " (as typed)"
                                                       VerticalAlign: =VerticalAlign.Top
                                                 - btnAbsMeBOpen:
                                                     Control: ModernButton
                                                     Properties:
-                                                      AccessibleLabel: |-
-                                                        ="Open report #" & ThisItem.ItemId
+                                                      AccessibleLabel: ="Open notice " & ThisItem.Ref
                                                       AlignInContainer: =AlignInContainer.Center
                                                       Appearance: =ButtonAppearance.Secondary
                                                       Color: =ColorInk
@@ -1068,9 +1068,11 @@ Screens:
                                                       LayoutMinHeight: =0
                                                       LayoutMinWidth: =0
                                                       OnSelect: |-
-                                                        =Set(varAbsMeSelId, ThisItem.ItemId);
-                                                        Set(varAbsMeMode, If(ThisItem.Kind = "A", "map", ""));
+                                                        =Set(varAbsNtSelId, ThisItem.NoticeId);
+                                                        Set(varAbsMeMode, If(ThisItem.Kind = "A", "map", "dates"));
+                                                        Set(varAbsNtAllStu, false);
                                                         Reset(cboAbsMeStudent);
+                                                        Reset(chkAbsNtAllStu);
                                                         Reset(txtAbsMeAbsDate);
                                                         Reset(txtAbsMeRetDate);
                                                         Reset(txtAbsMeDismissNote)
@@ -1083,7 +1085,7 @@ Screens:
                                                 AccessibleLabel: =Self.Text
                                                 AlignInContainer: =AlignInContainer.Stretch
                                                 Color: =ColorInk
-                                                Height: =If(conAbsRoot.Width < 640, 90, 72)
+                                                Height: =If(conAbsRoot.Width < 640, 144, 108)
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
                                                 PaddingBottom: =0
@@ -1091,8 +1093,7 @@ Screens:
                                                 PaddingRight: =0
                                                 PaddingTop: =0
                                                 Size: =12
-                                                Text: |-
-                                                  ="Error: " & If(ThisItem.ErrorDetail = "", "—", If(Len(ThisItem.ErrorDetail) > 160, Left(ThisItem.ErrorDetail, 160) & "…", ThisItem.ErrorDetail)) & " · created " & Text(ThisItem.DecCreated, "mmm d, yyyy h:mm AM/PM")
+                                                Text: ="Error " & If(ThisItem.ErrorDetail = "", "-", If(Len(ThisItem.ErrorDetail) > 100, Left(ThisItem.ErrorDetail, 100) & "...", ThisItem.ErrorDetail)) & " · " & If(ThisItem.StudentName = "", "no student", ThisItem.StudentName) & " · Campus " & If(ThisItem.CampusName = "", If(ThisItem.TypedCampus = "", "-", ThisItem.TypedCampus), ThisItem.CampusName) & " · absent " & If(IsBlank(ThisItem.FirstDay), "-", Text(ThisItem.FirstDay, "m/d/yyyy")) & " · back " & If(IsBlank(ThisItem.ReturnDate), "-", Text(ThisItem.ReturnDate, "m/d/yyyy")) & " · Reason " & If(ThisItem.ReasonText = "", "-", If(Len(ThisItem.ReasonText) > 60, Left(ThisItem.ReasonText, 60) & "...", ThisItem.ReasonText)) & " · Parent " & If(ThisItem.ParentName = "", "-", ThisItem.ParentName) & If(ThisItem.Relationship = "", "", " (" & ThisItem.Relationship & ")") & " · notified " & If(IsBlank(ThisItem.NoticeAt), "-", Text(ThisItem.NoticeAt, "mm/dd/yyyy h:mm AM/PM"))
                                                 VerticalAlign: =VerticalAlign.Top
                         - conAbsMeDetail:
                             Control: GroupContainer
@@ -1118,7 +1119,7 @@ Screens:
                               RadiusBottomRight: =6
                               RadiusTopLeft: =6
                               RadiusTopRight: =6
-                              Visible: =conAbsRoot.Width >= 1024 || !IsBlank(varAbsMeSelId)
+                              Visible: =conAbsRoot.Width >= 1024 || !IsBlank(varAbsNtSelId)
                             Children:
                               - lblAbsMeDetailTitle:
                                   Control: ModernText
@@ -1143,7 +1144,7 @@ Screens:
                                     AccessibleLabel: =Self.Text
                                     AlignInContainer: =AlignInContainer.Stretch
                                     Color: =ColorInk
-                                    Height: =If(IsBlank(LookUp(colAbsMe, ItemId = varAbsMeSelId)), 60, If(conAbsRoot.Width < 640, 320, 210))
+                                    Height: =If(IsBlank(LookUp(colAbsMe, NoticeId = varAbsNtSelId)), 60, If(conAbsRoot.Width < 640, 400, 270))
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
                                     PaddingBottom: =0
@@ -1153,18 +1154,18 @@ Screens:
                                     Size: =13
                                     Text: |-
                                       =With(
-                                          {it: LookUp(colAbsMe, ItemId = varAbsMeSelId)},
+                                          {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId)},
                                           If(
                                               IsBlank(it),
-                                              "Choose Open on a report to map it to a student, fix its dates, or dismiss it.",
-                                              "Report #" & it.ItemId & " · " & If(it.Kind = "A", "No Student ID", "Could not process") & If(it.Status = "", "", " · " & it.Status) & Char(10) &
-                                              "Student as typed: " & it.FirstName & " " & it.LastName & Char(10) &
-                                              "School site: " & If(it.SchoolSite = "", "—", it.SchoolSite) & Char(10) &
-                                              "Absence date: " & If(it.AbsText = "", "—", it.AbsText) & " · Return date: " & If(it.RetText = "", "—", it.RetText) & Char(10) &
-                                              "Reason: " & If(it.Reason = "", "—", If(Len(it.Reason) > 160, Left(it.Reason, 160) & "…", it.Reason)) & Char(10) &
-                                              "Submitted by " & If(it.SubmittedBy = "", "—", it.SubmittedBy) & " · notified " & If(it.Notified = "", "—", it.Notified) & Char(10) &
-                                              "Student_ID: " & If(it.StudentKey = "", "blank", it.StudentKey) &
-                                              If(it.Kind = "B", Char(10) & "Error: " & If(it.ErrorDetail = "", "—", If(Len(it.ErrorDetail) > 200, Left(it.ErrorDetail, 200) & "…", it.ErrorDetail)) & If(it.SpFound, "", " · SharePoint item not found"), "")
+                                              "Choose Open on a notice to map it to a student, fix its dates, or dismiss it.",
+                                              "Notice " & it.Ref & " · " & If(it.Kind = "A", "Could not match", "Could not process") & " · " & it.MatchText & Char(10) &
+                                              "Student as typed: " & it.FirstName & " " & it.LastName & " · campus as typed: " & If(it.TypedCampus = "", "-", it.TypedCampus) & Char(10) &
+                                              "Campus: " & If(it.CampusName = "", "not set", it.CampusName) & " · student: " & If(it.StudentName = "", "not set", it.StudentName) & Char(10) &
+                                              "First Day Absent: " & If(IsBlank(it.FirstDay), "-", Text(it.FirstDay, "m/d/yyyy")) & " · Return Date: " & If(IsBlank(it.ReturnDate), "-", Text(it.ReturnDate, "m/d/yyyy")) & Char(10) &
+                                              "Reason: " & If(it.ReasonText = "", "-", If(Len(it.ReasonText) > 120, Left(it.ReasonText, 120) & "...", it.ReasonText)) & Char(10) &
+                                              "Parent: " & If(it.ParentName = "", "-", it.ParentName) & If(it.Relationship = "", "", " (" & it.Relationship & ")") & " · notified " & If(IsBlank(it.NoticeAt), "-", Text(it.NoticeAt, "mm/dd/yyyy h:mm AM/PM")) & Char(10) &
+                                              "Match Detail: " & If(it.MatchDetail = "", "-", If(Len(it.MatchDetail) > 120, Left(it.MatchDetail, 120) & "...", it.MatchDetail)) &
+                                              If(it.Kind = "B", Char(10) & "Error: " & If(it.ErrorDetail = "", "-", If(Len(it.ErrorDetail) > 160, Left(it.ErrorDetail, 160) & "...", it.ErrorDetail)), "")
                                           )
                                       )
                                     VerticalAlign: =VerticalAlign.Top
@@ -1185,7 +1186,7 @@ Screens:
                                     RadiusBottomRight: =0
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
-                                    Visible: =!IsBlank(varAbsMeSelId)
+                                    Visible: =!IsBlank(varAbsNtSelId)
                                   Children:
                                     - btnAbsMeModeMap:
                                         Control: ModernButton
@@ -1220,12 +1221,12 @@ Screens:
                                           OnSelect: =Set(varAbsMeMode, "dates")
                                           Size: =14
                                           Text: ="Fix dates"
-                                          Visible: =LookUp(colAbsMe, ItemId = varAbsMeSelId).Kind = "B"
+                                          Visible: =LookUp(colAbsMe, NoticeId = varAbsNtSelId).Kind = "B"
                                           Width: =110
                                     - btnAbsMeModeDismiss:
                                         Control: ModernButton
                                         Properties:
-                                          AccessibleLabel: =Self.Text & " this report" & If(varAbsMeMode = "dismiss", " (open)", "")
+                                          AccessibleLabel: =Self.Text & " this notice" & If(varAbsMeMode = "dismiss", " (open)", "")
                                           AlignInContainer: =AlignInContainer.Center
                                           Appearance: =If(varAbsMeMode = "dismiss", ButtonAppearance.Primary, ButtonAppearance.Secondary)
                                           BasePaletteColor: =ColorTeal
@@ -1242,7 +1243,7 @@ Screens:
                                     - btnAbsMeClose:
                                         Control: ModernButton
                                         Properties:
-                                          AccessibleLabel: ="Close this report without changes"
+                                          AccessibleLabel: ="Close this notice without changes"
                                           AlignInContainer: =AlignInContainer.Center
                                           Appearance: =ButtonAppearance.Secondary
                                           Color: =ColorInk
@@ -1252,9 +1253,11 @@ Screens:
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           OnSelect: |-
-                                            =Set(varAbsMeSelId, Blank());
+                                            =Set(varAbsNtSelId, Blank());
                                             Set(varAbsMeMode, "");
+                                            Set(varAbsNtAllStu, false);
                                             Reset(cboAbsMeStudent);
+                                            Reset(chkAbsNtAllStu);
                                             Reset(txtAbsMeAbsDate);
                                             Reset(txtAbsMeRetDate);
                                             Reset(txtAbsMeDismissNote)
@@ -1267,7 +1270,7 @@ Screens:
                                   Properties:
                                     DropShadow: =DropShadow.None
                                     FillPortions: =0
-                                    Height: =If(conAbsRoot.Width < 640, 190, 172)
+                                    Height: =If(conAbsRoot.Width < 640, 230, 212)
                                     LayoutAlignItems: =LayoutAlignItems.Stretch
                                     LayoutDirection: =LayoutDirection.Vertical
                                     LayoutGap: =8
@@ -1277,7 +1280,7 @@ Screens:
                                     RadiusBottomRight: =0
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
-                                    Visible: =!IsBlank(varAbsMeSelId) && varAbsMeMode = "map"
+                                    Visible: =!IsBlank(varAbsNtSelId) && varAbsMeMode = "map"
                                   Children:
                                     - conAbsMeMapField:
                                         Control: GroupContainer
@@ -1326,7 +1329,16 @@ Screens:
                                                 InputTextPlaceholder: ="Type a name or Student Key"
                                                 ItemDisplayText: =ThisItem.Label
                                                 Items: |-
-                                                  =With({cid: LookUp(colAbsMe, ItemId = varAbsMeSelId).CampusId}, Sort(Filter(colAbsMeStudents, IsBlank(cid) || cid = ZeroGuid || CampusId = cid), DisplayName, SortOrder.Ascending))
+                                                  =With(
+                                                      {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId)},
+                                                      With(
+                                                          {base: Filter(colAbsMeStudents, (it.CampusId = ZeroGuid || CampusId = it.CampusId) && (IsBlank(it.FirstDay) || (StartDate <= it.FirstDay && (IsBlank(EndDate) || EndDate >= it.FirstDay))))},
+                                                          With(
+                                                              {hit: Filter(base, Len(Trim(it.LastName)) > 0 && Trim(it.LastName) in DisplayName)},
+                                                              Sort(If(varAbsNtAllStu || CountRows(hit) = 0, base, hit), DisplayName, SortOrder.Ascending)
+                                                          )
+                                                      )
+                                                  )
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
                                                 SelectMultiple: =false
@@ -1346,86 +1358,100 @@ Screens:
                                           Size: =13
                                           Text: |-
                                             =With(
-                                                {it: LookUp(colAbsMe, ItemId = varAbsMeSelId), stu: First(cboAbsMeStudent.SelectedItems)},
+                                                {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId), stu: First(cboAbsMeStudent.SelectedItems)},
                                                 If(
-                                                    CountRows(cboAbsMeStudent.SelectedItems) <> 1, "Pick the student this report is about. Save mapping stays off until you do.",
-                                                    Trim(Coalesce(stu.StudentKey, "")) = "", stu.DisplayName & " has no Student Key (External Client ID). Add it on the Students screen first.",
-                                                    "Ready: Save mapping writes Student_ID " & stu.StudentKey & " and Match_Status Manually Resolved on report #" & it.ItemId & ". Nothing else in SharePoint changes."
+                                                    IsBlank(it), "Choose Open on a notice first.",
+                                                    CountRows(cboAbsMeStudent.SelectedItems) <> 1, If(!varAbsNtAllStu && CountRows(Filter(colAbsMeStudents, (it.CampusId = ZeroGuid || CampusId = it.CampusId) && (IsBlank(it.FirstDay) || (StartDate <= it.FirstDay && (IsBlank(EndDate) || EndDate >= it.FirstDay))))) = 0, "No student is enrolled at this campus on the First Day Absent. Tick Show all students, or fix the dates.", "Pick the student this notice is about. Save mapping stays off until you do."),
+                                                    "Ready: Save mapping links notice " & it.Ref & " to " & stu.DisplayName & " (Mapped by office). The processing flow then adds the absences within a minute."
                                                 )
                                             )
                                           VerticalAlign: =VerticalAlign.Top
                                     - btnAbsMeMapSave:
                                         Control: ModernButton
                                         Properties:
-                                          AccessibleLabel: ="Save mapping to SharePoint"
+                                          AccessibleLabel: ="Save mapping to the absence notice"
                                           AlignInContainer: =AlignInContainer.Start
                                           BasePaletteColor: =ColorTeal
                                           Color: =ColorWhite
-                                          DisplayMode: =If(CanClassify && !varAbsMeSaving && !IsBlank(LookUp(colAbsMe, ItemId = varAbsMeSelId)) && CountRows(cboAbsMeStudent.SelectedItems) = 1 && Trim(Coalesce(First(cboAbsMeStudent.SelectedItems).StudentKey, "")) <> "", DisplayMode.Edit, DisplayMode.Disabled)
+                                          DisplayMode: =If(CanClassify && !varAbsMeSaving && !IsBlank(LookUp(colAbsMe, NoticeId = varAbsNtSelId)) && CountRows(cboAbsMeStudent.SelectedItems) = 1, DisplayMode.Edit, DisplayMode.Disabled)
                                           Height: =44
                                           Layout: =ButtonLayout.TextOnly
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           OnSelect: |-
                                             =With(
-                                                {it: LookUp(colAbsMe, ItemId = varAbsMeSelId), stu: First(cboAbsMeStudent.SelectedItems), n: CountRows(cboAbsMeStudent.SelectedItems)},
-                                                With(
-                                                    {qid: it.ItemId, key: Trim(Coalesce(stu.StudentKey, ""))},
-                                                    If(
-                                                        !CanClassify || varAbsMeSaving || IsBlank(it),
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · choose a report with Open first", Body: ""}),
-                                                        n <> 1 || key = "",
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · pick one student who has a Student Key", Body: "Report #" & qid & " was not changed."}),
-                                                        Set(varAbsMeSaving, true);
-                                                        Set(varAbsMeErr, "");
-                                                        With(
-                                                            {live: With({q: qid}, LookUp('Student Absence Log', ID = q)), prior: With({q: qid}, LookUp('Report Decisions', 'Report Item ID' = q))},
-                                                            If(
-                                                                IsBlank(live),
-                                                                Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · report #" & qid & " could not be read from SharePoint", Body: "Nothing was changed. The item may have been deleted. Use Reload."}),
-                                                                it.Kind = "A" && (Trim(Coalesce(live.Student_ID, "")) <> "" || !IsBlank(prior)),
-                                                                Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · report #" & qid & " was already handled", Body: "It now has Student_ID " & Coalesce(live.Student_ID, "(blank)") & If(IsBlank(prior), "", " and a Report Decisions row") & ". Nothing was written. Use Reload."}),
-                                                                it.Kind = "B" && (IsBlank(prior) || prior.'Processing Status' <> 'Processing Status (Report Decisions)'.Error),
-                                                                Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · report #" & qid & " is no longer in Could not process", Body: "The intake flow or another user already handled it. Nothing was written. Use Reload."}),
-                                                                With(
-                                                                    {w: IfError(Patch('Student Absence Log', live, {Student_ID: key, Match_Status: {Value: "Manually Resolved"}}), Set(varAbsMeErr, FirstError.Message); Blank())},
-                                                                    If(
-                                                                        IsBlank(w),
-                                                                        Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · report #" & qid & " could not be updated", Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was changed. The report and student are still selected; press Save mapping to retry."}),
-                                                                        With(
-                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Parent report #" & w.ID & " mapped to " & w.Student_ID, 100), Action: 'Action (Audit Events)'.Update, Entity: "sharepoint:Student Absence Log", 'Entity ID': Text(w.ID), Before: JSON({Student_ID: Coalesce(live.Student_ID, ""), Match_Status: Coalesce(live.Match_Status.Value, "")}), After: JSON({Student_ID: w.Student_ID, Match_Status: w.Match_Status.Value}), Reason: Left("Mapped in Absences, Mapping Errors: " & stu.DisplayName & " (" & key & ")", 500)}), Blank())},
-                                                                            Set(
-                                                                                varAbsMeReceipt,
-                                                                                {
-                                                                                    Kind: "Mapped",
-                                                                                    Title: "Report #" & w.ID & " mapped · Student_ID " & w.Student_ID & " · " & stu.DisplayName,
-                                                                                    Body: "Report: #" & w.ID & " · was " & If(it.Kind = "A", "No Student ID", "Could not process") & Char(10) &
-                                                                                        "Typed by parent: " & it.FirstName & " " & it.LastName & " · " & it.SchoolSite & Char(10) &
-                                                                                        "Student picked: " & stu.DisplayName & " · " & stu.StatusText & Char(10) &
-                                                                                        "Student_ID: " & w.Student_ID & Char(10) &
-                                                                                        "Match_Status: " & w.Match_Status.Value & Char(10) &
-                                                                                        "Other SharePoint columns: not written" & Char(10) &
-                                                                                        "Audit event: " & If(IsBlank(au), "NOT written", "Update written") & Char(10) &
-                                                                                        "Next: the intake flow picks this up within a few minutes and creates the absences (0s). Reload later to confirm."
-                                                                                }
-                                                                            );
-                                                                            If(it.Kind = "A", RemoveIf(colAbsMe, ItemId = qid));
-                                                                            If(it.Kind = "B", Patch(colAbsMe, it, {StudentKey: w.Student_ID, Status: "Mapped to " & w.Student_ID & ", waiting for the intake flow"}));
-                                                                            Set(varAbsMeSelId, Blank());
-                                                                            Set(varAbsMeMode, "");
-                                                                            Reset(cboAbsMeStudent)
-                                                                        )
+                                                {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId), stu: First(cboAbsMeStudent.SelectedItems), n: CountRows(cboAbsMeStudent.SelectedItems)},
+                                                If(
+                                                    !CanClassify || varAbsMeSaving || IsBlank(it),
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · choose a notice with Open first", Body: ""}),
+                                                    n <> 1,
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · pick one student", Body: "Notice " & it.Ref & " was not changed."}),
+                                                    Set(varAbsMeSaving, true);
+                                                    Set(varAbsMeErr, "");
+                                                    With(
+                                                        {
+                                                            live: With({q: it.NoticeId}, LookUp('Absence Notices', ThisRecord.'Absence Notice' = q)),
+                                                            srec: With({qs: stu.StudentId}, LookUp(Students, ThisRecord.Student = qs)),
+                                                            mdet: Left("Mapped by " & Coalesce(CurrentUserRow.'Full Name', User().FullName) & " " & Text(Now(), "m/d/yyyy h:mm AM/PM"), 1000)
+                                                        },
+                                                        If(
+                                                            IsBlank(live),
+                                                            Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · notice " & it.Ref & " could not be read", Body: "Nothing was changed. It may have been deleted. Use Reload."}),
+                                                            live.'Status (aaca_status)' <> 'Status (Absence Notices)'.New,
+                                                            Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · notice " & it.Ref & " is already " & Text(live.'Status (aaca_status)'), Body: "Another user or the processing flow handled it. Nothing was written, and it has been removed from this list."}); RemoveIf(colAbsMe, NoticeId = it.NoticeId); Set(varAbsNtSelId, Blank()); Set(varAbsMeMode, ""),
+                                                            IsBlank(srec),
+                                                            Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · the student could not be read", Body: "Notice " & it.Ref & " was not changed. Use Reload."}),
+                                                            With(
+                                                                {w: IfError(Patch('Absence Notices', live, {Student: srec, 'Match Status': 'Match Status (Absence Notices)'.'Mapped by office', 'Match Detail': mdet, 'Error Detail': ""}), Set(varAbsMeErr, FirstError.Message); Blank())},
+                                                                If(
+                                                                    IsBlank(w),
+                                                                    Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · notice " & it.Ref & " could not be updated", Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was changed. The notice and student are still selected; press Save mapping to retry."}),
+                                                                    With(
+                                                                        {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Absence notice " & w.Reference & " mapped to " & Coalesce(w.Student.'Display Name', stu.DisplayName), 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_absencenotice", 'Entity ID': Text(w.'Absence Notice'), Before: JSON({Student: Coalesce(live.Student.'Display Name', ""), MatchStatus: Text(live.'Match Status'), MatchDetail: Coalesce(live.'Match Detail', ""), ErrorDetail: Coalesce(live.'Error Detail', "")}), After: JSON({Student: Coalesce(w.Student.'Display Name', ""), MatchStatus: Text(w.'Match Status'), MatchDetail: Coalesce(w.'Match Detail', ""), ErrorDetail: Coalesce(w.'Error Detail', "")}), Reason: Left("Mapped in Absences, Mapping Errors: " & stu.DisplayName, 500)}), Blank())},
+                                                                        Set(
+                                                                            varAbsMeReceipt,
+                                                                            {
+                                                                                Kind: "Mapped",
+                                                                                Title: "Notice " & w.Reference & " mapped to " & Coalesce(w.Student.'Display Name', stu.DisplayName) & " · the days will appear shortly",
+                                                                                Body: "Notice: " & w.Reference & " · was " & If(it.Kind = "A", "Could not match", "Could not process") & Char(10) &
+                                                                                    "Typed by parent: " & it.FirstName & " " & it.LastName & " · " & it.TypedCampus & Char(10) &
+                                                                                    "Student: " & Coalesce(w.Student.'Display Name', "") & " · " & If(stu.StudentKey = "", "no Student Key", stu.StudentKey) & Char(10) &
+                                                                                    "Match Status: " & Text(w.'Match Status') & Char(10) &
+                                                                                    "Match Detail: " & Coalesce(w.'Match Detail', "") & Char(10) &
+                                                                                    "Error Detail: " & If(Coalesce(w.'Error Detail', "") = "", "cleared", w.'Error Detail') & Char(10) &
+                                                                                    "Status: " & Text(w.'Status (aaca_status)') & Char(10) &
+                                                                                    "Audit event: " & If(IsBlank(au), "NOT written", "Update written") & Char(10) &
+                                                                                    "Next: the processing flow creates the absences (0s) within about a minute. Reload Classify absences to see them."
+                                                                            }
+                                                                        );
+                                                                        RemoveIf(colAbsMe, NoticeId = it.NoticeId);
+                                                                        Set(varAbsNtSelId, Blank());
+                                                                        Set(varAbsMeMode, "");
+                                                                        Reset(cboAbsMeStudent)
                                                                     )
                                                                 )
                                                             )
-                                                        );
-                                                        Set(varAbsMeSaving, false)
-                                                    )
+                                                        )
+                                                    );
+                                                    Set(varAbsMeSaving, false);
+                                                    If(varAbsMeReceipt.Kind = "Mapped", Select(btnAbsMeEngine))
                                                 )
                                             )
                                           Size: =14
                                           Text: ="Save mapping"
                                           Width: =160
+                                    - chkAbsNtAllStu:
+                                        Control: ModernCheckbox
+                                        Properties:
+                                          AccessibleLabel: ="Show all students enrolled at the notice's campus"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Default: =varAbsNtAllStu
+                                          DisplayMode: =If(varAbsMeSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Label: ="Show all students enrolled at the notice's campus"
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnCheck: =Set(varAbsNtAllStu, true)
+                                          OnUncheck: =Set(varAbsNtAllStu, false)
                               - conAbsMeDatesPanel:
                                   Control: GroupContainer
                                   Variant: AutoLayout
@@ -1442,7 +1468,7 @@ Screens:
                                     RadiusBottomRight: =0
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
-                                    Visible: =!IsBlank(varAbsMeSelId) && varAbsMeMode = "dates" && LookUp(colAbsMe, ItemId = varAbsMeSelId).Kind = "B"
+                                    Visible: =!IsBlank(varAbsNtSelId) && varAbsMeMode = "dates" && LookUp(colAbsMe, NoticeId = varAbsNtSelId).Kind = "B"
                                   Children:
                                     - conAbsMeDatesRow:
                                         Control: GroupContainer
@@ -1481,7 +1507,7 @@ Screens:
                                                 - lblAbsMeAbsDate:
                                                     Control: ModernText
                                                     Properties:
-                                                      AccessibleLabel: ="Absence Date, required, M/D/YYYY"
+                                                      AccessibleLabel: ="First Day Absent, required, M/D/YYYY"
                                                       AlignInContainer: =AlignInContainer.Stretch
                                                       Color: =ColorMuted
                                                       FontWeight: =FontWeight.Semibold
@@ -1493,22 +1519,23 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =12
-                                                      Text: ="Absence Date * (M/D/YYYY)"
+                                                      Text: ="First Day Absent * (M/D/YYYY)"
                                                       Wrap: =false
                                                 - txtAbsMeAbsDate:
                                                     Control: ModernTextInput
                                                     Properties:
-                                                      AccessibleLabel: ="Absence Date"
+                                                      AccessibleLabel: ="First Day Absent"
                                                       AlignInContainer: =AlignInContainer.Stretch
                                                       Appearance: =Appearance.Outline
                                                       Color: =ColorInk
-                                                      Default: =LookUp(colAbsMe, ItemId = varAbsMeSelId).AbsText
+                                                      Default: |-
+                                                        =With({it: LookUp(colAbsMe, NoticeId = varAbsNtSelId)}, If(IsBlank(it.FirstDay), "", Text(it.FirstDay, "m/d/yyyy")))
                                                       DisplayMode: =If(varAbsMeSaving, DisplayMode.Disabled, DisplayMode.Edit)
                                                       Height: =36
                                                       LayoutMinHeight: =0
                                                       LayoutMinWidth: =0
                                                       MaxLength: =10
-                                                      Placeholder: ="9/14/2026"
+                                                      Placeholder: ="10/6/2026"
                                           - conAbsMeRetField:
                                               Control: GroupContainer
                                               Variant: AutoLayout
@@ -1529,7 +1556,7 @@ Screens:
                                                 - lblAbsMeRetDate:
                                                     Control: ModernText
                                                     Properties:
-                                                      AccessibleLabel: ="Return Date, M/D/YYYY, blank means one day"
+                                                      AccessibleLabel: ="Return Date, the day the child is back, required, M/D/YYYY"
                                                       AlignInContainer: =AlignInContainer.Stretch
                                                       Color: =ColorMuted
                                                       FontWeight: =FontWeight.Semibold
@@ -1541,7 +1568,7 @@ Screens:
                                                       PaddingRight: =0
                                                       PaddingTop: =0
                                                       Size: =12
-                                                      Text: ="Return Date (M/D/YYYY, blank = one day)"
+                                                      Text: ="Return Date * (day back, M/D/YYYY)"
                                                       Wrap: =false
                                                 - txtAbsMeRetDate:
                                                     Control: ModernTextInput
@@ -1550,13 +1577,14 @@ Screens:
                                                       AlignInContainer: =AlignInContainer.Stretch
                                                       Appearance: =Appearance.Outline
                                                       Color: =ColorInk
-                                                      Default: =LookUp(colAbsMe, ItemId = varAbsMeSelId).RetText
+                                                      Default: |-
+                                                        =With({it: LookUp(colAbsMe, NoticeId = varAbsNtSelId)}, If(IsBlank(it.ReturnDate), "", Text(it.ReturnDate, "m/d/yyyy")))
                                                       DisplayMode: =If(varAbsMeSaving, DisplayMode.Disabled, DisplayMode.Edit)
                                                       Height: =36
                                                       LayoutMinHeight: =0
                                                       LayoutMinWidth: =0
                                                       MaxLength: =10
-                                                      Placeholder: ="9/16/2026"
+                                                      Placeholder: ="10/8/2026"
                                     - lblAbsMeDatesCheck:
                                         Control: ModernText
                                         Properties:
@@ -1573,23 +1601,22 @@ Screens:
                                           Size: =13
                                           Text: |-
                                             =With(
-                                                {a: IfError(DateValue(Trim(txtAbsMeAbsDate.Text), "en-US"), Blank()), rt: Trim(txtAbsMeRetDate.Text)},
-                                                With(
-                                                    {r: If(rt = "", Blank(), IfError(DateValue(rt, "en-US"), Blank()))},
-                                                    If(
-                                                        IsBlank(a), "Type the Absence Date as M/D/YYYY, for example 9/14/2026.",
-                                                        rt <> "" && IsBlank(r), "Type the Return Date as M/D/YYYY, or leave it blank for a one-day absence.",
-                                                        !IsBlank(r) && r <= a, "The Return Date must be after the Absence Date (it is the day the child is back).",
-                                                        !IsBlank(r) && DateDiff(a, r, TimeUnit.Days) > 60, "Those dates cover more than 60 days, the most the intake flow accepts. Check them.",
-                                                        "Ready: Save dates writes Absence Date " & Text(a, "m/d/yyyy") & If(IsBlank(r), " and a blank Return Date", " and Return Date " & Text(r, "m/d/yyyy")) & ". Nothing else in SharePoint changes."
-                                                    )
+                                                {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId), a: IfError(DateValue(Trim(txtAbsMeAbsDate.Text), "en-US"), Blank()), r: IfError(DateValue(Trim(txtAbsMeRetDate.Text), "en-US"), Blank())},
+                                                If(
+                                                    IsBlank(it) || it.Kind <> "B", "Open a notice in Could not process first.",
+                                                    it.StudentId = ZeroGuid, "This notice has no student yet. Use Map student; it also asks the processing flow to run again.",
+                                                    IsBlank(a), "Type the First Day Absent as M/D/YYYY, for example 10/6/2026.",
+                                                    IsBlank(r), "Type the Return Date (the day the child is back) as M/D/YYYY.",
+                                                    r <= a, "The Return Date must be after the First Day Absent.",
+                                                    DateDiff(a, r, TimeUnit.Days) > 60, "Those dates cover more than 60 days. Check them.",
+                                                    "Ready: Save dates sets " & Text(a, "m/d/yyyy") & " to " & Text(DateAdd(r, -1, TimeUnit.Days), "m/d/yyyy") & " (back " & Text(r, "m/d/yyyy") & "), clears the error and asks the processing flow to run again."
                                                 )
                                             )
                                           VerticalAlign: =VerticalAlign.Top
                                     - btnAbsMeDatesSave:
                                         Control: ModernButton
                                         Properties:
-                                          AccessibleLabel: ="Save dates to SharePoint"
+                                          AccessibleLabel: ="Save dates to the absence notice"
                                           AlignInContainer: =AlignInContainer.Start
                                           BasePaletteColor: =ColorTeal
                                           Color: =ColorWhite
@@ -1600,53 +1627,54 @@ Screens:
                                           LayoutMinWidth: =0
                                           OnSelect: |-
                                             =With(
-                                                {it: LookUp(colAbsMe, ItemId = varAbsMeSelId), a: IfError(DateValue(Trim(txtAbsMeAbsDate.Text), "en-US"), Blank()), rt: Trim(txtAbsMeRetDate.Text)},
-                                                With(
-                                                    {qid: it.ItemId, r: If(rt = "", Blank(), IfError(DateValue(rt, "en-US"), Blank()))},
-                                                    If(
-                                                        !CanClassify || varAbsMeSaving || IsBlank(it) || it.Kind <> "B",
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · open a report in Could not process first", Body: ""}),
-                                                        IsBlank(a) || (rt <> "" && IsBlank(r)) || (!IsBlank(r) && (r <= a || DateDiff(a, r, TimeUnit.Days) > 60)),
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · check the dates", Body: "Type dates as M/D/YYYY. The Return Date is the day the child is back: after the Absence Date and at most 60 days later. Report #" & qid & " was not changed."}),
-                                                        Set(varAbsMeSaving, true);
-                                                        Set(varAbsMeErr, "");
-                                                        With(
-                                                            {live: With({q: qid}, LookUp('Student Absence Log', ID = q)), aTxt: Text(a, "m/d/yyyy"), rTxt: If(IsBlank(r), "", Text(r, "m/d/yyyy"))},
-                                                            If(
-                                                                IsBlank(live),
-                                                                Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · report #" & qid & " could not be read from SharePoint", Body: "Nothing was changed. The item may have been deleted. Use Reload."}),
-                                                                With(
-                                                                    {w: IfError(Patch('Student Absence Log', live, {'Absence Date': aTxt, 'Return Date': rTxt}), Set(varAbsMeErr, FirstError.Message); Blank())},
-                                                                    If(
-                                                                        IsBlank(w),
-                                                                        Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · report #" & qid & " could not be updated", Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was changed. Press Save dates to retry."}),
-                                                                        With(
-                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Parent report #" & w.ID & " dates fixed", 100), Action: 'Action (Audit Events)'.Update, Entity: "sharepoint:Student Absence Log", 'Entity ID': Text(w.ID), Before: JSON({AbsenceDate: Coalesce(live.'Absence Date', ""), ReturnDate: Coalesce(live.'Return Date', "")}), After: JSON({AbsenceDate: Coalesce(w.'Absence Date', ""), ReturnDate: Coalesce(w.'Return Date', "")}), Reason: "Dates fixed in Absences, Mapping Errors"}), Blank())},
-                                                                            Set(
-                                                                                varAbsMeReceipt,
-                                                                                {
-                                                                                    Kind: "Dates fixed",
-                                                                                    Title: "Report #" & w.ID & " dates saved · " & w.'Absence Date' & If(Coalesce(w.'Return Date', "") = "", " (one day)", " to " & w.'Return Date'),
-                                                                                    Body: "Report: #" & w.ID & " · Could not process" & Char(10) &
-                                                                                        "Absence Date: " & Coalesce(live.'Absence Date', "(blank)") & " -> " & Coalesce(w.'Absence Date', "(blank)") & Char(10) &
-                                                                                        "Return Date: " & Coalesce(live.'Return Date', "(blank)") & " -> " & Coalesce(w.'Return Date', "(blank)") & Char(10) &
-                                                                                        "Other SharePoint columns: not written" & Char(10) &
-                                                                                        "Audit event: " & If(IsBlank(au), "NOT written", "Update written") & Char(10) &
-                                                                                        "Next: the intake flow picks this up within a few minutes and creates the absences (0s). Reload later to confirm."
-                                                                                }
-                                                                            );
-                                                                            Patch(colAbsMe, it, {AbsText: Coalesce(w.'Absence Date', ""), RetText: Coalesce(w.'Return Date', ""), Status: "Dates fixed, waiting for the intake flow"});
-                                                                            Set(varAbsMeSelId, Blank());
-                                                                            Set(varAbsMeMode, "");
-                                                                            Reset(txtAbsMeAbsDate);
-                                                                            Reset(txtAbsMeRetDate)
-                                                                        )
+                                                {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId), a: IfError(DateValue(Trim(txtAbsMeAbsDate.Text), "en-US"), Blank()), r: IfError(DateValue(Trim(txtAbsMeRetDate.Text), "en-US"), Blank())},
+                                                If(
+                                                    !CanClassify || varAbsMeSaving || IsBlank(it) || it.Kind <> "B",
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · open a notice in Could not process first", Body: ""}),
+                                                    it.StudentId = ZeroGuid || IsBlank(a) || IsBlank(r) || r <= a || DateDiff(a, r, TimeUnit.Days) > 60,
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · " & lblAbsMeDatesCheck.Text, Body: "Notice " & it.Ref & " was not changed."}),
+                                                    Set(varAbsMeSaving, true);
+                                                    Set(varAbsMeErr, "");
+                                                    With(
+                                                        {live: With({q: it.NoticeId}, LookUp('Absence Notices', ThisRecord.'Absence Notice' = q))},
+                                                        If(
+                                                            IsBlank(live),
+                                                            Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · notice " & it.Ref & " could not be read", Body: "Nothing was changed. It may have been deleted. Use Reload."}),
+                                                            live.'Status (aaca_status)' <> 'Status (Absence Notices)'.New,
+                                                            Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not saved · notice " & it.Ref & " is already " & Text(live.'Status (aaca_status)'), Body: "Another user or the processing flow handled it. Nothing was written, and it has been removed from this list."}); RemoveIf(colAbsMe, NoticeId = it.NoticeId); Set(varAbsNtSelId, Blank()); Set(varAbsMeMode, ""),
+                                                            With(
+                                                                {w: IfError(Patch('Absence Notices', live, {'First Day Absent': a, 'Last Day Absent': DateAdd(r, -1, TimeUnit.Days), 'Return Date': r, 'Error Detail': "", 'Match Status': 'Match Status (Absence Notices)'.'Mapped by office'}), Set(varAbsMeErr, FirstError.Message); Blank())},
+                                                                If(
+                                                                    IsBlank(w),
+                                                                    Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not saved · notice " & it.Ref & " could not be updated", Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was changed. Press Save dates to retry."}),
+                                                                    With(
+                                                                        {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Absence notice " & w.Reference & " dates fixed", 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_absencenotice", 'Entity ID': Text(w.'Absence Notice'), Before: JSON({FirstDay: Text(live.'First Day Absent', "yyyy-mm-dd"), LastDay: Text(live.'Last Day Absent', "yyyy-mm-dd"), ReturnDate: Text(live.'Return Date', "yyyy-mm-dd"), MatchStatus: Text(live.'Match Status'), ErrorDetail: Coalesce(live.'Error Detail', "")}), After: JSON({FirstDay: Text(w.'First Day Absent', "yyyy-mm-dd"), LastDay: Text(w.'Last Day Absent', "yyyy-mm-dd"), ReturnDate: Text(w.'Return Date', "yyyy-mm-dd"), MatchStatus: Text(w.'Match Status'), ErrorDetail: Coalesce(w.'Error Detail', "")}), Reason: "Dates fixed in Absences, Mapping Errors"}), Blank())},
+                                                                        Set(
+                                                                            varAbsMeReceipt,
+                                                                            {
+                                                                                Kind: "Dates fixed",
+                                                                                Title: "Notice " & w.Reference & " dates saved · " & Text(w.'First Day Absent', "m/d/yyyy") & " to " & Text(w.'Last Day Absent', "m/d/yyyy") & " · the days will appear shortly",
+                                                                                Body: "Notice: " & w.Reference & " · was Could not process" & Char(10) &
+                                                                                    "First Day Absent: " & Text(w.'First Day Absent', "m/d/yyyy") & " (was " & If(IsBlank(live.'First Day Absent'), "blank", Text(live.'First Day Absent', "m/d/yyyy")) & ")" & Char(10) &
+                                                                                    "Last Day Absent: " & Text(w.'Last Day Absent', "m/d/yyyy") & " (was " & If(IsBlank(live.'Last Day Absent'), "blank", Text(live.'Last Day Absent', "m/d/yyyy")) & ")" & Char(10) &
+                                                                                    "Return Date: " & Text(w.'Return Date', "m/d/yyyy") & " (was " & If(IsBlank(live.'Return Date'), "blank", Text(live.'Return Date', "m/d/yyyy")) & ")" & Char(10) &
+                                                                                    "Error Detail: " & If(Coalesce(w.'Error Detail', "") = "", "cleared", w.'Error Detail') & " · Match Status: " & Text(w.'Match Status') & Char(10) &
+                                                                                    "Audit event: " & If(IsBlank(au), "NOT written", "Update written") & Char(10) &
+                                                                                    "Next: the processing flow creates the absences (0s) within about a minute. Reload Classify absences to see them."
+                                                                            }
+                                                                        );
+                                                                        RemoveIf(colAbsMe, NoticeId = it.NoticeId);
+                                                                        Set(varAbsNtSelId, Blank());
+                                                                        Set(varAbsMeMode, "");
+                                                                        Reset(txtAbsMeAbsDate);
+                                                                        Reset(txtAbsMeRetDate)
                                                                     )
                                                                 )
                                                             )
-                                                        );
-                                                        Set(varAbsMeSaving, false)
-                                                    )
+                                                        )
+                                                    );
+                                                    Set(varAbsMeSaving, false);
+                                                    If(varAbsMeReceipt.Kind = "Dates fixed", Select(btnAbsMeEngine))
                                                 )
                                             )
                                           Size: =14
@@ -1668,7 +1696,7 @@ Screens:
                                     RadiusBottomRight: =0
                                     RadiusTopLeft: =0
                                     RadiusTopRight: =0
-                                    Visible: =!IsBlank(varAbsMeSelId) && varAbsMeMode = "dismiss"
+                                    Visible: =!IsBlank(varAbsNtSelId) && varAbsMeMode = "dismiss"
                                   Children:
                                     - conAbsMeDismissField:
                                         Control: GroupContainer
@@ -1716,7 +1744,7 @@ Screens:
                                                 LayoutMinHeight: =0
                                                 LayoutMinWidth: =0
                                                 MaxLength: =1000
-                                                Placeholder: ="e.g. duplicate of report 699, or not an AACA student"
+                                                Placeholder: ="e.g. duplicate of ABS-2026-001002, or not an AACA student"
                                                 Type: =TextInputType.Multiline
                                     - btnAbsMeDismissSave:
                                         Control: ModernButton
@@ -1725,74 +1753,60 @@ Screens:
                                           AlignInContainer: =AlignInContainer.Start
                                           BasePaletteColor: =ColorUnexcused
                                           Color: =ColorWhite
-                                          DisplayMode: =If(CanClassify && !varAbsMeSaving && !IsBlank(LookUp(colAbsMe, ItemId = varAbsMeSelId)) && Trim(txtAbsMeDismissNote.Text) <> "", DisplayMode.Edit, DisplayMode.Disabled)
+                                          DisplayMode: =If(CanClassify && !varAbsMeSaving && !IsBlank(LookUp(colAbsMe, NoticeId = varAbsNtSelId)) && Trim(txtAbsMeDismissNote.Text) <> "", DisplayMode.Edit, DisplayMode.Disabled)
                                           Height: =44
                                           Layout: =ButtonLayout.TextOnly
                                           LayoutMinHeight: =0
                                           LayoutMinWidth: =0
                                           OnSelect: |-
                                             =With(
-                                                {it: LookUp(colAbsMe, ItemId = varAbsMeSelId), why: Left(Trim(txtAbsMeDismissNote.Text), 1000)},
-                                                With(
-                                                    {qid: it.ItemId},
-                                                    If(
-                                                        !CanClassify || varAbsMeSaving || IsBlank(it),
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · choose a report with Open first", Body: ""}),
-                                                        why = "",
-                                                        Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · type why the report is dismissed", Body: "Report #" & qid & " was not changed."}),
-                                                        Set(varAbsMeSaving, true);
-                                                        Set(varAbsMeErr, "");
-                                                        With(
-                                                            {prior: With({q: qid}, LookUp('Report Decisions', 'Report Item ID' = q))},
-                                                            If(
-                                                                it.Kind = "A" && !IsBlank(prior),
-                                                                Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · report #" & qid & " already has a decision", Body: "Nothing was written, and the report has been removed from this list."}); RemoveIf(colAbsMe, ItemId = qid); Set(varAbsMeSelId, Blank()); Set(varAbsMeMode, ""),
-                                                                it.Kind = "B" && IsBlank(prior),
-                                                                Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not dismissed · the Report Decisions row for report #" & qid & " was not found", Body: "Nothing was written. Use Reload."}),
-                                                                With(
-                                                                    {
-                                                                        dec: IfError(
-                                                                            If(
-                                                                                it.Kind = "A",
-                                                                                Patch('Report Decisions', Defaults('Report Decisions'), {Summary: Left("Dismissed parent report #" & qid & " (no Student ID) · " & it.FirstName & " " & it.LastName, 100), 'Report Item ID': qid, Decision: 'Decision (Report Decisions)'.Dismissed, 'Processing Status': 'Processing Status (Report Decisions)'.Processed, Note: why, Campus: With({qc: it.CampusId}, LookUp(Campuses, ThisRecord.Campus = qc))}),
-                                                                                it.Kind = "B",
-                                                                                Patch('Report Decisions', prior, {Decision: 'Decision (Report Decisions)'.Dismissed, 'Processing Status': 'Processing Status (Report Decisions)'.Processed, Note: why})
-                                                                            ),
-                                                                            Set(varAbsMeErr, FirstError.Message); Blank()
-                                                                        )
-                                                                    },
-                                                                    If(
-                                                                        IsBlank(dec),
-                                                                        Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not dismissed · the decision could not be saved for report #" & qid, Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was written. Press Confirm dismiss to retry."}),
-                                                                        With(
-                                                                            {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Parent report #" & qid & " dismissed in Mapping Errors", 100), Action: If(it.Kind = "A", 'Action (Audit Events)'.Create, 'Action (Audit Events)'.Update), Entity: "aaca_reportdecision", 'Entity ID': Text(dec.'Report Decision'), Before: JSON({ReportItemId: qid, List: If(it.Kind = "A", "No Student ID", "Could not process"), ErrorDetail: it.ErrorDetail}), After: JSON({Decision: Text(dec.Decision), ProcessingStatus: Text(dec.'Processing Status'), Note: dec.Note}), Reason: Left(why, 500)}), Blank())},
-                                                                            Set(
-                                                                                varAbsMeReceipt,
-                                                                                {
-                                                                                    Kind: "Dismissed",
-                                                                                    Title: "Dismissed · report #" & dec.'Report Item ID',
-                                                                                    Body: "Report: #" & dec.'Report Item ID' & " · was " & If(it.Kind = "A", "No Student ID", "Could not process") & Char(10) &
-                                                                                        "Typed by parent: " & it.FirstName & " " & it.LastName & " · " & it.SchoolSite & Char(10) &
-                                                                                        "Decision: " & Text(dec.Decision) & Char(10) &
-                                                                                        "Processing Status: " & Text(dec.'Processing Status') & Char(10) &
-                                                                                        "Note: " & dec.Note & Char(10) &
-                                                                                        "Report Decisions row: " & If(it.Kind = "A", "created", "updated") & Char(10) &
-                                                                                        "Attendance and SharePoint: not changed" & Char(10) &
-                                                                                        "Audit event: " & If(IsBlank(au), "NOT written", "written") & Char(10) &
-                                                                                        "The intake flow will not process this report."
-                                                                                }
-                                                                            );
-                                                                            RemoveIf(colAbsMe, ItemId = qid);
-                                                                            Set(varAbsMeSelId, Blank());
-                                                                            Set(varAbsMeMode, "");
-                                                                            Reset(txtAbsMeDismissNote)
-                                                                        )
+                                                {it: LookUp(colAbsMe, NoticeId = varAbsNtSelId), why: Left(Trim(txtAbsMeDismissNote.Text), 1000)},
+                                                If(
+                                                    !CanClassify || varAbsMeSaving || IsBlank(it),
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · choose a notice with Open first", Body: ""}),
+                                                    why = "",
+                                                    Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · type why the notice is dismissed", Body: "Notice " & it.Ref & " was not changed."}),
+                                                    Set(varAbsMeSaving, true);
+                                                    Set(varAbsMeErr, "");
+                                                    With(
+                                                        {live: With({q: it.NoticeId}, LookUp('Absence Notices', ThisRecord.'Absence Notice' = q))},
+                                                        If(
+                                                            IsBlank(live),
+                                                            Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not dismissed · notice " & it.Ref & " could not be read", Body: "Nothing was changed. Use Reload."}),
+                                                            live.'Status (aaca_status)' <> 'Status (Absence Notices)'.New,
+                                                            Set(varAbsMeReceipt, {Kind: "Blocked", Title: "Not dismissed · notice " & it.Ref & " is already " & Text(live.'Status (aaca_status)'), Body: "Nothing was written, and it has been removed from this list."}); RemoveIf(colAbsMe, NoticeId = it.NoticeId); Set(varAbsNtSelId, Blank()); Set(varAbsMeMode, ""),
+                                                            With(
+                                                                {w: IfError(Patch('Absence Notices', live, {'Status (aaca_status)': 'Status (Absence Notices)'.Dismissed, Note: why, 'Processed On': Now(), 'Processed By': CurrentUserRow}), Set(varAbsMeErr, FirstError.Message); Blank())},
+                                                                If(
+                                                                    IsBlank(w),
+                                                                    Set(varAbsMeReceipt, {Kind: "Failed", Title: "Not dismissed · notice " & it.Ref & " could not be updated", Body: "Error: " & Coalesce(varAbsMeErr, "unknown error") & Char(10) & "Nothing was written. Press Confirm dismiss to retry."}),
+                                                                    With(
+                                                                        {au: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Absence notice " & w.Reference & " dismissed in Mapping Errors", 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_absencenotice", 'Entity ID': Text(w.'Absence Notice'), Before: JSON({Status: Text(live.'Status (aaca_status)'), Note: Coalesce(live.Note, ""), List: If(it.Kind = "A", "Could not match", "Could not process")}), After: JSON({Status: Text(w.'Status (aaca_status)'), Note: Coalesce(w.Note, ""), ProcessedOn: Text(w.'Processed On', "yyyy-mm-dd hh:mm"), ProcessedBy: Coalesce(w.'Processed By'.'Full Name', "")}), Reason: Left(why, 500)}), Blank())},
+                                                                        Set(
+                                                                            varAbsMeReceipt,
+                                                                            {
+                                                                                Kind: "Dismissed",
+                                                                                Title: "Dismissed · notice " & w.Reference,
+                                                                                Body: "Notice: " & w.Reference & " · was " & If(it.Kind = "A", "Could not match", "Could not process") & Char(10) &
+                                                                                    "Typed by parent: " & it.FirstName & " " & it.LastName & " · " & it.TypedCampus & Char(10) &
+                                                                                    "Status: " & Text(w.'Status (aaca_status)') & Char(10) &
+                                                                                    "Note: " & Coalesce(w.Note, "") & Char(10) &
+                                                                                    "Processed: " & Text(w.'Processed On', "mm/dd/yyyy h:mm AM/PM") & " by " & Coalesce(w.'Processed By'.'Full Name', "") & Char(10) &
+                                                                                    "Attendance: not changed" & Char(10) &
+                                                                                    "Audit event: " & If(IsBlank(au), "NOT written", "Update written") & Char(10) &
+                                                                                    "The processing flow will not process this notice."
+                                                                            }
+                                                                        );
+                                                                        RemoveIf(colAbsMe, NoticeId = it.NoticeId);
+                                                                        Set(varAbsNtSelId, Blank());
+                                                                        Set(varAbsMeMode, "");
+                                                                        Reset(txtAbsMeDismissNote)
                                                                     )
                                                                 )
                                                             )
-                                                        );
-                                                        Set(varAbsMeSaving, false)
-                                                    )
+                                                        )
+                                                    );
+                                                    Set(varAbsMeSaving, false)
                                                 )
                                             )
                                           Size: =14
@@ -1855,7 +1869,8 @@ Screens:
                                                     n
                                                 )
                                             ),
-                                            NoticeOn: r.'Notice Received On'
+                                            NoticeOn: r.'Notice Received On', NtRef: Coalesce(r.'Absence Notice'.Reference, ""), NtParent: Coalesce(r.'Absence Notice'.'Parent Name', ""), NtRel: Coalesce(r.'Absence Notice'.Relationship, ""), NtReason: Coalesce(r.'Absence Notice'.'Reason Text', ""), NtAt: r.'Absence Notice'.'Notice At',
+                                            NtId: If(IsBlank(r.'Absence Notice'), ZeroGuid, r.'Absence Notice'.'Absence Notice'), NtFirst: r.'Absence Notice'.'First Day Absent', NtReturn: r.'Absence Notice'.'Return Date'
                                         }
                                     )
                                 );
@@ -1869,8 +1884,8 @@ Screens:
                                             AbsDate: r.Date,
                                             TeacherName: Coalesce(r.Teacher.Name, "No teacher"),
                                             ReportId: Coalesce(r.'Source Report ID', 0),
-                                            NoticeOn: r.'Notice Received On',
-                                            Locked: !IsBlank(LookUp(colAbsLocks, CampusId = r.Campus.Campus && MonthStart = Date(Year(r.Date), Month(r.Date), 1)))
+                                            NoticeOn: r.'Notice Received On', NtRef: Coalesce(r.'Absence Notice'.Reference, ""), NtParent: Coalesce(r.'Absence Notice'.'Parent Name', ""), NtRel: Coalesce(r.'Absence Notice'.Relationship, ""), NtReason: Coalesce(r.'Absence Notice'.'Reason Text', ""), NtAt: r.'Absence Notice'.'Notice At',
+                                            Locked:!IsBlank(LookUp(colAbsLocks, CampusId = r.Campus.Campus && MonthStart = Date(Year(r.Date), Month(r.Date), 1)))
                                         }
                                     )
                                 )
@@ -1881,6 +1896,19 @@ Screens:
                             ClearCollect(colAbsCfRpt, ForAll(Distinct(Filter(colAbsCf, ReportId > 0), ReportId) As k, With({q: k.Value}, {ReportId: q, Reason: Coalesce(LookUp('Student Absence Log', ID = q).Reason, "")}))); true,
                             Set(varAbsLoadError, "Parent reasons could not be read from SharePoint (" & FirstError.Message & ")")
                         )
+                    );
+                    IfError(
+                        ClearCollect(
+                            colAbsNtDays,
+                            ForAll(
+                                Distinct(Filter(colAbsList, NtId <> ZeroGuid), NtId) As g,
+                                With(
+                                    {days: Sort(Filter(Attendance, 'Absence Notice'.'Absence Notice' = g.Value && 'Is Deleted' = false && Present = false), Date, SortOrder.Ascending)},
+                                    {NtId: g.Value, N: CountRows(days), Dates: Concat(days, Text(Date, "mmm d"), ", ")}
+                                )
+                            )
+                        ); true,
+                        Set(varAbsLoadError, "Report day counts could not be loaded (" & FirstError.Message & ")")
                     );
                     Set(varAbsLoading, false)
                   Text: ="load"
@@ -2004,77 +2032,75 @@ Screens:
                   OnSelect: |-
                     =Set(varAbsMeLoading, true);
                     Set(varAbsMeLoadError, "");
-                    Set(varAbsMeSelId, Blank());
+                    Set(varAbsNtSelId, Blank());
                     Set(varAbsMeMode, "");
+                    Set(varAbsNtAllStu, false);
                     Reset(cboAbsMeStudent);
+                    Reset(chkAbsNtAllStu);
                     Reset(txtAbsMeAbsDate);
                     Reset(txtAbsMeRetDate);
                     Reset(txtAbsMeDismissNote);
                     If(
                         !CanClassify,
                         Clear(colAbsMe),
-                        IfError(
-                            With(
-                                {cut: ParentReportCutover},
+                        With(
+                            {sc: If(StudentCampusLock <> ZeroGuid, StudentCampusLock, varAbsMeCampusId)},
+                            IfError(
                                 Concurrent(
-                                    ClearCollect(colAbsMeSrc, ForAll(Filter('Student Absence Log', Match_Status.Value = "Needs Review") As r, {ItemId: r.ID, Created: r.Created, StudentKey: Trim(Coalesce(r.Student_ID, "")), FirstName: Coalesce(r.'Student First Name', ""), LastName: Coalesce(r.'Student Last Name', ""), SchoolSite: Trim(Coalesce(r.'School Site', "")), AbsText: Coalesce(r.'Absence Date', ""), RetText: Coalesce(r.'Return Date', ""), Reason: Coalesce(r.Reason, ""), SubmittedBy: Coalesce(r.'Submitted By', ""), Notified: Coalesce(r.'Date Notified', "")})),
-                                    ClearCollect(colAbsMeErrDec, ForAll(Filter('Report Decisions', 'Processing Status' = 'Processing Status (Report Decisions)'.Error) As d, {ItemId: d.'Report Item ID', DecId: d.'Report Decision', ErrorDetail: Coalesce(d.'Error Detail', ""), StudentKey: Trim(Coalesce(d.'Student Key', "")), CampusId: Coalesce(d.Campus.Campus, ZeroGuid), DecCreated: d.'Created On'})),
                                     ClearCollect(colAbsMeStuRaw, ForAll(Students As s, {StudentId: s.Student, DisplayName: Coalesce(s.'Display Name', "Unnamed student"), StudentKey: Trim(Coalesce(s.'External Client ID', "")), StatusText: Text(s.'Status (aaca_status)')})),
-                                    ClearCollect(colAbsMeEnr, ForAll(Enrollments As e, {StudentId: e.Student.Student, CampusId: e.Campus.Campus, CampusName: Coalesce(e.Campus.Name, ""), StartDate: e.'Start Date', EndDate: e.'End Date'}))
-                                )
-                            ); true,
-                            Set(varAbsMeLoadError, FirstError.Message)
+                                    ClearCollect(colAbsMeEnr, ForAll(Enrollments As e, {StudentId: e.Student.Student, CampusId: e.Campus.Campus, CampusName: Coalesce(e.Campus.Name, ""), StartDate: e.'Start Date', EndDate: e.'End Date'})),
+                                    ClearCollect(
+                                        colAbsMe,
+                                        Filter(
+                                            ForAll(
+                                                If(
+                                                    sc = ZeroGuid,
+                                                    Filter('Absence Notices', 'Status (aaca_status)' = 'Status (Absence Notices)'.New),
+                                                    Filter('Absence Notices', 'Status (aaca_status)' = 'Status (Absence Notices)'.New && Campus.Campus = sc)
+                                                ) As n,
+                                                {
+                                                    Kind: If(
+                                                        Trim(Coalesce(n.'Error Detail', "")) <> "", "B",
+                                                        n.'Match Status' = 'Match Status (Absence Notices)'.Unmatched || n.'Match Status' = 'Match Status (Absence Notices)'.Ambiguous, "A",
+                                                        ""
+                                                    ),
+                                                    NoticeId: n.'Absence Notice',
+                                                    Ref: Coalesce(n.Reference, "(no reference)"),
+                                                    FirstName: Coalesce(n.'Typed First Name', ""),
+                                                    LastName: Coalesce(n.'Typed Last Name', ""),
+                                                    TypedCampus: Coalesce(n.'Typed Campus', ""),
+                                                    CampusId: Coalesce(n.Campus.Campus, ZeroGuid),
+                                                    CampusName: Coalesce(n.Campus.Name, ""),
+                                                    StudentId: Coalesce(n.Student.Student, ZeroGuid),
+                                                    StudentName: Coalesce(n.Student.'Display Name', ""),
+                                                    FirstDay: n.'First Day Absent',
+                                                    ReturnDate: n.'Return Date',
+                                                    ReasonText: Coalesce(n.'Reason Text', ""),
+                                                    ParentName: Coalesce(n.'Parent Name', ""),
+                                                    Relationship: Coalesce(n.Relationship, ""),
+                                                    NoticeAt: n.'Notice At',
+                                                    MatchText: Coalesce(Text(n.'Match Status'), ""),
+                                                    MatchDetail: Coalesce(n.'Match Detail', ""),
+                                                    ErrorDetail: Coalesce(n.'Error Detail', ""),
+                                                    Created: n.'Created On',
+                                                    Status: ""
+                                                }
+                                            ),
+                                            Kind <> ""
+                                        )
+                                    )
+                                ); true,
+                                Set(varAbsMeLoadError, FirstError.Message)
+                            )
                         );
-                        IfError(
-                            With({minId: Coalesce(Min(colAbsMeSrc, ItemId), 0)}, ClearCollect(colAbsMeDecIds, ForAll(Filter('Report Decisions', 'Report Item ID' >= minId) As d, {ItemId: d.'Report Item ID'}))); true,
-                            Set(varAbsMeLoadError, "Report Decisions could not be read (" & FirstError.Message & ")")
-                        );
+                        If(varAbsMeLoadError <> "", Clear(colAbsMe));
                         ClearCollect(
                             colAbsMeStudents,
                             ForAll(
-                                colAbsMeStuRaw As s,
+                                colAbsMeEnr As e,
                                 With(
-                                    {
-                                        cur: First(Sort(Filter(colAbsMeEnr, StudentId = s.StudentId && StartDate <= Today() && (IsBlank(EndDate) || EndDate >= Today())), StartDate, SortOrder.Descending)),
-                                        lst: First(Sort(Filter(colAbsMeEnr, StudentId = s.StudentId), StartDate, SortOrder.Descending))
-                                    },
-                                    With(
-                                        {cid: If(IsBlank(cur), lst.CampusId, cur.CampusId), cn: If(IsBlank(cur), lst.CampusName, cur.CampusName)},
-                                        {StudentId: s.StudentId, DisplayName: s.DisplayName, StudentKey: s.StudentKey, StatusText: s.StatusText, CampusId: Coalesce(cid, ZeroGuid), Label: s.DisplayName & " · " & Coalesce(cn, "no campus") & " · " & If(s.StudentKey = "", "no Student Key", s.StudentKey) & " · " & s.StatusText}
-                                    )
-                                )
-                            )
-                        );
-                        If(
-                            varAbsMeLoadError <> "",
-                            Clear(colAbsMe),
-                            With(
-                                {sc: If(StudentCampusLock <> ZeroGuid, StudentCampusLock, varAbsMeCampusId)},
-                                ClearCollect(
-                                    colAbsMe,
-                                    Filter(
-                                        ForAll(
-                                            Filter(colAbsMeSrc, StudentKey = "" && Created >= ParentReportCutover && !(ItemId in colAbsMeDecIds.ItemId)) As s,
-                                            With(
-                                                {site: LookUp(colAbsCampusOpts, CampusName = s.SchoolSite)},
-                                                {Kind: "A", ItemId: s.ItemId, DecId: ZeroGuid, Created: s.Created, StudentKey: "", FirstName: s.FirstName, LastName: s.LastName, SchoolSite: s.SchoolSite, CampusId: Coalesce(site.CampusId, ZeroGuid), AbsText: s.AbsText, RetText: s.RetText, Reason: s.Reason, SubmittedBy: s.SubmittedBy, Notified: s.Notified, ErrorDetail: "", DecCreated: s.Created, Status: "", SpFound: true}
-                                            )
-                                        ),
-                                        sc = ZeroGuid || CampusId = sc
-                                    ),
-                                    Filter(
-                                        ForAll(
-                                            colAbsMeErrDec As d,
-                                            With(
-                                                {sp: With({q: d.ItemId}, LookUp('Student Absence Log', ID = q))},
-                                                With(
-                                                    {site: LookUp(colAbsCampusOpts, CampusName = Trim(Coalesce(sp.'School Site', "")))},
-                                                    {Kind: "B", ItemId: d.ItemId, DecId: d.DecId, Created: Coalesce(sp.Created, d.DecCreated), StudentKey: Coalesce(Trim(sp.Student_ID), d.StudentKey, ""), FirstName: Coalesce(sp.'Student First Name', ""), LastName: Coalesce(sp.'Student Last Name', ""), SchoolSite: Trim(Coalesce(sp.'School Site', "")), CampusId: If(d.CampusId <> ZeroGuid, d.CampusId, Coalesce(site.CampusId, ZeroGuid)), AbsText: Coalesce(sp.'Absence Date', ""), RetText: Coalesce(sp.'Return Date', ""), Reason: Coalesce(sp.Reason, ""), SubmittedBy: Coalesce(sp.'Submitted By', ""), Notified: Coalesce(sp.'Date Notified', ""), ErrorDetail: d.ErrorDetail, DecCreated: d.DecCreated, Status: "", SpFound: !IsBlank(sp)}
-                                                )
-                                            )
-                                        ),
-                                        StudentCampusLock <> ZeroGuid || sc = ZeroGuid || CampusId = sc
-                                    )
+                                    {s: LookUp(colAbsMeStuRaw, StudentId = e.StudentId)},
+                                    {StudentId: e.StudentId, DisplayName: Coalesce(s.DisplayName, "Unnamed student"), StudentKey: Coalesce(s.StudentKey, ""), StatusText: Coalesce(s.StatusText, ""), CampusId: e.CampusId, StartDate: e.StartDate, EndDate: e.EndDate, Label: Coalesce(s.DisplayName, "Unnamed student") & " · " & If(Coalesce(s.StudentKey, "") = "", "no Student Key", s.StudentKey) & " · " & e.CampusName & " · " & Coalesce(s.StatusText, "")}
                                 )
                             )
                         )
@@ -2448,7 +2474,11 @@ Screens:
                                           PaddingTop: =0
                                           Size: =12
                                           Text: |-
-                                            =Text(ThisItem.AbsDate, "ddd mmm d, yyyy") & " · Teacher " & ThisItem.TeacherName & " · " & If(ThisItem.ReportId > 0, "Parent report #" & ThisItem.ReportId, "Parent report") & If(IsBlank(ThisItem.NoticeOn), "", " · Reported " & Text(ThisItem.NoticeOn, "mmm d, yyyy h:mm AM/PM") & " (Pacific)") & With({rs: Coalesce(LookUp(colAbsCfRpt, ReportId = ThisItem.ReportId).Reason, "")}, If(rs = "", "", " · Reason: " & If(Len(rs) > 100, Left(rs, 100) & "…", rs))) & If(ThisItem.Locked, " · Month locked", "")
+                                            =Text(ThisItem.AbsDate, "ddd mmm d, yyyy") & " · Teacher " & ThisItem.TeacherName & " · " & If(
+                                                ThisItem.NtRef <> "",
+                                                "Notice " & ThisItem.NtRef & If(ThisItem.NtParent = "", "", " · " & ThisItem.NtParent & If(ThisItem.NtRel = "", "", " (" & ThisItem.NtRel & ")")) & If(ThisItem.NtReason = "", "", " · " & If(Len(ThisItem.NtReason) > 80, Left(ThisItem.NtReason, 80) & "...", ThisItem.NtReason)) & If(IsBlank(ThisItem.NtAt), " · no notice", " · notified " & Text(ThisItem.NtAt, "mm/dd/yyyy h:mm AM/PM")),
+                                                If(ThisItem.ReportId > 0, "Parent report #" & ThisItem.ReportId, "Parent report") & If(IsBlank(ThisItem.NoticeOn), "", " · Reported " & Text(ThisItem.NoticeOn, "mmm d, yyyy h:mm AM/PM") & " (Pacific)") & With({rs: Coalesce(LookUp(colAbsCfRpt, ReportId = ThisItem.ReportId).Reason, "")}, If(rs = "", "", " · Reason: " & If(Len(rs) > 100, Left(rs, 100) & "…", rs)))
+                                            ) & If(ThisItem.Locked, " · Month locked", "")
                                           VerticalAlign: =VerticalAlign.Top
                                     - conAbsCfRowActions:
                                         Control: GroupContainer
@@ -3164,7 +3194,7 @@ Screens:
                                     Selectable: =false
                                     TabIndex: =0
                                     TemplatePadding: =0
-                                    TemplateSize: =If(conAbsRoot.Width < 640, 268, 170)
+                                    TemplateSize: =If(conAbsRoot.Width < 640, 376, 220)
                                     Visible: =CountRows(Filter(colAbsList, (varAbsTeacherId = ZeroGuid || TeacherId = varAbsTeacherId) && (varAbsStatus = "All" || ClassText = varAbsStatus))) > 0
                                   Children:
                                     - conAbsRowShellV:
@@ -3281,9 +3311,90 @@ Screens:
                                                 PaddingTop: =0
                                                 Size: =12
                                                 Text: |-
-                                                  =ThisItem.SrcText & If(IsBlank(ThisItem.NoticeOn), "", If(ThisItem.SrcText = "", "", " · ") & "Reported " & Text(ThisItem.NoticeOn, "mmm d, yyyy h:mm AM/PM") & " (Pacific)") & If(ThisItem.ParentReason = "", "", " · Reason: " & If(Len(ThisItem.ParentReason) > 100, Left(ThisItem.ParentReason, 100) & "…", ThisItem.ParentReason))
+                                                  =If(
+                                                      ThisItem.NtRef <> "",
+                                                      ThisItem.SrcText & If(ThisItem.SrcText = "", "", " · ") & "Notice " & ThisItem.NtRef & If(ThisItem.NtParent = "", "", " · " & ThisItem.NtParent & If(ThisItem.NtRel = "", "", " (" & ThisItem.NtRel & ")")) & If(IsBlank(ThisItem.NtAt), " · no notice", " · notified " & Text(ThisItem.NtAt, "mm/dd/yyyy h:mm AM/PM")),
+                                                      ThisItem.SrcText & If(IsBlank(ThisItem.NoticeOn), "", If(ThisItem.SrcText = "", "", " · ") & "Reported " & Text(ThisItem.NoticeOn, "mmm d, yyyy h:mm AM/PM") & " (Pacific)") & If(ThisItem.ParentReason = "", "", " · Reason: " & If(Len(ThisItem.ParentReason) > 100, Left(ThisItem.ParentReason, 100) & "…", ThisItem.ParentReason))
+                                                  )
                                                 VerticalAlign: =VerticalAlign.Top
-                                                Visible: =ThisItem.SrcText <> "" || !IsBlank(ThisItem.NoticeOn) || ThisItem.ParentReason <> ""
+                                                Visible: =ThisItem.SrcText <> "" || !IsBlank(ThisItem.NoticeOn) || ThisItem.ParentReason <> "" || ThisItem.NtRef <> ""
+                                          - lblAbsNtReasonV:
+                                              Control: ModernText
+                                              Properties:
+                                                AccessibleLabel: =Self.Text
+                                                AlignInContainer: =AlignInContainer.Stretch
+                                                Color: =ColorInk
+                                                FontWeight: =FontWeight.Semibold
+                                                Height: =If(conAbsRoot.Width < 640, 36, 18)
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Size: =12
+                                                Text: |-
+                                                  =With({r: Coalesce(ThisItem.NtReason, ThisItem.ParentReason, "")}, If(r = "", "Reason: none given", "Reason: " & If(Len(r) > 160, Left(r, 160) & "...", r)))
+                                                VerticalAlign: =VerticalAlign.Top
+                                                Wrap: =conAbsRoot.Width < 640
+                                          - conAbsNtSpanRowV:
+                                              Control: GroupContainer
+                                              Variant: AutoLayout
+                                              Properties:
+                                                DropShadow: =DropShadow.None
+                                                FillPortions: =0
+                                                Height: =If(conAbsRoot.Width < 640, 64, 24)
+                                                LayoutAlignItems: =LayoutAlignItems.Center
+                                                LayoutDirection: =If(conAbsRoot.Width < 640, LayoutDirection.Vertical, LayoutDirection.Horizontal)
+                                                LayoutGap: =4
+                                                LayoutMinHeight: =0
+                                                LayoutMinWidth: =0
+                                                Visible: =ThisItem.NtId <> ZeroGuid
+                                              Children:
+                                                - lblAbsNtSpanV:
+                                                    Control: ModernText
+                                                    Properties:
+                                                      AccessibleLabel: =Self.Text
+                                                      AlignInContainer: =AlignInContainer.Stretch
+                                                      Color: =ColorMuted
+                                                      FillPortions: =1
+                                                      Height: =If(conAbsRoot.Width < 640, 36, 20)
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      PaddingBottom: =0
+                                                      PaddingLeft: =0
+                                                      PaddingRight: =0
+                                                      PaddingTop: =0
+                                                      Size: =12
+                                                      Text: |-
+                                                        =With(
+                                                            {d: LookUp(colAbsNtDays, NtId = ThisItem.NtId)},
+                                                            "Report: absent " & Text(ThisItem.NtFirst, "ddd mmm d") &
+                                                            If(IsBlank(ThisItem.NtReturn), "", " - back " & Text(ThisItem.NtReturn, "ddd mmm d")) &
+                                                            If(IsBlank(d), "", " · " & d.N & If(d.N = 1, " school day", " school days") & " missed (" & d.Dates & ")")
+                                                        )
+                                                      VerticalAlign: =VerticalAlign.Top
+                                                      Wrap: =conAbsRoot.Width < 640
+                                                - btnAbsNtSelAllV:
+                                                    Control: ModernButton
+                                                    Properties:
+                                                      AccessibleLabel: ="Tick every day of this report"
+                                                      AlignInContainer: =AlignInContainer.Center
+                                                      Appearance: =ButtonAppearance.Subtle
+                                                      Color: =ColorTeal
+                                                      DisplayMode: =If(varAbsSaving || ThisItem.Locked, DisplayMode.Disabled, DisplayMode.Edit)
+                                                      Height: =24
+                                                      Layout: =ButtonLayout.TextOnly
+                                                      LayoutMinHeight: =0
+                                                      LayoutMinWidth: =0
+                                                      OnSelect: |-
+                                                        =ForAll(
+                                                            Filter(colAbsList, NtId = ThisItem.NtId && !Locked) As d,
+                                                            If(IsBlank(LookUp(colAbsTicked, AttId = d.AttId)), Collect(colAbsTicked, {AttId: d.AttId}))
+                                                        )
+                                                      Size: =12
+                                                      Text: ="Select all days in this report"
+                                                      Width: =210
                                           - conAbsRowBottomV:
                                               Control: GroupContainer
                                               Variant: AutoLayout
@@ -3516,7 +3627,7 @@ Screens:
                               DropShadow: =DropShadow.None
                               Fill: =ColorWhite
                               FillPortions: =If(conAbsRoot.Width >= 1024, 1, 0)
-                              Height: =16 + If(!IsBlank(varAbsSelId), 28 + 8 + 72 + 8 + 22 + Max(36, CountRows(colAbsReasons) * 32) + 8 + 36 + 8 + 44, 28 + If(varAbsAddMode = "", 8 + 60, 0) + 8 + 44 + If(varAbsAddMode = "leftearly", 8 + 368, varAbsAddMode = "absence", 8 + If(varAbsAddClass = "Excused", 492, 430), 0)) + 16
+                              Height: =16 + If(!IsBlank(varAbsSelId), 28 + 8 + 72 + 8 + 22 + Max(36, CountRows(colAbsReasons) * 32) + 8 + 36 + 8 + 44, 28 + If(varAbsAddMode = "", 8 + 60, 0) + 8 + 44 + If(varAbsAddMode = "leftearly", 8 + 368, varAbsAddMode = "absence", 8 + 520 + If(varAbsAddClass = "Excused", 62, 0) + If(varAbsNtHow = "Parent notified us", 124, 0), 0)) + 16
                               LayoutAlignItems: =LayoutAlignItems.Stretch
                               LayoutDirection: =LayoutDirection.Vertical
                               LayoutGap: =8
@@ -3733,7 +3844,10 @@ Screens:
                                             Set(varAbsAddMode, "absence");
                                             Set(varAbsAddClass, "");
                                             Set(varAbsAddReasonId, Blank());
+                                            Set(varAbsNtHow, "");
+                                            Set(varAbsNtOpenAt, Now());
                                             Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV);
+                                            Reset(rdoAbsNtHowV); Reset(dpAbsNtDateV); Reset(txtAbsNtTimeV);
                                             Select(btnAbsAddLoadEngine)
                                           Size: =14
                                           Text: ="Add absence"
@@ -3758,7 +3872,10 @@ Screens:
                                             Set(varAbsAddMode, "leftearly");
                                             Set(varAbsAddClass, "");
                                             Set(varAbsAddReasonId, Blank());
+                                            Set(varAbsNtHow, "");
+                                            Set(varAbsNtOpenAt, Now());
                                             Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV);
+                                            Reset(rdoAbsNtHowV); Reset(dpAbsNtDateV); Reset(txtAbsNtTimeV);
                                             Select(btnAbsAddLoadEngine)
                                           Size: =14
                                           Text: ="Left early"
@@ -3769,7 +3886,7 @@ Screens:
                                   Properties:
                                     DropShadow: =DropShadow.None
                                     FillPortions: =0
-                                    Height: =If(varAbsAddMode = "leftearly", 368, varAbsAddClass = "Excused", 492, 430)
+                                    Height: =If(varAbsAddMode = "leftearly", 368, 520 + If(varAbsAddClass = "Excused", 62, 0) + If(varAbsNtHow = "Parent notified us", 124, 0))
                                     LayoutAlignItems: =LayoutAlignItems.Stretch
                                     LayoutDirection: =LayoutDirection.Vertical
                                     LayoutGap: =4
@@ -3948,24 +4065,6 @@ Screens:
                                           LayoutMinWidth: =0
                                           OnChange: =Set(varAbsAddReasonId, Self.Selected.ReasonId)
                                           Visible: =varAbsAddMode = "absence" && varAbsAddClass = "Excused"
-                                    - lblAbsLeTimeV:
-                                        Control: ModernText
-                                        Properties:
-                                          AccessibleLabel: =Self.Text
-                                          AlignInContainer: =AlignInContainer.Stretch
-                                          Color: =ColorMuted
-                                          FontWeight: =FontWeight.Semibold
-                                          Height: =18
-                                          LayoutMinHeight: =0
-                                          LayoutMinWidth: =0
-                                          PaddingBottom: =0
-                                          PaddingLeft: =0
-                                          PaddingRight: =0
-                                          PaddingTop: =0
-                                          Size: =12
-                                          Text: ="Time left * (h:mm AM/PM)"
-                                          Visible: =varAbsAddMode = "leftearly"
-                                          Wrap: =false
                                     - txtAbsLeTimeV:
                                         Control: ModernTextInput
                                         Properties:
@@ -4044,17 +4143,24 @@ Screens:
                                                     )
                                                 ),
                                                 With(
-                                                    {n: CountRows(cboAbsAddStuV.SelectedItems), d0: dpAbsAddFromV.SelectedDate, d1: Coalesce(dpAbsAddToV.SelectedDate, dpAbsAddFromV.SelectedDate)},
-                                                    If(
-                                                        varAbsAddErr <> "", "Could not load students: " & varAbsAddErr,
-                                                        n <> 1, "Pick the student.",
-                                                        IsBlank(d0), "Choose the From date.",
-                                                        d1 < d0, "The To date must be on or after the From date.",
-                                                        d1 > DateAdd(Today(), 90, TimeUnit.Days), "The To date can be at most 90 days ahead.",
-                                                        DateDiff(d0, d1, TimeUnit.Days) > 60, "Choose at most 61 days at a time.",
-                                                        !(varAbsAddClass in ["Excused", "Unexcused"]), "Choose Excused or Unexcused.",
-                                                        varAbsAddClass = "Excused" && IsBlank(LookUp(colAbsReasons, ReasonId = varAbsAddReasonId)), "Excused needs an absence reason.",
-                                                        "Ready: Save absence adds a 0 (" & varAbsAddClass & ") for each school day from " & Text(d0, "mmm d") & " to " & Text(d1, "mmm d") & ". Days already marked are skipped and listed."
+                                                    {n: CountRows(cboAbsAddStuV.SelectedItems), d0: dpAbsAddFromV.SelectedDate, d1: Coalesce(dpAbsAddToV.SelectedDate, dpAbsAddFromV.SelectedDate), nd: dpAbsNtDateV.SelectedDate, ntt: Trim(txtAbsNtTimeV.Text)},
+                                                    With(
+                                                        {ntm: If(EndsWith(Upper(ntt), "AM") || EndsWith(Upper(ntt), "PM"), IfError(TimeValue(ntt, "en-US"), Blank()), Blank())},
+                                                        If(
+                                                            varAbsAddErr <> "", "Could not load students: " & varAbsAddErr,
+                                                            n <> 1, "Pick the student.",
+                                                            IsBlank(d0), "Choose the From date.",
+                                                            d1 < d0, "The To date must be on or after the From date.",
+                                                            d1 > DateAdd(Today(), 90, TimeUnit.Days), "The To date can be at most 90 days ahead.",
+                                                            DateDiff(d0, d1, TimeUnit.Days) > 60, "Choose at most 61 days at a time.",
+                                                            !(varAbsAddClass in ["Excused", "Unexcused"]), "Choose Excused or Unexcused.",
+                                                            varAbsAddClass = "Excused" && IsBlank(LookUp(colAbsReasons, ReasonId = varAbsAddReasonId)), "Excused needs an absence reason.",
+                                                            !(varAbsNtHow in ["Parent notified us", "No notice"]), "Choose how we heard about it.",
+                                                            varAbsNtHow = "Parent notified us" && IsBlank(nd), "Choose the date the parent told us.",
+                                                            varAbsNtHow = "Parent notified us" && IsBlank(ntm), "Type the time the parent told us as h:mm AM/PM, for example 8:15 AM.",
+                                                            varAbsNtHow = "Parent notified us" && DateTime(Year(nd), Month(nd), Day(nd), Hour(ntm), Minute(ntm), 0) > Now(), "The time the parent told us cannot be in the future.",
+                                                            "Ready: Save absence records the notice (" & If(varAbsNtHow = "No notice", "no notice", "told " & Text(nd, "m/d") & " " & Text(ntm, "h:mm AM/PM")) & ") and a 0 (" & varAbsAddClass & ") for each school day from " & Text(d0, "mmm d") & " to " & Text(d1, "mmm d") & ". Days already marked are skipped."
+                                                        )
                                                     )
                                                 )
                                             )
@@ -4097,15 +4203,23 @@ Screens:
                                                           cls: varAbsAddClass,
                                                           rsn: With({qr: varAbsAddReasonId}, LookUp('Absence Reasons', ThisRecord.'Absence Reason' = qr && Active = true)),
                                                           note: Left(Trim(txtAbsAddNoteV.Text), 2000),
-                                                          c0: varAbsCampusId
+                                                          c0: varAbsCampusId,
+                                                          how: varAbsNtHow,
+                                                          nd: dpAbsNtDateV.SelectedDate,
+                                                          ntt: Trim(txtAbsNtTimeV.Text)
                                                       },
+                                                      With(
+                                                      {ntm: If(EndsWith(Upper(ntt), "AM") || EndsWith(Upper(ntt), "PM"), IfError(TimeValue(ntt, "en-US"), Blank()), Blank())},
+                                                      With(
+                                                      {nat: If(how = "Parent notified us" && !IsBlank(nd) && !IsBlank(ntm), DateTime(Year(nd), Month(nd), Day(nd), Hour(ntm), Minute(ntm), 0), Blank())},
                                                       If(
                                                           !CanClassify || varAbsSaving || varAbsLoading || varAbsAddMode <> "absence",
                                                           Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. Only the Attendance Office and System Admin can add absences, and not while saving or loading."}); Clear(colAbsReceiptLines),
-                                                          CountRows(cboAbsAddStuV.SelectedItems) <> 1 || IsBlank(d0) || d1 < d0 || d1 > DateAdd(Today(), 90, TimeUnit.Days) || DateDiff(d0, d1, TimeUnit.Days) > 60 || !(cls in ["Excused", "Unexcused"]) || (cls = "Excused" && IsBlank(rsn)),
+                                                          CountRows(cboAbsAddStuV.SelectedItems) <> 1 || IsBlank(d0) || d1 < d0 || d1 > DateAdd(Today(), 90, TimeUnit.Days) || DateDiff(d0, d1, TimeUnit.Days) > 60 || !(cls in ["Excused", "Unexcused"]) || (cls = "Excused" && IsBlank(rsn)) || !(how in ["Parent notified us", "No notice"]) || (how = "Parent notified us" && (IsBlank(nat) || nat > Now())),
                                                           Set(varAbsReceipt, {Kind: "Blocked", Title: "Not saved. " & lblAbsAddCheckV.Text}); Clear(colAbsReceiptLines),
                                                           Set(varAbsSaving, true);
                                                           Clear(colAbsLog);
+                                                          Set(varAbsNtErr, "");
                                                           IfError(
                                                               Concurrent(
                                                                   ClearCollect(colAbsLocks, ForAll(Filter('Month Locks', 'Status (aaca_status)' = 'Status (Month Locks)'.Locked) As m, {CampusId: m.Campus.Campus, MonthStart: m.Month})),
@@ -4114,6 +4228,53 @@ Screens:
                                                               ); true,
                                                               Set(varAbsAddErr, FirstError.Message)
                                                           );
+                                                          With(
+                                                          {
+                                                              srec: With({qs: stu.StudentId}, LookUp(Students, ThisRecord.Student = qs)),
+                                                              crec: With({qc: c0}, LookUp(Campuses, ThisRecord.Campus = qc))
+                                                          },
+                                                          With(
+                                                          {
+                                                              nt: If(
+                                                                  !IsBlank(srec) && !IsBlank(crec),
+                                                                  IfError(
+                                                                      Patch(
+                                                                          'Absence Notices',
+                                                                          Defaults('Absence Notices'),
+                                                                          {
+                                                                              Summary: Left(stu.StudentName & " - absent " & Text(d0, "m/d/yyyy"), 100),
+                                                                              Source: 'Source (Absence Notices)'.Office,
+                                                                              'Status (aaca_status)': 'Status (Absence Notices)'.Accepted,
+                                                                              'Match Status': 'Match Status (Absence Notices)'.Matched,
+                                                                              Student: srec,
+                                                                              Campus: crec,
+                                                                              'Absence Reason': If(cls = "Excused", rsn, Blank()),
+                                                                              'First Day Absent': d0,
+                                                                              'Last Day Absent': d1,
+                                                                              'Return Date': DateAdd(d1, 1, TimeUnit.Days),
+                                                                              'Reason Text': If(note <> "", note, cls = "Excused", rsn.Name, ""),
+                                                                              'Notice At': nat,
+                                                                              'Processed On': Now(),
+                                                                              'Processed By': CurrentUserRow
+                                                                          }
+                                                                      ),
+                                                                      Set(varAbsNtErr, FirstError.Message); Blank()
+                                                                  )
+                                                              )
+                                                          },
+                                                          If(
+                                                          IsBlank(nt),
+                                                          Set(varAbsReceipt, {Kind: "Failed", Title: "Not saved · " & stu.StudentName & " · the absence notice could not be created, so no days were added"});
+                                                          ClearCollect(
+                                                              colAbsReceiptLines,
+                                                              {Label: "Error", Value: If(varAbsNtErr <> "", varAbsNtErr, IsBlank(srec), "The student could not be read.", "The campus could not be read.")},
+                                                              {Label: "Attendance", Value: "Not changed"}
+                                                          ),
+                                                          With(
+                                                          {
+                                                              ref: Coalesce(nt.Reference, "(reference pending)"),
+                                                              aun: IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Absence notice " & Coalesce(nt.Reference, "") & " created (office) for " & stu.StudentName, 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_absencenotice", 'Entity ID': Text(nt.'Absence Notice'), Before: "", After: JSON({Reference: Coalesce(nt.Reference, ""), Source: Text(nt.Source), Status: Text(nt.'Status (aaca_status)'), MatchStatus: Text(nt.'Match Status'), FirstDay: Text(nt.'First Day Absent', "yyyy-mm-dd"), LastDay: Text(nt.'Last Day Absent', "yyyy-mm-dd"), ReturnDate: Text(nt.'Return Date', "yyyy-mm-dd"), NoticeAt: If(IsBlank(nt.'Notice At'), "", Text(nt.'Notice At', "yyyy-mm-dd hh:mm")), ReasonText: Coalesce(nt.'Reason Text', "")}), Reason: If(how = "Parent notified us", "Office recorded a parent notice", "Office absence with no notice")}), Blank())
+                                                          },
                                                           ForAll(
                                                               Sequence(DateDiff(d0, d1, TimeUnit.Days) + 1, 0) As n,
                                                               With(
@@ -4174,7 +4335,8 @@ Screens:
                                                                                                           'Classified On': Now(),
                                                                                                           'Classified By': CurrentUserRow,
                                                                                                           Notes: note,
-                                                                                                          'Notice Received On': Blank(),
+                                                                                                          'Absence Notice': nt,
+                                                                                                          'Notice Received On': nt.'Notice At',
                                                                                                           'Parent Reported Absent': false,
                                                                                                           'Source Report ID': Blank(),
                                                                                                           'Left Early': false,
@@ -4187,8 +4349,8 @@ Screens:
                                                                                           )
                                                                                       },
                                                                                       With(
-                                                                                          {au: If(!IsBlank(wr), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Office absence " & wr.'Record Key', 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_attendance", 'Entity ID': Text(wr.Attendance), Before: If(IsBlank(live), "", JSON({IsDeleted: true, Present: live.Present})), After: JSON({Present: wr.Present, Source: Text(wr.Source), Classification: Text(wr.'Absence Classification'), Reason: Coalesce(wr.'Absence Reason'.Name, ""), Notes: Coalesce(wr.Notes, "")}), Reason: "Manual absence added in Absences (no parent notice)"}), Blank()))},
-                                                                                          Collect(colAbsLog, {AttId: Coalesce(wr.Attendance, live.Attendance, ZeroGuid), StudentName: stu.StudentName, AbsDate: d, TeacherName: Coalesce(seg.TeacherName, ""), CampusName: "", OldClass: If(IsBlank(live), "No record", "Deleted record (reused)"), NewClass: If(IsBlank(wr), "", Text(wr.'Absence Classification') & If(IsBlank(wr.'Absence Reason'), "", " (" & wr.'Absence Reason'.Name & ")")), ReasonName: If(IsBlank(wr), "", Coalesce(wr.Notes, "")), ByName: If(IsBlank(wr), "", Coalesce(wr.'Classified By'.'Full Name', "")), OnText: If(IsBlank(wr), "", Text(wr.'Classified On', "mmm d, yyyy h:mm AM/PM")), Outcome: If(!IsBlank(wr), "created", outcome = "ok", "failed", outcome), AuditOk: !IsBlank(au)})
+                                                                                          {au: If(!IsBlank(wr), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Office absence " & wr.'Record Key', 100), Action: 'Action (Audit Events)'.Create, Entity: "aaca_attendance", 'Entity ID': Text(wr.Attendance), Before: If(IsBlank(live), "", JSON({IsDeleted: true, Present: live.Present})), After: JSON({Present: wr.Present, Source: Text(wr.Source), Classification: Text(wr.'Absence Classification'), Reason: Coalesce(wr.'Absence Reason'.Name, ""), Notes: Coalesce(wr.Notes, ""), Notice: Coalesce(nt.Reference, ""), NoticeReceivedOn: If(IsBlank(wr.'Notice Received On'), "", Text(wr.'Notice Received On', "yyyy-mm-dd hh:mm"))}), Reason: If(IsBlank(nt.'Notice At'), "Office absence, no notice (" & Coalesce(nt.Reference, "") & ")", "Office absence, parent notified " & Text(nt.'Notice At', "mm/dd/yyyy h:mm AM/PM") & " (" & Coalesce(nt.Reference, "") & ")")}), Blank()))},
+                                                                                          Collect(colAbsLog, {AttId: Coalesce(wr.Attendance, live.Attendance, ZeroGuid), StudentName: stu.StudentName, AbsDate: d, TeacherName: Coalesce(seg.TeacherName, ""), CampusName: "", OldClass: If(IsBlank(live), "No record", "Deleted record (reused)"), NewClass: If(IsBlank(wr), "", Text(wr.'Absence Classification') & If(IsBlank(wr.'Absence Reason'), "", " (" & wr.'Absence Reason'.Name & ")") & If(IsBlank(wr.'Absence Notice'), " · notice NOT linked", " · notice linked")), ReasonName: If(IsBlank(wr), "", Coalesce(wr.Notes, "")), ByName: If(IsBlank(wr), "", Coalesce(wr.'Classified By'.'Full Name', "")), OnText: If(IsBlank(wr), "", Text(wr.'Classified On', "mmm d, yyyy h:mm AM/PM")), Outcome: If(!IsBlank(wr), "created", outcome = "ok", "failed", outcome), AuditOk: !IsBlank(au)})
                                                                                       )
                                                                                   )
                                                                               )
@@ -4205,13 +4367,19 @@ Screens:
                                                                   g: First(Filter(colAbsLog, Outcome = "created"))
                                                               },
                                                               With(
-                                                                  {sk: CountRows(colAbsLog) - cr - fl - ns},
+                                                                  {
+                                                                      sk: CountRows(colAbsLog) - cr - fl - ns,
+                                                                      nc: If(cr = 0, IfError(Patch('Absence Notices', nt, {'Status (aaca_status)': 'Status (Absence Notices)'.Cancelled, Note: "No attendance days were created (every day was skipped or failed)."}), Blank()))
+                                                                  },
+                                                                  If(!IsBlank(nc), IfError(Patch('Audit Events', Defaults('Audit Events'), {Summary: Left("Absence notice " & ref & " cancelled (no days created)", 100), Action: 'Action (Audit Events)'.Update, Entity: "aaca_absencenotice", 'Entity ID': Text(nc.'Absence Notice'), Before: JSON({Status: "Accepted"}), After: JSON({Status: Text(nc.'Status (aaca_status)'), Note: Coalesce(nc.Note, "")}), Reason: "Add absence created no attendance days"}), Blank()));
                                                                   Set(varAbsReceipt, {Kind: If(cr = 0, "Failed", "Added"), Title: "Add absence · " & stu.StudentName & " · " & Text(d0, "mmm d") & If(d1 = d0, "", " – " & Text(d1, "mmm d")) & ", " & Text(d1, "yyyy") & " · " & cr & " created, " & sk & " skipped, " & fl & " failed" & If(ns > 0, " · " & ns & " non-school day(s) ignored", "")});
                                                                   ClearCollect(
                                                                       colAbsReceiptLines,
-                                                                      {Label: "Operation", Value: "Add absence (Source Office, no parent notice)"},
+                                                                      {Label: "Operation", Value: "Add absence (Source Office) with an Absence Notice"},
                                                                       {Label: "Student", Value: stu.StudentName & " · " & stu.StudentNumber},
                                                                       {Label: "Dates", Value: Text(d0, "ddd mmm d, yyyy") & If(d1 = d0, "", " – " & Text(d1, "ddd mmm d, yyyy"))},
+                                                                      {Label: "Notice", Value: If(IsBlank(nt.'Notice At'), "no notice (billable) · " & ref, ref & " · notified " & Text(nt.'Notice At', "mm/dd/yyyy h:mm AM/PM")) & If(cr = 0, If(IsBlank(nc), " · could NOT be cancelled", " · cancelled (no days were created)"), "")},
+                                                                      {Label: "Notice audit", Value: If(IsBlank(aun), "NOT written", "Create written")},
                                                                       {Label: "Classification", Value: If(cr = 0, "Nothing written", g.NewClass)},
                                                                       {Label: "Classified by", Value: If(cr = 0, "—", g.ByName & " · " & g.OnText)},
                                                                       {Label: "Note", Value: If(cr = 0, "—", g.ReasonName = "", "None", g.ReasonName)},
@@ -4220,11 +4388,17 @@ Screens:
                                                                       {Label: "Failed", Value: Text(fl)},
                                                                       ForAll(Filter(colAbsLog, Outcome <> "not a school day") As g2, {Label: Text(g2.AbsDate, "ddd mmm d"), Value: If(g2.Outcome = "created", "Created · " & g2.NewClass & " · teacher " & g2.TeacherName & If(g2.OldClass = "Deleted record (reused)", " · reused deleted row", "") & If(g2.AuditOk, " · audit Create written", " · audit NOT written"), g2.Outcome = "failed", "FAILED · not written", "Skipped · " & g2.Outcome)})
                                                                   );
-                                                                  If(cr > 0, Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank()); Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV))
+                                                                  If(cr > 0, Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank()); Set(varAbsNtHow, ""); Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(rdoAbsNtHowV); Reset(dpAbsNtDateV); Reset(txtAbsNtTimeV))
                                                               )
+                                                          )
+                                                          )
+                                                          )
+                                                          )
                                                           );
                                                           Set(varAbsSaving, false);
                                                           If(CountRows(Filter(colAbsLog, Outcome = "created")) > 0, Select(btnAbsLoadEngine))
+                                                      )
+                                                      )
                                                       )
                                                   )
                                                 Size: =14
@@ -4392,8 +4566,127 @@ Screens:
                                                 OnSelect: |-
                                                   =Set(varAbsReceipt, {Kind: "Cancelled", Title: If(varAbsAddMode = "leftearly", "Left early", "Add absence") & " cancelled · nothing was changed"});
                                                   Clear(colAbsReceiptLines);
-                                                  Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank());
-                                                  Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV)
+                                                  Set(varAbsAddMode, ""); Set(varAbsAddClass, ""); Set(varAbsAddReasonId, Blank()); Set(varAbsNtHow, "");
+                                                  Reset(cboAbsAddStuV); Reset(dpAbsAddFromV); Reset(dpAbsAddToV); Reset(rdoAbsAddClassV); Reset(ddAbsAddReasonV); Reset(txtAbsAddNoteV); Reset(txtAbsLeTimeV);
+                                                  Reset(rdoAbsNtHowV); Reset(dpAbsNtDateV); Reset(txtAbsNtTimeV)
                                                 Size: =14
                                                 Text: ="Cancel"
                                                 Width: =100
+                                    - lblAbsNtHowV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="How did we hear about it? *"
+                                          Visible: =varAbsAddMode = "absence"
+                                          Wrap: =false
+                                    - rdoAbsNtHowV:
+                                        Control: ModernRadio
+                                        Properties:
+                                          AccessibleLabel: ="How did we hear about it"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorInk
+                                          Default: |-
+                                            ={Value: varAbsNtHow}
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =64
+                                          Items: =["Parent notified us", "No notice"]
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          OnChange: =Set(varAbsNtHow, Self.Selected.Value)
+                                          Visible: =varAbsAddMode = "absence"
+                                    - lblAbsNtDateV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Date the parent told us *"
+                                          Visible: =varAbsAddMode = "absence" && varAbsNtHow = "Parent notified us"
+                                          Wrap: =false
+                                    - dpAbsNtDateV:
+                                        Control: ModernDatePicker
+                                        Properties:
+                                          AccessibleLabel: ="Date the parent told us"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          DefaultDate: =Today()
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          EndDate: =Today()
+                                          Format: =DatePickerFormat.Short
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          StartDate: =Date(FirstSchoolYear, 1, 1)
+                                          Visible: =varAbsAddMode = "absence" && varAbsNtHow = "Parent notified us"
+                                    - lblAbsNtTimeV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Time the parent told us * (h:mm AM/PM)"
+                                          Visible: =varAbsAddMode = "absence" && varAbsNtHow = "Parent notified us"
+                                          Wrap: =false
+                                    - txtAbsNtTimeV:
+                                        Control: ModernTextInput
+                                        Properties:
+                                          AccessibleLabel: ="Time the parent told us, h:mm AM/PM"
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Appearance: =Appearance.Outline
+                                          Color: =ColorInk
+                                          Default: =Text(varAbsNtOpenAt, "h:mm AM/PM")
+                                          DisplayMode: =If(varAbsSaving, DisplayMode.Disabled, DisplayMode.Edit)
+                                          Height: =36
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          MaxLength: =8
+                                          Placeholder: ="8:15 AM"
+                                          Visible: =varAbsAddMode = "absence" && varAbsNtHow = "Parent notified us"
+                                    - lblAbsLeTimeV:
+                                        Control: ModernText
+                                        Properties:
+                                          AccessibleLabel: =Self.Text
+                                          AlignInContainer: =AlignInContainer.Stretch
+                                          Color: =ColorMuted
+                                          FontWeight: =FontWeight.Semibold
+                                          Height: =18
+                                          LayoutMinHeight: =0
+                                          LayoutMinWidth: =0
+                                          PaddingBottom: =0
+                                          PaddingLeft: =0
+                                          PaddingRight: =0
+                                          PaddingTop: =0
+                                          Size: =12
+                                          Text: ="Time left * (h:mm AM/PM)"
+                                          Visible: =varAbsAddMode = "leftearly"
+                                          Wrap: =false

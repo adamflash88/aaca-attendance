@@ -1838,7 +1838,7 @@ Screens:
                                                                 !IsBlank(dup),
                                                                 Set(varTrnReceipt, {Kind: "Blocked", Title: "Not saved · " & stu.StudentName & " already has active transportation (added by someone else). Use Reload."}); Clear(colTrnReceiptLines),
                                                                 With(
-                                                                    {wr: IfError(Patch('Student Transportation', Defaults('Student Transportation'), {Summary: Left(stu.KeyBase & " - transportation", 100), Student: stu.StuRec, Campus: stu.CampRec, 'Start Date': sd, 'Usual Pattern': pat, Source: 'Source (Student Transportation)'.Manual, Note: note}), Blank())},
+                                                                    {wr: IfError(Patch('Student Transportation', Defaults('Student Transportation'), {Summary: Left(stu.KeyBase & " - transportation", 100), Student: stu.StuRec, Campus: LookUp(Campuses, Campus = varTrnCampusId), 'Start Date': sd, 'Usual Pattern': pat, Source: 'Source (Student Transportation)'.Manual, Note: note}), Blank())},
                                                                     If(
                                                                         IsBlank(wr),
                                                                         Set(varTrnReceipt, {Kind: "Failed", Title: "Not saved · " & stu.StudentName & " · the save failed; press Add transportation to retry"}); Clear(colTrnReceiptLines),

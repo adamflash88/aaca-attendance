@@ -659,12 +659,12 @@ Screens:
                               LayoutGap: =8
                               LayoutMinHeight: =0
                               LayoutMinWidth: =0
-                              Width: =382
+                              Width: =472
                             Children:
                               - tabAttViewMode:
                                   Control: ModernTabList
                                   Properties:
-                                    AccessibleLabel: ="Month or Day view"
+                                    AccessibleLabel: ="Month, Day or Quarters view"
                                     AlignInContainer: =AlignInContainer.Center
                                     Appearance: =TabListAppearance.Subtle
                                     BasePaletteColor: =ColorTeal
@@ -672,11 +672,12 @@ Screens:
                                     Default: |-
                                       =If(conAttRoot.Width < 640, {Value: "Day"}, {Value: "Month"})
                                     Height: =44
-                                    Items: =["Month", "Day"]
+                                    Items: =["Month", "Day", "Quarters"]
                                     LayoutMinHeight: =0
                                     LayoutMinWidth: =0
+                                    OnChange: =If(Self.Selected.Value = "Quarters", Select(btnAttQtrEngine))
                                     TabSize: =TabSize.Small
-                                    Width: =160
+                                    Width: =250
                               - btnAttDetailsToggle:
                                   Control: ModernButton
                                   Properties:
@@ -1194,7 +1195,7 @@ Screens:
                   RadiusBottomRight: =6
                   RadiusTopLeft: =6
                   RadiusTopRight: =6
-                  Visible: =StaffReady && tabAttViewMode.Selected.Value <> "Day"
+                  Visible: =StaffReady && tabAttViewMode.Selected.Value = "Month"
                 Children:
                   - lblAttLegend:
                       Control: ModernText
@@ -1928,6 +1929,409 @@ Screens:
                                           Text: ="Undo"
                                           Visible: =ThisItem.HasRecord && ThisItem.Letter = "P"
                                           Width: =88
+            - conAttQtrView:
+                Control: GroupContainer
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =ColorRule
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.None
+                  Fill: =ColorWhite
+                  FillPortions: =0
+                  Height: =16 + 44 + 8 + 36 + 8 + 40 + 8 + Min(528, Max(88, 48 * CountRows(colAttQtr))) + 8 + 40 + 16
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  PaddingBottom: =16
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =16
+                  RadiusBottomLeft: =6
+                  RadiusBottomRight: =6
+                  RadiusTopLeft: =6
+                  RadiusTopRight: =6
+                  Visible: =StaffReady && tabAttViewMode.Selected.Value = "Quarters"
+                Children:
+                  - conAttQtrHead:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =44
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                      Children:
+                        - lblAttQtrTitle:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorInk
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Bold
+                              Height: =28
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =18
+                              Text: ="Absences by quarter · " & Coalesce(varTeacher.Name, "no teacher") & " · " & Coalesce(varAttQtrYear.Name, "")
+                              Wrap: =false
+                        - ddAttQtrYear:
+                            Control: ModernDropdown
+                            Properties:
+                              AccessibleLabel: ="School year"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =Appearance.Outline
+                              Color: =ColorInk
+                              Default: =varAttQtrYear
+                              DisplayMode: =If(varAttQtrLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              Height: =36
+                              ItemDisplayText: =ThisItem.Name
+                              Items: =Sort('School Years', 'Start Date', SortOrder.Descending)
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnChange: =Set(varAttQtrYear, Self.Selected); Select(btnAttQtrEngine)
+                              Width: =160
+                        - btnAttQtrReload:
+                            Control: ModernButton
+                            Properties:
+                              AccessibleLabel: ="Reload quarter counts"
+                              AlignInContainer: =AlignInContainer.Center
+                              Appearance: =ButtonAppearance.Secondary
+                              Color: =ColorInk
+                              DisplayMode: =If(varAttQtrLoading, DisplayMode.Disabled, DisplayMode.Edit)
+                              Height: =44
+                              Layout: =ButtonLayout.TextOnly
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              OnSelect: =Select(btnAttQtrEngine)
+                              Size: =14
+                              Text: =If(varAttQtrLoading, "Loading...", "Reload")
+                  - lblAttQtrHelp:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =If(varAttQtrError <> "", ColorUnexcused, ColorMuted)
+                        Height: =36
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =12
+                        Text: |-
+                          =If(varAttQtrError <> "", "Could not load the quarter counts: " & varAttQtrError, "Total days absent per quarter for report cards: excused, unexcused and not yet classified (left early counts as present). A student's whole quarter counts, including days with another teacher. Tap a number to see the dates.")
+                        VerticalAlign: =VerticalAlign.Top
+                  - conAttQtrColHead:
+                      Control: GroupContainer
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        Fill: =ColorPaper
+                        FillPortions: =0
+                        Height: =40
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =8
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingLeft: =8
+                        PaddingRight: =8
+                      Children:
+                        - lblAttQtrHName:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              AlignInContainer: =AlignInContainer.Center
+                              Color: =ColorMuted
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              Height: =20
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: ="Student (" & CountRows(colAttQtr) & ")"
+                              Wrap: =false
+                        - lblAttQtrHQ1:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({c: LookUp(colAttQtrCols, Term = "Q1")}, "Q1" & If(c.Has && Today() >= c.S && Today() <= c.E, " · so far", "") & Char(10) & If(c.Has, Text(c.S, "m/d/yy") & " - " & Text(c.E, "m/d/yy"), "not set"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =124
+                        - lblAttQtrHQ2:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({c: LookUp(colAttQtrCols, Term = "Q2")}, "Q2" & If(c.Has && Today() >= c.S && Today() <= c.E, " · so far", "") & Char(10) & If(c.Has, Text(c.S, "m/d/yy") & " - " & Text(c.E, "m/d/yy"), "not set"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =124
+                        - lblAttQtrHQ3:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({c: LookUp(colAttQtrCols, Term = "Q3")}, "Q3" & If(c.Has && Today() >= c.S && Today() <= c.E, " · so far", "") & Char(10) & If(c.Has, Text(c.S, "m/d/yy") & " - " & Text(c.E, "m/d/yy"), "not set"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =124
+                        - lblAttQtrHQ4:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({c: LookUp(colAttQtrCols, Term = "Q4")}, "Q4" & If(c.Has && Today() >= c.S && Today() <= c.E, " · so far", "") & Char(10) & If(c.Has, Text(c.S, "m/d/yy") & " - " & Text(c.E, "m/d/yy"), "not set"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =124
+                        - lblAttQtrHESY:
+                            Control: ModernText
+                            Properties:
+                              AccessibleLabel: =Self.Text
+                              Align: =Align.Center
+                              AlignInContainer: =AlignInContainer.Stretch
+                              Color: =ColorMuted
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Size: =12
+                              Text: |-
+                                =With({c: LookUp(colAttQtrCols, Term = "ESY")}, "ESY" & If(c.Has && Today() >= c.S && Today() <= c.E, " · so far", "") & Char(10) & If(c.Has, Text(c.S, "m/d/yy") & " - " & Text(c.E, "m/d/yy"), "not set"))
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =124
+                  - galAttQtr:
+                      Control: Gallery
+                      Variant: Vertical
+                      Properties:
+                        AccessibleLabel: ="Absences by quarter"
+                        FillPortions: =0
+                        Height: =Min(528, Max(88, 48 * CountRows(colAttQtr)))
+                        Items: =Sort(colAttQtr, Name, SortOrder.Ascending)
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        Selectable: =false
+                        TabIndex: =0
+                        TemplatePadding: =0
+                        TemplateSize: =48
+                      Children:
+                        - conAttQtrRow:
+                            Control: GroupContainer
+                            Variant: AutoLayout
+                            Properties:
+                              BorderColor: =ColorRule
+                              BorderThickness: =1
+                              DropShadow: =DropShadow.None
+                              Fill: =If(varAttQtrSel.StudentId = ThisItem.StudentId, ColorInfoBg, ColorWhite)
+                              Height: =Parent.TemplateHeight - 4
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =8
+                              PaddingLeft: =8
+                              PaddingRight: =8
+                              Width: =Parent.TemplateWidth - 16
+                            Children:
+                              - lblAttQtrName:
+                                  Control: ModernText
+                                  Properties:
+                                    AccessibleLabel: =Self.Text
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Color: =ColorInk
+                                    FillPortions: =1
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =20
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =14
+                                    Text: =ThisItem.Name
+                                    Wrap: =false
+                              - btnAttQtrCQ1:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Q1 absences for " & ThisItem.Name
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q1", ButtonAppearance.Primary, ButtonAppearance.Subtle)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q1", ColorWhite, ColorInk)
+                                    DisplayMode: =If(IsBlank(ThisItem.Q1), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAttQtrSel, {StudentId: ThisItem.StudentId, Term: "Q1"})
+                                    Size: =14
+                                    Text: =If(IsBlank(ThisItem.Q1), "-", Text(ThisItem.Q1))
+                                    Width: =124
+                              - btnAttQtrCQ2:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Q2 absences for " & ThisItem.Name
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q2", ButtonAppearance.Primary, ButtonAppearance.Subtle)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q2", ColorWhite, ColorInk)
+                                    DisplayMode: =If(IsBlank(ThisItem.Q2), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAttQtrSel, {StudentId: ThisItem.StudentId, Term: "Q2"})
+                                    Size: =14
+                                    Text: =If(IsBlank(ThisItem.Q2), "-", Text(ThisItem.Q2))
+                                    Width: =124
+                              - btnAttQtrCQ3:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Q3 absences for " & ThisItem.Name
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q3", ButtonAppearance.Primary, ButtonAppearance.Subtle)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q3", ColorWhite, ColorInk)
+                                    DisplayMode: =If(IsBlank(ThisItem.Q3), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAttQtrSel, {StudentId: ThisItem.StudentId, Term: "Q3"})
+                                    Size: =14
+                                    Text: =If(IsBlank(ThisItem.Q3), "-", Text(ThisItem.Q3))
+                                    Width: =124
+                              - btnAttQtrCQ4:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="Q4 absences for " & ThisItem.Name
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q4", ButtonAppearance.Primary, ButtonAppearance.Subtle)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "Q4", ColorWhite, ColorInk)
+                                    DisplayMode: =If(IsBlank(ThisItem.Q4), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAttQtrSel, {StudentId: ThisItem.StudentId, Term: "Q4"})
+                                    Size: =14
+                                    Text: =If(IsBlank(ThisItem.Q4), "-", Text(ThisItem.Q4))
+                                    Width: =124
+                              - btnAttQtrCESY:
+                                  Control: ModernButton
+                                  Properties:
+                                    AccessibleLabel: ="ESY absences for " & ThisItem.Name
+                                    AlignInContainer: =AlignInContainer.Center
+                                    Appearance: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "ESY", ButtonAppearance.Primary, ButtonAppearance.Subtle)
+                                    BasePaletteColor: =ColorTeal
+                                    Color: =If(varAttQtrSel.StudentId = ThisItem.StudentId && varAttQtrSel.Term = "ESY", ColorWhite, ColorInk)
+                                    DisplayMode: =If(IsBlank(ThisItem.ESY), DisplayMode.Disabled, DisplayMode.Edit)
+                                    Height: =36
+                                    Layout: =ButtonLayout.TextOnly
+                                    LayoutMinHeight: =0
+                                    LayoutMinWidth: =0
+                                    OnSelect: |-
+                                      =Set(varAttQtrSel, {StudentId: ThisItem.StudentId, Term: "ESY"})
+                                    Size: =14
+                                    Text: =If(IsBlank(ThisItem.ESY), "-", Text(ThisItem.ESY))
+                                    Width: =124
+                  - lblAttQtrDetail:
+                      Control: ModernText
+                      Properties:
+                        AccessibleLabel: =Self.Text
+                        AlignInContainer: =AlignInContainer.Stretch
+                        Color: =ColorInk
+                        Height: =40
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        Size: =13
+                        Text: |-
+                          =With(
+                              {c: LookUp(colAttQtrCols, Term = varAttQtrSel.Term), st: LookUp(colAttQtr, StudentId = varAttQtrSel.StudentId)},
+                              If(
+                                  IsBlank(st) || IsBlank(c), If(CountRows(colAttQtr) = 0 && !varAttQtrLoading, "No students in this class for the chosen school year.", "Tap a number to see the dates."),
+                                  With(
+                                      {ds: Sort(Filter(colAttQtrAbs, StudentId = st.StudentId && D >= c.S && D <= c.E), D, SortOrder.Ascending)},
+                                      st.Name & " · " & c.Term & ": " & CountRows(ds) & If(CountRows(ds) = 1, " day absent", " days absent") & If(CountRows(ds) = 0, "", " - " & Concat(ds, Text(D, "ddd mmm d"), ", "))
+                                  )
+                              )
+                          )
+                        VerticalAlign: =VerticalAlign.Top
             - btnAttSaveEngine:
                 Control: Classic/Button
                 Properties:
@@ -2148,6 +2552,66 @@ Screens:
                     )
                   Text: ="bulk"
                   Visible: =false
+            - btnAttQtrEngine:
+                Control: Classic/Button
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  AutoDisableOnSelect: =false
+                  LayoutMinHeight: =0
+                  LayoutMinWidth: =0
+                  OnSelect: |-
+                    =Set(varAttQtrLoading, true);
+                    Set(varAttQtrError, "");
+                    Set(varAttQtrSel, {StudentId: ZeroGuid, Term: ""});
+                    If(IsBlank(varAttQtrYear), Set(varAttQtrYear, CurrentSchoolYear));
+                    Clear(colAttQtrAbs);
+                    If(
+                        !StaffReady || IsBlank(varTeacher) || IsBlank(varAttQtrYear),
+                        Clear(colAttQtr); Clear(colAttQtrCols); Clear(colAttQtrEnr),
+                        IfError(
+                            With(
+                                {yid: varAttQtrYear.'School Year', ys: varAttQtrYear.'Start Date', ye: varAttQtrYear.'End Date', cid: varCampus.Campus, tid: varTeacher.Staff},
+                                ClearCollect(colAttQtrTerms, ForAll(Filter(Terms, 'School Year'.'School Year' = yid) As t, {TermText: Text(t.'Term (aaca_term)'), CampusId: If(IsBlank(t.Campus), ZeroGuid, t.Campus.Campus), S: t.'Start Date', E: t.'End Date'}));
+                                ClearCollect(
+                                    colAttQtrCols,
+                                    ForAll(
+                                        ["Q1", "Q2", "Q3", "Q4", "ESY"] As q,
+                                        With(
+                                            {tm: Coalesce(LookUp(colAttQtrTerms, TermText = q.Value && CampusId = cid), LookUp(colAttQtrTerms, TermText = q.Value && CampusId = ZeroGuid))},
+                                            {Term: q.Value, S: tm.S, E: tm.E, Has: !IsBlank(tm)}
+                                        )
+                                    )
+                                );
+                                ClearCollect(colAttQtrEnr, ForAll(Filter(Enrollments, Teacher.Staff = tid && 'Start Date' <= ye && (IsBlank('End Date') || 'End Date' >= ys)) As e, {StudentId: e.Student.Student, Name: Coalesce(e.Student.'Display Name', "Unknown student")}));
+                                ForAll(
+                                    Distinct(colAttQtrEnr, StudentId) As g,
+                                    Collect(colAttQtrAbs, ForAll(Filter(Attendance, Student.Student = g.Value && Present = false && 'Is Deleted' = false && Date >= ys && Date <= ye) As a, {StudentId: g.Value, D: a.Date}))
+                                );
+                                ClearCollect(
+                                    colAttQtr,
+                                    ForAll(
+                                        Distinct(colAttQtrEnr, StudentId) As g,
+                                        With(
+                                            {sid: g.Value},
+                                            {
+                                                StudentId: sid,
+                                                Name: LookUp(colAttQtrEnr, StudentId = sid).Name,
+                                                Q1: With({c: LookUp(colAttQtrCols, Term = "Q1")}, If(c.Has, CountRows(Filter(colAttQtrAbs, StudentId = sid && D >= c.S && D <= c.E)), Blank())),
+                                                Q2: With({c: LookUp(colAttQtrCols, Term = "Q2")}, If(c.Has, CountRows(Filter(colAttQtrAbs, StudentId = sid && D >= c.S && D <= c.E)), Blank())),
+                                                Q3: With({c: LookUp(colAttQtrCols, Term = "Q3")}, If(c.Has, CountRows(Filter(colAttQtrAbs, StudentId = sid && D >= c.S && D <= c.E)), Blank())),
+                                                Q4: With({c: LookUp(colAttQtrCols, Term = "Q4")}, If(c.Has, CountRows(Filter(colAttQtrAbs, StudentId = sid && D >= c.S && D <= c.E)), Blank())),
+                                                ESY: With({c: LookUp(colAttQtrCols, Term = "ESY")}, If(c.Has, CountRows(Filter(colAttQtrAbs, StudentId = sid && D >= c.S && D <= c.E)), Blank()))
+                                            }
+                                        )
+                                    )
+                                )
+                            ); true,
+                            Set(varAttQtrError, FirstError.Message)
+                        )
+                    );
+                    Set(varAttQtrLoading, false)
+                  Text: ="quarters"
+                  Visible: =false
             - btnAttLoadEngine:
                 Control: Classic/Button
                 Properties:
@@ -2266,6 +2730,7 @@ Screens:
                         varViewDate < varMonthStart || varViewDate > varMonthEnd,
                         Set(varViewDate, If(Today() >= varMonthStart && Today() <= varMonthEnd, Today(), varMonthStart))
                     );
-                    Set(varLoading, false)
+                    Set(varLoading, false);
+                    If(tabAttViewMode.Selected.Value = "Quarters", Select(btnAttQtrEngine))
                   Text: ="load"
                   Visible: =false

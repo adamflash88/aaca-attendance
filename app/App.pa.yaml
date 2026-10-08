@@ -204,6 +204,16 @@ App:
       Set(varHelpBusy, false);
       Set(varHelpConvId, "");
       ClearCollect(colHelpMsgs, {N: 0, Q: "", A: ""});
-      Clear(colHelpMsgs)
-    StartScreen: =Screen1
+      Clear(colHelpMsgs);
+      Set(varAbsNtSelId, ZeroGuid);
+      Set(varAbsNtSelId, Blank());
+      Set(varAbsNtAllStu, false);
+      Set(varAbsNtHow, "");
+      Set(varAbsNtOpenAt, Now());
+      Set(varAbsNtErr, "");
+      Set(varAttQtrYear, CurrentSchoolYear);
+      Set(varAttQtrSel, {StudentId: ZeroGuid, Term: ""});
+      Set(varAttQtrLoading, false);
+      Set(varAttQtrError, "")
+    StartScreen: =If(Lower(Coalesce(Param("screen"), "")) = "absences" && CanClassify, AbsencesScreen, Screen1)
     Theme: =PowerAppsTheme
