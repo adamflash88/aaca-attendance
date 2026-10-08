@@ -1,0 +1,358 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e91",
+ "name": "AACA - Website Absence Intake",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_commondataserviceforapps": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedcommondataserviceforapps_2b783"
+     },
+     "api": {
+      "name": "shared_commondataserviceforapps"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "manual": {
+      "metadata": {
+       "operationMetadataId": "c99ebe25-22de-4887-8799-8422a66b45ff"
+      },
+      "type": "Request",
+      "kind": "Http",
+      "inputs": {
+       "triggerAuthenticationType": "All",
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "FN": {
+            "type": "string"
+           },
+           "LN": {
+            "type": "string"
+           },
+           "DOA": {
+            "type": "string"
+           },
+           "RETURN": {
+            "type": "string"
+           },
+           "School": {
+            "type": "string"
+           },
+           "Reason": {
+            "type": "string"
+           },
+           "DN": {
+            "type": "string"
+           },
+           "PN": {
+            "type": "string"
+           },
+           "Relationship": {
+            "type": "string"
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "actions": {
+     "Campus": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "1aa2a730-8318-4b7c-b789-e1100a0a1c09"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "ListRecords"
+       },
+       "parameters": {
+        "entityName": "aaca_campuses",
+        "$select": "aaca_campusid,aaca_name,aaca_ownerteamid",
+        "$filter": "aaca_active eq true and aaca_name eq '@{replace(trim(coalesce(triggerBody()?['data']?['School'], '')), '''', '''''')}'",
+        "$top": 1
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Check": {
+      "runAfter": {
+       "Campus": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "6c66a579-6842-4ba6-b46e-53c49a628eaf"
+      },
+      "type": "Scope",
+      "actions": {
+       "Absence_date": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "75509bd5-c326-4cfd-81aa-7c61d02dbacd"
+        },
+        "type": "Compose",
+        "inputs": "@formatDateTime(triggerBody()?['data']?['DOA'], 'yyyy-MM-dd')"
+       },
+       "Return_date": {
+        "runAfter": {
+         "Absence_date": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "85da2ae1-23e9-4328-a4f9-ec4dac2ad34c"
+        },
+        "type": "Compose",
+        "inputs": "@if(empty(trim(coalesce(triggerBody()?['data']?['RETURN'], ''))), addDays(outputs('Absence_date'), 1, 'yyyy-MM-dd'), formatDateTime(triggerBody()?['data']?['RETURN'], 'yyyy-MM-dd'))"
+       },
+       "Is_valid": {
+        "runAfter": {
+         "Return_date": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "ef97aee4-cdbd-450b-ad0a-51fa8e5624f7"
+        },
+        "type": "Compose",
+        "inputs": "@and(not(empty(trim(coalesce(triggerBody()?['data']?['FN'], '')))), not(empty(trim(coalesce(triggerBody()?['data']?['LN'], '')))), not(empty(body('Campus')?['value'])), greater(outputs('Return_date'), outputs('Absence_date')), lessOrEquals(div(sub(ticks(outputs('Return_date')), ticks(outputs('Absence_date'))), 864000000000), 60))"
+       }
+      }
+     },
+     "Bad_request": {
+      "runAfter": {
+       "Check": [
+        "Failed",
+        "TimedOut"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "5426623c-b403-4111-8340-5129bf436899"
+      },
+      "type": "Response",
+      "kind": "Http",
+      "inputs": {
+       "statusCode": 400,
+       "headers": {
+        "Content-Type": "application/json"
+       },
+       "body": {
+        "ok": false,
+        "error": "Missing or invalid name, school or dates."
+       }
+      }
+     },
+     "If_valid": {
+      "runAfter": {
+       "Check": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "0e5c4ec2-35d4-42e2-ae7a-9039789d9c1b"
+      },
+      "type": "If",
+      "expression": {
+       "and": [
+        {
+         "equals": [
+          "@outputs('Is_valid')",
+          true
+         ]
+        }
+       ]
+      },
+      "actions": {
+       "Enrollments_on_day": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "a59c49c2-557f-456a-807f-9f28d7aa8e6d"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_enrollments",
+          "$select": "_aaca_student_value",
+          "$filter": "_aaca_campus_value eq @{first(body('Campus')?['value'])?['aaca_campusid']} and aaca_startdate le @{outputs('Absence_date')} and (aaca_enddate eq null or aaca_enddate ge @{outputs('Absence_date')})",
+          "$expand": "aaca_student($select=aaca_studentid,aaca_firstname,aaca_lastname,aaca_status)"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Name_matches": {
+        "runAfter": {
+         "Enrollments_on_day": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "3bfebee0-5578-4065-a72f-3c3cd45e03c6"
+        },
+        "type": "Query",
+        "inputs": {
+         "from": "@body('Enrollments_on_day')?['value']",
+         "where": "@and(equals(toLower(trim(replace(replace(replace(coalesce(item()?['aaca_student']?['aaca_firstname'], ''), '-', ' '), '  ', ' '), '  ', ' '))), toLower(trim(replace(replace(replace(coalesce(triggerBody()?['data']?['FN'], ''), '-', ' '), '  ', ' '), '  ', ' ')))), equals(toLower(trim(replace(replace(replace(coalesce(item()?['aaca_student']?['aaca_lastname'], ''), '-', ' '), '  ', ' '), '  ', ' '))), toLower(trim(replace(replace(replace(coalesce(triggerBody()?['data']?['LN'], ''), '-', ' '), '  ', ' '), '  ', ' ')))), not(equals(item()?['aaca_student']?['aaca_status'], 582100002)))"
+        }
+       },
+       "Match_ids": {
+        "runAfter": {
+         "Name_matches": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "5fcc1af4-39ac-457f-96bf-879202b93b04"
+        },
+        "type": "Select",
+        "inputs": {
+         "from": "@body('Name_matches')",
+         "select": "@item()?['_aaca_student_value']"
+        }
+       },
+       "Create_notice": {
+        "runAfter": {
+         "Match_ids": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "e59c590e-8b2b-4a96-8c79-8a604d79c1ff"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "CreateRecord"
+         },
+         "parameters": {
+          "entityName": "aaca_absencenotices",
+          "item/aaca_name": "@{take(concat(trim(triggerBody()?['data']?['FN']), ' ', trim(triggerBody()?['data']?['LN']), ' - absent ', formatDateTime(outputs('Absence_date'), 'M/d/yyyy')), 200)}",
+          "item/aaca_source": 582100000,
+          "item/aaca_status": 582100000,
+          "item/aaca_noticeat": "@{trigger()?['startTime']}",
+          "item/aaca_websitesubmittedat": "@if(empty(coalesce(triggerBody()?['data']?['DN'], '')), null, triggerBody()?['data']?['DN'])",
+          "item/aaca_absencestart": "@{outputs('Absence_date')}",
+          "item/aaca_absenceend": "@{addDays(outputs('Return_date'), -1, 'yyyy-MM-dd')}",
+          "item/aaca_returndate": "@{outputs('Return_date')}",
+          "item/aaca_typedfirstname": "@{take(trim(triggerBody()?['data']?['FN']), 100)}",
+          "item/aaca_typedlastname": "@{take(trim(triggerBody()?['data']?['LN']), 100)}",
+          "item/aaca_typedcampus": "@{take(trim(triggerBody()?['data']?['School']), 100)}",
+          "item/aaca_parentname": "@{take(trim(coalesce(triggerBody()?['data']?['PN'], '')), 200)}",
+          "item/aaca_relationshiptext": "@{take(trim(coalesce(triggerBody()?['data']?['Relationship'], '')), 100)}",
+          "item/aaca_reasontext": "@{take(coalesce(triggerBody()?['data']?['Reason'], ''), 4000)}",
+          "item/aaca_matchstatus": "@if(equals(length(union(body('Match_ids'), body('Match_ids'))), 1), 582100000, if(equals(length(union(body('Match_ids'), body('Match_ids'))), 0), 582100001, 582100002))",
+          "item/aaca_matchdetail": "@{if(equals(length(union(body('Match_ids'), body('Match_ids'))), 1), 'Matched on name and campus', if(equals(length(union(body('Match_ids'), body('Match_ids'))), 0), concat('No student enrolled at ', first(body('Campus')?['value'])?['aaca_name'], ' on that date with this name'), concat(length(union(body('Match_ids'), body('Match_ids'))), ' students at ', first(body('Campus')?['value'])?['aaca_name'], ' have this name')))}",
+          "item/aaca_campus@odata.bind": "@{concat('/aaca_campuses(', first(body('Campus')?['value'])?['aaca_campusid'], ')')}",
+          "item/aaca_student@odata.bind": "@if(equals(length(union(body('Match_ids'), body('Match_ids'))), 1), concat('/aaca_students(', first(union(body('Match_ids'), body('Match_ids'))), ')'), null)",
+          "item/ownerid@odata.bind": "@if(empty(first(body('Campus')?['value'])?['aaca_ownerteamid']), null, concat('/teams(', first(body('Campus')?['value'])?['aaca_ownerteamid'], ')'))"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Accepted": {
+        "runAfter": {
+         "Create_notice": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "94b23694-a6f2-43c0-a233-d80d86419796"
+        },
+        "type": "Response",
+        "kind": "Http",
+        "inputs": {
+         "statusCode": 200,
+         "headers": {
+          "Content-Type": "application/json"
+         },
+         "body": {
+          "ok": true,
+          "reference": "@{body('Create_notice')?['aaca_reference']}"
+         }
+        }
+       },
+       "Save_failed": {
+        "runAfter": {
+         "Create_notice": [
+          "Failed",
+          "TimedOut"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "e2499ccf-1f97-4c16-b49c-bd138ac2a75d"
+        },
+        "type": "Response",
+        "kind": "Http",
+        "inputs": {
+         "statusCode": 500,
+         "headers": {
+          "Content-Type": "application/json"
+         },
+         "body": {
+          "ok": false,
+          "error": "The absence could not be saved. Please call the school office."
+         }
+        }
+       }
+      },
+      "else": {
+       "actions": {
+        "Invalid": {
+         "runAfter": {},
+         "metadata": {
+          "operationMetadataId": "ace3127f-d5e5-4bc3-a5d0-8d812010fb6b"
+         },
+         "type": "Response",
+         "kind": "Http",
+         "inputs": {
+          "statusCode": 400,
+          "headers": {
+           "Content-Type": "application/json"
+          },
+          "body": {
+           "ok": false,
+           "error": "Missing or invalid name, school or dates."
+          }
+         }
+        }
+       }
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}

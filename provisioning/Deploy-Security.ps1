@@ -76,7 +76,8 @@ Grant $m 'aaca_staff' 'Create', 'Write', 'Append' 'Local'
 Grant $m 'aaca_studenttransport', 'aaca_transportlog' 'Create', 'Read', 'Write', 'Append', 'Assign' 'Local'
 # Family portal: process their campus's absence notices (parents create them through the portal) and see who the
 # guardians are. Guardian onboarding (creating links) is a later phase.
-Grant $m 'aaca_absencenotice' 'Read', 'Write', 'Append' 'Local'
+# Phase 2: office records parent calls as Absence Notices (Add absence) and links the days to them.
+Grant $m 'aaca_absencenotice' 'Create', 'Read', 'Write', 'Append', 'AppendTo', 'Assign' 'Local'
 Grant $m 'aaca_guardianlink' 'Read' 'Local'
 # Student profile (AACA Student Records app): office maintains emergency contacts and medications.
 Grant $m 'aaca_emergencycontact', 'aaca_studentmedication' 'Create', 'Read', 'Write', 'Delete', 'Append', 'Assign' 'Local'

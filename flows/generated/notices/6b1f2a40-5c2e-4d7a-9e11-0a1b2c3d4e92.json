@@ -1,0 +1,256 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e92",
+ "name": "AACA - Absence Notice Alert",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_commondataserviceforapps": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedcommondataserviceforapps_2b783"
+     },
+     "api": {
+      "name": "shared_commondataserviceforapps"
+     }
+    },
+    "shared_teams": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedteams_reminders"
+     },
+     "api": {
+      "name": "shared_teams"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "When_a_notice_is_added": {
+      "metadata": {
+       "operationMetadataId": "8e9a99a9-71ed-4e42-b742-aba56b85c6c6"
+      },
+      "type": "OpenApiConnectionWebhook",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "SubscribeWebhookTrigger"
+       },
+       "parameters": {
+        "subscriptionRequest/message": 1,
+        "subscriptionRequest/entityname": "aaca_absencenotice",
+        "subscriptionRequest/scope": 4,
+        "subscriptionRequest/filterexpression": "aaca_source ne 582100003"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     }
+    },
+    "actions": {
+     "Campus": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "5195a6a3-3c4d-414a-ab25-11b5c62f0018"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "GetItem"
+       },
+       "parameters": {
+        "entityName": "aaca_campuses",
+        "recordId": "@triggerOutputs()?['body']?['_aaca_campus_value']",
+        "$select": "aaca_name,aaca_absencechatid"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Matched_student": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "3da857a2-cde6-4ab8-af80-fc740e8a5d41"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "ListRecords"
+       },
+       "parameters": {
+        "entityName": "aaca_students",
+        "$select": "aaca_displayname",
+        "$filter": "aaca_studentid eq @{coalesce(triggerOutputs()?['body']?['_aaca_student_value'], '00000000-0000-0000-0000-000000000000')}",
+        "$top": 1
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Settings": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "92dcae15-5a8c-4491-a2bc-626e04495589"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "ListRecords"
+       },
+       "parameters": {
+        "entityName": "aaca_settings",
+        "$select": "aaca_key,aaca_value",
+        "$filter": "aaca_key eq 'AttendanceAppUrl' or aaca_key eq 'AbsenceAlertImageUrl' or aaca_key eq 'AbsenceAlertFallbackEmail'"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Setting_AttendanceAppUrl": {
+      "runAfter": {
+       "Settings": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "a5488de1-6cf0-4fda-baaf-d16d6901e3b8"
+      },
+      "type": "Query",
+      "inputs": {
+       "from": "@body('Settings')?['value']",
+       "where": "@equals(item()?['aaca_key'], 'AttendanceAppUrl')"
+      }
+     },
+     "Setting_AbsenceAlertImageUrl": {
+      "runAfter": {
+       "Settings": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "315f5f76-37db-4b81-9409-8906c09d4eed"
+      },
+      "type": "Query",
+      "inputs": {
+       "from": "@body('Settings')?['value']",
+       "where": "@equals(item()?['aaca_key'], 'AbsenceAlertImageUrl')"
+      }
+     },
+     "Setting_AbsenceAlertFallbackEmail": {
+      "runAfter": {
+       "Settings": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "14b915ea-5d3a-4570-84e3-9d4cafb78be6"
+      },
+      "type": "Query",
+      "inputs": {
+       "from": "@body('Settings')?['value']",
+       "where": "@equals(item()?['aaca_key'], 'AbsenceAlertFallbackEmail')"
+      }
+     },
+     "Where_to_post": {
+      "runAfter": {
+       "Campus": [
+        "Succeeded"
+       ],
+       "Matched_student": [
+        "Succeeded"
+       ],
+       "Setting_AttendanceAppUrl": [
+        "Succeeded"
+       ],
+       "Setting_AbsenceAlertImageUrl": [
+        "Succeeded"
+       ],
+       "Setting_AbsenceAlertFallbackEmail": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "42f3a07c-110c-444b-a565-1184c0afe3d3"
+      },
+      "type": "Switch",
+      "expression": "@if(not(empty(coalesce(body('Campus')?['aaca_absencechatid'], ''))), 'chat', if(not(empty(coalesce(first(body('Setting_AbsenceAlertFallbackEmail'))?['aaca_value'], ''))), 'fallback', 'none'))",
+      "cases": {
+       "Campus_chat": {
+        "case": "chat",
+        "actions": {
+         "Post_to_campus_chat": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "f862c3a3-be64-41ef-a9d5-2dddc3b3960a"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_teams",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+            "operationId": "PostCardToConversation"
+           },
+           "parameters": {
+            "poster": "Flow bot",
+            "body/messageBody": "{\n  \"type\": \"AdaptiveCard\",\n  \"$schema\": \"https://adaptivecards.io/schemas/adaptive-card.json\",\n  \"version\": \"1.5\",\n  \"body\": [\n    {\n      \"type\": \"Container\",\n      \"showBorder\": true,\n      \"roundedCorners\": true,\n      \"style\": \"warning\",\n      \"bleed\": true,\n      \"id\": \"con_Container\",\n      \"rtl\": false,\n      \"backgroundImage\": {\n        \"url\": \"@{coalesce(first(body('Setting_AbsenceAlertImageUrl'))?['aaca_value'], '')}\"\n      },\n      \"items\": [\n        {\n          \"type\": \"Badge\",\n          \"size\": \"ExtraLarge\",\n          \"text\": \"ABSENCE ALERT\",\n          \"horizontalAlignment\": \"Center\",\n          \"id\": \"icn_Absence\",\n          \"shape\": \"Rounded\"\n        },\n        {\n          \"type\": \"ProgressBar\",\n          \"id\": \"lbl_Progress\",\n          \"spacing\": \"Small\",\n          \"horizontalAlignment\": \"Center\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Date Notified: @{formatDateTime(convertFromUtc(triggerOutputs()?['body']?['aaca_noticeat'], 'Pacific Standard Time'), 'MM/dd/yyyy - h:mm tt')}\",\n          \"wrap\": true,\n          \"id\": \"txt_date\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Student Name: @{coalesce(first(body('Matched_student')?['value'])?['aaca_displayname'], concat(triggerOutputs()?['body']?['aaca_typedfirstname'], ' ', triggerOutputs()?['body']?['aaca_typedlastname']))}\",\n          \"wrap\": true,\n          \"id\": \"txt_student\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"wrap\": true,\n          \"id\": \"txt_match\",\n          \"weight\": \"Bolder\",\n          \"color\": \"@{if(or(equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100000), equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100003)), 'Good', 'Attention')}\",\n          \"text\": \"@{if(or(equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100000), equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100003)), 'Matched to this student in the attendance app', 'Could not match this student - map it in the app (Absences > Mapping Errors)')}\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Submitted By: @{if(equals(triggerOutputs()?['body']?['aaca_source'], 582100001), concat('Office - ', coalesce(triggerOutputs()?['body']?['_createdby_value@OData.Community.Display.V1.FormattedValue'], 'staff')), triggerOutputs()?['body']?['aaca_parentname'])}\",\n          \"wrap\": true,\n          \"id\": \"txt_SubBy\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Relationship to Student: @{if(empty(coalesce(triggerOutputs()?['body']?['aaca_relationshiptext'], '')), '-', triggerOutputs()?['body']?['aaca_relationshiptext'])}\",\n          \"wrap\": true,\n          \"id\": \"txt_Relationship\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Date of Absence: @{formatDateTime(triggerOutputs()?['body']?['aaca_absencestart'], 'MM/dd/yyyy')}\",\n          \"wrap\": true,\n          \"id\": \"txt_DOA\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Expected Date of Return: @{if(empty(triggerOutputs()?['body']?['aaca_returndate']), '-', formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'MM/dd/yyyy'))}\",\n          \"wrap\": true,\n          \"id\": \"txt_DOR\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Reason: @{coalesce(triggerOutputs()?['body']?['aaca_reasontext'], '')}\",\n          \"wrap\": true,\n          \"id\": \"txt_Reason\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Reference: @{triggerOutputs()?['body']?['aaca_reference']}\",\n          \"wrap\": true,\n          \"id\": \"txt_Ref\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"This alert is for your own awareness, nothing further is required.\",\n          \"wrap\": true,\n          \"color\": \"Attention\",\n          \"id\": \"txt_footer\",\n          \"horizontalAlignment\": \"Center\",\n          \"weight\": \"Lighter\"\n        }\n      ]\n    }\n  ],\n  \"actions\": [\n    {\n      \"type\": \"Action.OpenUrl\",\n      \"title\": \"Open in app\",\n      \"url\": \"@{concat(coalesce(first(body('Setting_AttendanceAppUrl'))?['aaca_value'], ''), if(contains(coalesce(first(body('Setting_AttendanceAppUrl'))?['aaca_value'], ''), '?'), '&', '?'), 'screen=absences')}\"\n    }\n  ]\n}",
+            "location": "Group chat",
+            "body/recipient": "@{body('Campus')?['aaca_absencechatid']}"
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         }
+        }
+       },
+       "Fallback": {
+        "case": "fallback",
+        "actions": {
+         "Post_to_fallback": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "0226d5dc-e104-40b5-b827-cfe1b752787e"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+           "host": {
+            "connectionName": "shared_teams",
+            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+            "operationId": "PostCardToConversation"
+           },
+           "parameters": {
+            "poster": "Flow bot",
+            "body/messageBody": "{\n  \"type\": \"AdaptiveCard\",\n  \"$schema\": \"https://adaptivecards.io/schemas/adaptive-card.json\",\n  \"version\": \"1.5\",\n  \"body\": [\n    {\n      \"type\": \"Container\",\n      \"showBorder\": true,\n      \"roundedCorners\": true,\n      \"style\": \"warning\",\n      \"bleed\": true,\n      \"id\": \"con_Container\",\n      \"rtl\": false,\n      \"backgroundImage\": {\n        \"url\": \"@{coalesce(first(body('Setting_AbsenceAlertImageUrl'))?['aaca_value'], '')}\"\n      },\n      \"items\": [\n        {\n          \"type\": \"Badge\",\n          \"size\": \"ExtraLarge\",\n          \"text\": \"ABSENCE ALERT\",\n          \"horizontalAlignment\": \"Center\",\n          \"id\": \"icn_Absence\",\n          \"shape\": \"Rounded\"\n        },\n        {\n          \"type\": \"ProgressBar\",\n          \"id\": \"lbl_Progress\",\n          \"spacing\": \"Small\",\n          \"horizontalAlignment\": \"Center\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Date Notified: @{formatDateTime(convertFromUtc(triggerOutputs()?['body']?['aaca_noticeat'], 'Pacific Standard Time'), 'MM/dd/yyyy - h:mm tt')}\",\n          \"wrap\": true,\n          \"id\": \"txt_date\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Student Name: @{coalesce(first(body('Matched_student')?['value'])?['aaca_displayname'], concat(triggerOutputs()?['body']?['aaca_typedfirstname'], ' ', triggerOutputs()?['body']?['aaca_typedlastname']))}\",\n          \"wrap\": true,\n          \"id\": \"txt_student\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"wrap\": true,\n          \"id\": \"txt_match\",\n          \"weight\": \"Bolder\",\n          \"color\": \"@{if(or(equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100000), equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100003)), 'Good', 'Attention')}\",\n          \"text\": \"@{if(or(equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100000), equals(triggerOutputs()?['body']?['aaca_matchstatus'], 582100003)), 'Matched to this student in the attendance app', 'Could not match this student - map it in the app (Absences > Mapping Errors)')}\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Submitted By: @{if(equals(triggerOutputs()?['body']?['aaca_source'], 582100001), concat('Office - ', coalesce(triggerOutputs()?['body']?['_createdby_value@OData.Community.Display.V1.FormattedValue'], 'staff')), triggerOutputs()?['body']?['aaca_parentname'])}\",\n          \"wrap\": true,\n          \"id\": \"txt_SubBy\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Relationship to Student: @{if(empty(coalesce(triggerOutputs()?['body']?['aaca_relationshiptext'], '')), '-', triggerOutputs()?['body']?['aaca_relationshiptext'])}\",\n          \"wrap\": true,\n          \"id\": \"txt_Relationship\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Date of Absence: @{formatDateTime(triggerOutputs()?['body']?['aaca_absencestart'], 'MM/dd/yyyy')}\",\n          \"wrap\": true,\n          \"id\": \"txt_DOA\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Expected Date of Return: @{if(empty(triggerOutputs()?['body']?['aaca_returndate']), '-', formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'MM/dd/yyyy'))}\",\n          \"wrap\": true,\n          \"id\": \"txt_DOR\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Reason: @{coalesce(triggerOutputs()?['body']?['aaca_reasontext'], '')}\",\n          \"wrap\": true,\n          \"id\": \"txt_Reason\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"Reference: @{triggerOutputs()?['body']?['aaca_reference']}\",\n          \"wrap\": true,\n          \"id\": \"txt_Ref\",\n          \"weight\": \"Bolder\",\n          \"color\": \"Accent\"\n        },\n        {\n          \"type\": \"TextBlock\",\n          \"text\": \"This alert is for your own awareness, nothing further is required.\",\n          \"wrap\": true,\n          \"color\": \"Attention\",\n          \"id\": \"txt_footer\",\n          \"horizontalAlignment\": \"Center\",\n          \"weight\": \"Lighter\"\n        }\n      ]\n    }\n  ],\n  \"actions\": [\n    {\n      \"type\": \"Action.OpenUrl\",\n      \"title\": \"Open in app\",\n      \"url\": \"@{concat(coalesce(first(body('Setting_AttendanceAppUrl'))?['aaca_value'], ''), if(contains(coalesce(first(body('Setting_AttendanceAppUrl'))?['aaca_value'], ''), '?'), '&', '?'), 'screen=absences')}\"\n    }\n  ]\n}",
+            "location": "Chat with Flow bot",
+            "body/recipient": "@{coalesce(first(body('Setting_AbsenceAlertFallbackEmail'))?['aaca_value'], '')}"
+           },
+           "authentication": "@parameters('$authentication')"
+          }
+         }
+        }
+       }
+      },
+      "default": {
+       "actions": {}
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}

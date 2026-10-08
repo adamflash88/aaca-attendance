@@ -1,0 +1,718 @@
+{
+ "workflowid": "6b1f2a40-5c2e-4d7a-9e11-0a1b2c3d4e93",
+ "name": "AACA - Absence Notice Processing",
+ "clientdata": {
+  "properties": {
+   "connectionReferences": {
+    "shared_commondataserviceforapps": {
+     "runtimeSource": "embedded",
+     "connection": {
+      "connectionReferenceLogicalName": "aaca_sharedcommondataserviceforapps_2b783"
+     },
+     "api": {
+      "name": "shared_commondataserviceforapps"
+     }
+    }
+   },
+   "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+     "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+     },
+     "$authentication": {
+      "defaultValue": {},
+      "type": "SecureObject"
+     }
+    },
+    "triggers": {
+     "When_a_matched_notice_is_ready": {
+      "metadata": {
+       "operationMetadataId": "52108783-e460-4066-878e-2fd546b61eb4"
+      },
+      "type": "OpenApiConnectionWebhook",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "SubscribeWebhookTrigger"
+       },
+       "parameters": {
+        "subscriptionRequest/message": 4,
+        "subscriptionRequest/entityname": "aaca_absencenotice",
+        "subscriptionRequest/scope": 4,
+        "subscriptionRequest/filterexpression": "aaca_status eq 582100000 and _aaca_student_value ne null and (aaca_matchstatus eq 582100000 or aaca_matchstatus eq 582100003)",
+        "subscriptionRequest/filteringattributes": "aaca_matchstatus,aaca_student"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     }
+    },
+    "actions": {
+     "Init_created": {
+      "runAfter": {},
+      "metadata": {
+       "operationMetadataId": "2fc67d08-6162-453f-8bd7-fdf9982eb094"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+       "variables": [
+        {
+         "name": "Created",
+         "type": "integer",
+         "value": 0
+        }
+       ]
+      }
+     },
+     "Init_skipped": {
+      "runAfter": {
+       "Init_created": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "8f228fa2-46d1-4b50-a7f7-f8ded50c24a7"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+       "variables": [
+        {
+         "name": "Skipped",
+         "type": "integer",
+         "value": 0
+        }
+       ]
+      }
+     },
+     "Init_conflict": {
+      "runAfter": {
+       "Init_skipped": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "40153463-7ba0-479d-9de8-a80511359c5b"
+      },
+      "type": "InitializeVariable",
+      "inputs": {
+       "variables": [
+        {
+         "name": "Conflict",
+         "type": "integer",
+         "value": 0
+        }
+       ]
+      }
+     },
+     "Process": {
+      "runAfter": {
+       "Init_conflict": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "7201d037-5ab6-49f8-a8ce-938cca28543a"
+      },
+      "type": "Scope",
+      "actions": {
+       "Start": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "84af2c64-65eb-4ebd-966f-0203bf367a44"
+        },
+        "type": "Compose",
+        "inputs": "@formatDateTime(triggerOutputs()?['body']?['aaca_absencestart'], 'yyyy-MM-dd')"
+       },
+       "EndExclusive": {
+        "runAfter": {
+         "Start": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "50e3815f-d361-4584-9fa7-ddaa85d44359"
+        },
+        "type": "Compose",
+        "inputs": "@if(or(empty(triggerOutputs()?['body']?['aaca_returndate']), lessOrEquals(formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'yyyy-MM-dd'), outputs('Start'))), addDays(outputs('Start'), 1, 'yyyy-MM-dd'), formatDateTime(triggerOutputs()?['body']?['aaca_returndate'], 'yyyy-MM-dd'))"
+       },
+       "LastDay": {
+        "runAfter": {
+         "EndExclusive": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "039b107c-ad43-447e-a8e3-a46ad0b0f9d3"
+        },
+        "type": "Compose",
+        "inputs": "@addDays(outputs('EndExclusive'), -1, 'yyyy-MM-dd')"
+       },
+       "DayCount": {
+        "runAfter": {
+         "LastDay": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "5358513a-092d-46ba-baa6-8e61ab66d9b7"
+        },
+        "type": "Compose",
+        "inputs": "@min(60, div(sub(ticks(outputs('EndExclusive')), ticks(outputs('Start'))), 864000000000))"
+       },
+       "Student": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "18a71c8b-c1e3-4b72-9ccb-e26fe9559669"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "GetItem"
+         },
+         "parameters": {
+          "entityName": "aaca_students",
+          "recordId": "@triggerOutputs()?['body']?['_aaca_student_value']",
+          "$select": "aaca_studentnumber"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Enrollments": {
+        "runAfter": {
+         "DayCount": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "afd7acf8-5dda-449c-8d30-71d417febcef"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_enrollments",
+          "$select": "aaca_enrollmentid,aaca_startdate,aaca_enddate,aaca_iepratio,_aaca_campus_value,_aaca_teacher_value,_aaca_schoolyear_value",
+          "$filter": "_aaca_student_value eq @{triggerOutputs()?['body']?['_aaca_student_value']} and aaca_startdate le @{outputs('LastDay')} and (aaca_enddate eq null or aaca_enddate ge @{outputs('Start')})",
+          "$expand": "aaca_campus($select=aaca_ownerteamid)"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Terms": {
+        "runAfter": {
+         "DayCount": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "d41b4069-3f67-42f7-917c-252ffcc1f6a3"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_terms",
+          "$select": "aaca_termid,aaca_startdate,aaca_enddate,_aaca_campus_value",
+          "$filter": "aaca_startdate le @{outputs('LastDay')} and aaca_enddate ge @{outputs('Start')}"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Exceptions": {
+        "runAfter": {
+         "DayCount": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "b26f61a1-07a7-4b89-9898-97da932f0286"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_calendarexceptions",
+          "$select": "aaca_date,aaca_type,_aaca_campus_value",
+          "$filter": "aaca_date ge @{outputs('Start')} and aaca_date le @{outputs('LastDay')}"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "SPED": {
+        "runAfter": {},
+        "metadata": {
+         "operationMetadataId": "76ce3a9d-3ce3-4278-bd88-33288c048dce"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_services",
+          "$select": "aaca_serviceid",
+          "$filter": "aaca_servicecode eq 'SPED'",
+          "$top": 1
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Attendance_in_range": {
+        "runAfter": {
+         "DayCount": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "2ed14e7e-a10e-4ad3-b3c9-8a36f1212ef5"
+        },
+        "type": "OpenApiConnection",
+        "inputs": {
+         "host": {
+          "connectionName": "shared_commondataserviceforapps",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+          "operationId": "ListRecords"
+         },
+         "parameters": {
+          "entityName": "aaca_attendances",
+          "$select": "aaca_attendanceid,aaca_date,aaca_present,aaca_isdeleted",
+          "$filter": "_aaca_student_value eq @{triggerOutputs()?['body']?['_aaca_student_value']} and aaca_date ge @{outputs('Start')} and aaca_date le @{outputs('LastDay')}"
+         },
+         "authentication": "@parameters('$authentication')"
+        }
+       },
+       "Each_day": {
+        "runAfter": {
+         "Student": [
+          "Succeeded"
+         ],
+         "Enrollments": [
+          "Succeeded"
+         ],
+         "Terms": [
+          "Succeeded"
+         ],
+         "Exceptions": [
+          "Succeeded"
+         ],
+         "SPED": [
+          "Succeeded"
+         ],
+         "Attendance_in_range": [
+          "Succeeded"
+         ]
+        },
+        "metadata": {
+         "operationMetadataId": "97f91871-5fb8-4736-858e-420e78f06b5d"
+        },
+        "type": "Foreach",
+        "foreach": "@range(0, outputs('DayCount'))",
+        "actions": {
+         "Day": {
+          "runAfter": {},
+          "metadata": {
+           "operationMetadataId": "66e48368-337f-494d-921e-385718786857"
+          },
+          "type": "Compose",
+          "inputs": "@addDays(outputs('Start'), item(), 'yyyy-MM-dd')"
+         },
+         "Enrollment_on_day": {
+          "runAfter": {
+           "Day": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "7b1f665e-eae6-4975-aec7-a89961db3b2e"
+          },
+          "type": "Query",
+          "inputs": {
+           "from": "@body('Enrollments')?['value']",
+           "where": "@and(lessOrEquals(item()?['aaca_startdate'], outputs('Day')), or(equals(item()?['aaca_enddate'], null), greaterOrEquals(item()?['aaca_enddate'], outputs('Day'))))"
+          }
+         },
+         "Enrollment": {
+          "runAfter": {
+           "Enrollment_on_day": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "1bdd0541-b362-486c-b413-08bf8d19dc29"
+          },
+          "type": "Compose",
+          "inputs": "@first(body('Enrollment_on_day'))"
+         },
+         "Term_on_day": {
+          "runAfter": {
+           "Enrollment": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "e664d341-b7c5-40cb-923f-50a1d7d0b958"
+          },
+          "type": "Query",
+          "inputs": {
+           "from": "@body('Terms')?['value']",
+           "where": "@and(equals(item()?['_aaca_campus_value'], outputs('Enrollment')?['_aaca_campus_value']), lessOrEquals(item()?['aaca_startdate'], outputs('Day')), greaterOrEquals(item()?['aaca_enddate'], outputs('Day')))"
+          }
+         },
+         "Makeup_on_day": {
+          "runAfter": {
+           "Enrollment": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "4d2a80fc-ff98-425b-8198-3824412e0d44"
+          },
+          "type": "Query",
+          "inputs": {
+           "from": "@body('Exceptions')?['value']",
+           "where": "@and(equals(item()?['aaca_date'], outputs('Day')), equals(item()?['aaca_type'], 582100004), or(equals(item()?['_aaca_campus_value'], null), equals(item()?['_aaca_campus_value'], outputs('Enrollment')?['_aaca_campus_value'])))"
+          }
+         },
+         "Closed_on_day": {
+          "runAfter": {
+           "Enrollment": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "be26857c-a0ed-4c83-9816-91e897a9a6f2"
+          },
+          "type": "Query",
+          "inputs": {
+           "from": "@body('Exceptions')?['value']",
+           "where": "@and(equals(item()?['aaca_date'], outputs('Day')), not(equals(item()?['aaca_type'], 582100004)), or(equals(item()?['_aaca_campus_value'], null), equals(item()?['_aaca_campus_value'], outputs('Enrollment')?['_aaca_campus_value'])))"
+          }
+         },
+         "Is_school_day": {
+          "runAfter": {
+           "Term_on_day": [
+            "Succeeded"
+           ],
+           "Makeup_on_day": [
+            "Succeeded"
+           ],
+           "Closed_on_day": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "776f0d4a-e2bf-4018-887f-f4bed07bff94"
+          },
+          "type": "Compose",
+          "inputs": "@and(not(equals(outputs('Enrollment'), null)), not(empty(body('Term_on_day'))), or(not(empty(body('Makeup_on_day'))), and(not(or(equals(dayOfWeek(outputs('Day')), 0), equals(dayOfWeek(outputs('Day')), 6))), empty(body('Closed_on_day')))))"
+         },
+         "School_day_check": {
+          "runAfter": {
+           "Is_school_day": [
+            "Succeeded"
+           ]
+          },
+          "metadata": {
+           "operationMetadataId": "cfd03aee-f8e6-4a31-b592-e0e833cca925"
+          },
+          "type": "If",
+          "expression": {
+           "and": [
+            {
+             "equals": [
+              "@outputs('Is_school_day')",
+              true
+             ]
+            }
+           ]
+          },
+          "actions": {
+           "Existing_on_day": {
+            "runAfter": {},
+            "metadata": {
+             "operationMetadataId": "48110077-d480-4c37-83d3-7adcf317e08e"
+            },
+            "type": "Query",
+            "inputs": {
+             "from": "@body('Attendance_in_range')?['value']",
+             "where": "@equals(item()?['aaca_date'], outputs('Day'))"
+            }
+           },
+           "Which_case": {
+            "runAfter": {
+             "Existing_on_day": [
+              "Succeeded"
+             ]
+            },
+            "metadata": {
+             "operationMetadataId": "9ab2ffc9-061d-4db0-acf1-af8db38a0bde"
+            },
+            "type": "Switch",
+            "expression": "@if(empty(body('Existing_on_day')), 'new', if(equals(first(body('Existing_on_day'))?['aaca_isdeleted'], true), 'deleted', if(equals(first(body('Existing_on_day'))?['aaca_present'], true), 'present', 'absent')))",
+            "cases": {
+             "New": {
+              "case": "new",
+              "actions": {
+               "Create_absence": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "8dd8ea21-1b11-4138-972e-5cb64a716379"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord"
+                 },
+                 "parameters": {
+                  "entityName": "aaca_attendances",
+                  "item/aaca_recordkey": "@{concat(replace(outputs('Day'), '-', ''), '|', body('Student')?['aaca_studentnumber'], '|SPED')}",
+                  "item/aaca_date": "@{outputs('Day')}",
+                  "item/aaca_present": false,
+                  "item/aaca_isdeleted": false,
+                  "item/aaca_source": "@if(equals(triggerOutputs()?['body']?['aaca_source'], 582100001), 582100002, 582100001)",
+                  "item/aaca_noticereceivedon": "@{triggerOutputs()?['body']?['aaca_noticeat']}",
+                  "item/aaca_notes": "@{take(concat('Parent report ', coalesce(triggerOutputs()?['body']?['aaca_reference'], ''), ': ', coalesce(triggerOutputs()?['body']?['aaca_reasontext'], '')), 2000)}",
+                  "item/aaca_absencenotice@odata.bind": "@{concat('/aaca_absencenotices(', triggerOutputs()?['body']?['aaca_absencenoticeid'], ')')}",
+                  "item/aaca_student@odata.bind": "@{concat('/aaca_students(', triggerOutputs()?['body']?['_aaca_student_value'], ')')}",
+                  "item/aaca_service@odata.bind": "@{concat('/aaca_services(', first(body('SPED')?['value'])?['aaca_serviceid'], ')')}",
+                  "item/aaca_enrollment@odata.bind": "@{concat('/aaca_enrollments(', outputs('Enrollment')?['aaca_enrollmentid'], ')')}",
+                  "item/aaca_teacher@odata.bind": "@if(equals(outputs('Enrollment')?['_aaca_teacher_value'], null), null, concat('/aaca_staffs(', outputs('Enrollment')?['_aaca_teacher_value'], ')'))",
+                  "item/aaca_campus@odata.bind": "@{concat('/aaca_campuses(', outputs('Enrollment')?['_aaca_campus_value'], ')')}",
+                  "item/aaca_schoolyear@odata.bind": "@if(equals(outputs('Enrollment')?['_aaca_schoolyear_value'], null), null, concat('/aaca_schoolyears(', outputs('Enrollment')?['_aaca_schoolyear_value'], ')'))",
+                  "item/aaca_term@odata.bind": "@{concat('/aaca_terms(', first(body('Term_on_day'))?['aaca_termid'], ')')}",
+                  "item/aaca_iepratio": "@outputs('Enrollment')?['aaca_iepratio']",
+                  "item/ownerid@odata.bind": "@if(empty(outputs('Enrollment')?['aaca_campus']?['aaca_ownerteamid']), null, concat('/teams(', outputs('Enrollment')?['aaca_campus']?['aaca_ownerteamid'], ')'))"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               },
+               "Count_created": {
+                "runAfter": {
+                 "Create_absence": [
+                  "Succeeded"
+                 ]
+                },
+                "metadata": {
+                 "operationMetadataId": "953947cc-ffda-401c-a9b3-b5dd17f179da"
+                },
+                "type": "IncrementVariable",
+                "inputs": {
+                 "name": "Created",
+                 "value": 1
+                }
+               }
+              }
+             },
+             "Deleted": {
+              "case": "deleted",
+              "actions": {
+               "Revive_as_absence": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "591da1cc-992b-4b57-91e5-9a25084ba267"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateRecord"
+                 },
+                 "parameters": {
+                  "entityName": "aaca_attendances",
+                  "recordId": "@first(body('Existing_on_day'))?['aaca_attendanceid']",
+                  "item/aaca_present": false,
+                  "item/aaca_isdeleted": false,
+                  "item/aaca_source": "@if(equals(triggerOutputs()?['body']?['aaca_source'], 582100001), 582100002, 582100001)",
+                  "item/aaca_noticereceivedon": "@{triggerOutputs()?['body']?['aaca_noticeat']}",
+                  "item/aaca_notes": "@{take(concat('Parent report ', coalesce(triggerOutputs()?['body']?['aaca_reference'], ''), ': ', coalesce(triggerOutputs()?['body']?['aaca_reasontext'], '')), 2000)}",
+                  "item/aaca_absencenotice@odata.bind": "@{concat('/aaca_absencenotices(', triggerOutputs()?['body']?['aaca_absencenoticeid'], ')')}"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               },
+               "Count_revived": {
+                "runAfter": {
+                 "Revive_as_absence": [
+                  "Succeeded"
+                 ]
+                },
+                "metadata": {
+                 "operationMetadataId": "c2407e4d-d738-46b2-b3fe-6a779c37f52b"
+                },
+                "type": "IncrementVariable",
+                "inputs": {
+                 "name": "Created",
+                 "value": 1
+                }
+               }
+              }
+             },
+             "Present": {
+              "case": "present",
+              "actions": {
+               "Flag_conflict": {
+                "runAfter": {},
+                "metadata": {
+                 "operationMetadataId": "874bd090-06d2-41e2-8624-1029681bb50d"
+                },
+                "type": "OpenApiConnection",
+                "inputs": {
+                 "host": {
+                  "connectionName": "shared_commondataserviceforapps",
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateRecord"
+                 },
+                 "parameters": {
+                  "entityName": "aaca_attendances",
+                  "recordId": "@first(body('Existing_on_day'))?['aaca_attendanceid']",
+                  "item/aaca_parentreportedabsent": true,
+                  "item/aaca_noticereceivedon": "@{triggerOutputs()?['body']?['aaca_noticeat']}",
+                  "item/aaca_absencenotice@odata.bind": "@{concat('/aaca_absencenotices(', triggerOutputs()?['body']?['aaca_absencenoticeid'], ')')}"
+                 },
+                 "authentication": "@parameters('$authentication')"
+                }
+               },
+               "Count_conflict": {
+                "runAfter": {
+                 "Flag_conflict": [
+                  "Succeeded"
+                 ]
+                },
+                "metadata": {
+                 "operationMetadataId": "cc820c17-0ebb-45fe-90a7-6bb81e53589a"
+                },
+                "type": "IncrementVariable",
+                "inputs": {
+                 "name": "Conflict",
+                 "value": 1
+                }
+               }
+              }
+             }
+            },
+            "default": {
+             "actions": {
+              "Count_already_absent": {
+               "runAfter": {},
+               "metadata": {
+                "operationMetadataId": "2b4e1416-d3a7-47b2-bbd4-dd0d6064fb0d"
+               },
+               "type": "IncrementVariable",
+               "inputs": {
+                "name": "Skipped",
+                "value": 1
+               }
+              }
+             }
+            }
+           }
+          },
+          "else": {
+           "actions": {
+            "Count_not_school_day": {
+             "runAfter": {},
+             "metadata": {
+              "operationMetadataId": "d37dff6a-70e5-40b4-a04a-80d5187bad4d"
+             },
+             "type": "IncrementVariable",
+             "inputs": {
+              "name": "Skipped",
+              "value": 1
+             }
+            }
+           }
+          }
+         }
+        },
+        "runtimeConfiguration": {
+         "concurrency": {
+          "repetitions": 1
+         }
+        }
+       }
+      }
+     },
+     "Mark_accepted": {
+      "runAfter": {
+       "Process": [
+        "Succeeded"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "f8a7c693-1559-4e1c-b06d-294264a10fbd"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "UpdateRecord"
+       },
+       "parameters": {
+        "entityName": "aaca_absencenotices",
+        "recordId": "@triggerOutputs()?['body']?['aaca_absencenoticeid']",
+        "item/aaca_status": 582100001,
+        "item/aaca_processedon": "@{utcNow()}",
+        "item/aaca_dayscreated": "@variables('Created')",
+        "item/aaca_daysskipped": "@variables('Skipped')",
+        "item/aaca_daysconflict": "@variables('Conflict')",
+        "item/aaca_errordetail": ""
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     },
+     "Record_error": {
+      "runAfter": {
+       "Process": [
+        "Failed",
+        "TimedOut"
+       ]
+      },
+      "metadata": {
+       "operationMetadataId": "9eea259d-f501-4526-9ef2-a9aee580df29"
+      },
+      "type": "OpenApiConnection",
+      "inputs": {
+       "host": {
+        "connectionName": "shared_commondataserviceforapps",
+        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+        "operationId": "UpdateRecord"
+       },
+       "parameters": {
+        "entityName": "aaca_absencenotices",
+        "recordId": "@triggerOutputs()?['body']?['aaca_absencenoticeid']",
+        "item/aaca_errordetail": "@{take(concat('Could not create the absence days: ', coalesce(string(result('Process')), '')), 2000)}"
+       },
+       "authentication": "@parameters('$authentication')"
+      }
+     }
+    },
+    "outputs": {}
+   },
+   "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+ }
+}
